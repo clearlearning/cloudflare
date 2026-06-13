@@ -1,0 +1,924 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CLEAR DEI Membership Dashboard</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{
+  --burgundy:#64092C;--burgundy-light:#8a1040;--burgundy-pale:#f9f0f3;
+  --gold:#DDA838;--gold-light:#f0c55a;--gold-pale:#fdf8ec;
+  --charcoal:#484848;--charcoal-light:#6b6b6b;
+  --blue:#084D78;--white:#fff;
+  --bg:#f4f5f7;--border:#e0e0e0;
+  --shadow:0 2px 8px rgba(0,0,0,.08);
+  --font:'Open Sans',sans-serif;--display:'Trebuchet MS',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:var(--font);background:var(--bg);color:var(--charcoal);min-height:100vh;}
+
+#header{background:var(--burgundy);color:#fff;padding:0 28px;display:flex;align-items:center;justify-content:space-between;height:60px;position:sticky;top:0;z-index:300;box-shadow:0 2px 8px rgba(0,0,0,.25);}
+#header h1{font-family:var(--display);font-size:1.15rem;font-weight:700;}
+#header .sub{font-size:.72rem;opacity:.72;margin-top:2px;}
+#header-right{display:flex;align-items:center;gap:12px;}
+#upload-btn{background:var(--gold);color:var(--charcoal);border:none;padding:7px 16px;border-radius:4px;font-family:var(--font);font-size:.82rem;font-weight:700;cursor:pointer;}
+#upload-btn:hover{background:var(--gold-light);}
+#last-loaded{font-size:.7rem;opacity:.72;text-align:right;line-height:1.4;}
+#file-input{display:none;}
+
+#upload-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:999;display:flex;align-items:center;justify-content:center;}
+#upload-box{background:#fff;border-radius:8px;padding:36px 40px;width:480px;box-shadow:0 8px 32px rgba(0,0,0,.25);text-align:center;}
+#upload-box h2{font-family:var(--display);color:var(--burgundy);margin-bottom:8px;font-size:1.15rem;}
+#upload-box p{font-size:.83rem;color:var(--charcoal-light);margin-bottom:20px;line-height:1.6;}
+#drop-zone{border:2px dashed var(--border);border-radius:8px;padding:36px 24px;cursor:pointer;transition:all .15s;margin-bottom:14px;}
+#drop-zone:hover,#drop-zone.dragover{border-color:var(--burgundy);background:var(--burgundy-pale);}
+#drop-zone .di{font-size:2.2rem;margin-bottom:8px;opacity:.3;}
+#drop-zone .dl{font-size:.88rem;color:var(--charcoal-light);}
+#drop-zone .ds{font-size:.74rem;color:var(--charcoal-light);margin-top:4px;opacity:.7;}
+.upload-note{font-size:.72rem;color:var(--charcoal-light);background:#f8f8f8;border-radius:4px;padding:10px 14px;text-align:left;line-height:1.5;}
+#upload-error{color:#c0392b;font-size:.8rem;margin-top:10px;display:none;}
+
+#snap-bar{background:var(--gold-pale);border-bottom:1px solid #f0e0b0;padding:6px 28px;font-size:.74rem;color:#7a5c00;display:none;}
+#snap-bar.on{display:block;}
+
+/* FILTER SECTION */
+#filter-section{background:#fff;border-bottom:2px solid var(--border);padding:18px 28px 20px;display:none;}
+#filter-section.on{display:block;}
+#filter-section h2{font-family:var(--display);font-size:1rem;font-weight:700;color:var(--burgundy);margin-bottom:14px;}
+#filter-row{display:flex;flex-wrap:wrap;gap:14px;align-items:flex-start;}
+.fg{display:flex;flex-direction:column;gap:5px;min-width:160px;position:relative;z-index:100;}
+.fg:nth-child(4){z-index:99;}.fg:nth-child(5){z-index:98;}.fg:nth-child(6){z-index:97;}.fg:nth-child(7){z-index:96;}
+.fg label{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--charcoal-light);}
+.dd-trigger{display:flex;align-items:center;justify-content:space-between;padding:7px 10px;border:1px solid var(--border);border-radius:4px;background:#fff;cursor:pointer;font-family:var(--font);font-size:.82rem;color:var(--charcoal);user-select:none;min-width:160px;gap:6px;transition:border-color .15s;}
+.dd-trigger:hover{border-color:var(--charcoal-light);}
+.dd-trigger.active{border-color:var(--gold);box-shadow:0 0 0 2px rgba(221,168,56,.25);}
+.dd-trigger .arrow{font-size:.6rem;color:var(--charcoal-light);flex-shrink:0;transition:transform .2s;}
+.dd-trigger.active .arrow{transform:rotate(180deg);}
+.dd-trigger .dd-label{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.dd-panel{position:absolute;top:calc(100% + 4px);left:0;z-index:250;background:#fff;border:1px solid var(--border);border-radius:6px;box-shadow:0 4px 16px rgba(0,0,0,.12);min-width:240px;max-width:340px;display:none;flex-direction:column;}
+.dd-panel.open{display:flex;}
+.dd-search{padding:8px 10px;border:none;border-bottom:1px solid var(--border);font-family:var(--font);font-size:.8rem;color:var(--charcoal);outline:none;width:100%;background:#fafafa;}
+.dd-list{max-height:200px;overflow-y:auto;padding:4px 0;}
+.dd-opt{display:flex;align-items:center;gap:8px;padding:5px 12px;cursor:pointer;font-size:.8rem;color:var(--charcoal);}
+.dd-opt:hover{background:var(--burgundy-pale);}
+.dd-opt input[type=checkbox]{accent-color:var(--burgundy);cursor:pointer;flex-shrink:0;width:14px;height:14px;}
+.dd-opt .opt-lbl{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.dd-opt .opt-cnt{font-size:.7rem;color:var(--charcoal-light);flex-shrink:0;margin-left:auto;}
+.dd-footer{display:flex;gap:12px;padding:7px 12px;border-top:1px solid var(--border);background:#fafafa;border-radius:0 0 6px 6px;}
+.dd-footer a{font-size:.74rem;color:var(--blue);cursor:pointer;font-weight:600;}
+.dd-footer a:hover{text-decoration:underline;}
+#filter-actions{display:flex;align-items:flex-end;gap:10px;margin-left:auto;padding-top:22px;}
+#apply-btn{background:var(--burgundy);color:#fff;border:none;padding:8px 20px;border-radius:4px;font-family:var(--font);font-size:.84rem;font-weight:700;cursor:pointer;}
+#apply-btn:hover{background:var(--burgundy-light);}
+#reset-btn{background:none;border:1px solid var(--border);border-radius:4px;padding:7px 16px;font-size:.82rem;color:var(--charcoal-light);cursor:pointer;font-family:var(--font);}
+#reset-btn:hover{border-color:var(--burgundy);color:var(--burgundy);}
+#view-count{font-size:.74rem;color:var(--charcoal-light);padding-bottom:10px;white-space:nowrap;}
+
+#main{padding:22px 28px 48px;max-width:1440px;margin:0 auto;}
+
+#empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:90px 20px;text-align:center;}
+#empty-state .ei{font-size:3.5rem;opacity:.18;margin-bottom:14px;}
+#empty-state h2{font-family:var(--display);color:var(--charcoal);margin-bottom:8px;font-size:1.3rem;}
+#empty-state p{font-size:.84rem;color:var(--charcoal-light);max-width:380px;line-height:1.6;}
+#empty-state button{margin-top:20px;background:var(--burgundy);color:#fff;border:none;padding:9px 24px;border-radius:4px;font-family:var(--font);font-size:.88rem;font-weight:700;cursor:pointer;}
+
+#summary-strip{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:22px;}
+.sc{background:#fff;border-radius:8px;padding:18px 20px;box-shadow:var(--shadow);border-top:3px solid var(--border);}
+.sc.c1{border-top-color:var(--burgundy);}.sc.c2{border-top-color:var(--gold);}.sc.c3{border-top-color:var(--blue);}.sc.c4{border-top-color:#2e7d32;}.sc.c5{border-top-color:#6a1b9a;}
+.sc .val{font-family:var(--display);font-size:2rem;font-weight:700;color:var(--charcoal);line-height:1;margin-bottom:4px;}
+.sc .lbl{font-size:.7rem;text-transform:uppercase;letter-spacing:.06em;color:var(--charcoal-light);font-weight:700;}
+.sc .sub{font-size:.74rem;color:var(--charcoal-light);margin-top:3px;}
+
+#rep-banner{background:#fff;border-radius:8px;padding:14px 22px;margin-bottom:22px;box-shadow:var(--shadow);display:flex;align-items:center;gap:20px;flex-wrap:wrap;}
+#rep-banner .rl{font-size:.74rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--charcoal-light);white-space:nowrap;}
+#rep-bar-wrap{flex:1;min-width:160px;}
+#rep-bar-bg{height:16px;background:#e8e8e8;border-radius:8px;overflow:hidden;}
+#rep-bar-fill{height:100%;background:linear-gradient(90deg,var(--burgundy),var(--gold));border-radius:8px;transition:width .6s;width:0%;}
+.rs{font-size:.8rem;color:var(--charcoal);white-space:nowrap;}
+.rs strong{color:var(--burgundy);}
+
+#chart-grid{display:grid;grid-template-columns:repeat(12,1fr);gap:18px;}
+.cc{background:#fff;border-radius:8px;box-shadow:var(--shadow);padding:18px 18px 14px;position:relative;}
+.cc h3{font-family:var(--display);font-size:.9rem;font-weight:700;color:var(--charcoal);margin-bottom:1px;}
+.cc .csub{font-size:.68rem;color:var(--charcoal-light);margin-bottom:12px;}
+.rep-badge{position:absolute;top:14px;right:16px;font-size:.68rem;font-weight:700;color:var(--charcoal-light);background:var(--bg);border-radius:10px;padding:2px 8px;border:1px solid var(--border);}
+.cw{position:relative;width:100%;}
+.cw canvas{width:100%!important;}
+
+/* ADA stat */
+.ada-stat{display:flex;flex-direction:column;align-items:center;justify-content:center;height:220px;gap:8px;}
+.ada-num{font-family:var(--display);font-size:3.5rem;font-weight:700;color:var(--burgundy);line-height:1;}
+.ada-lbl{font-size:.8rem;color:var(--charcoal-light);text-align:center;max-width:200px;line-height:1.4;}
+.ada-pct{font-size:1.1rem;font-weight:700;color:var(--charcoal);margin-top:4px;}
+
+/* Custom tooltip for axis hover */
+#axis-tooltip{position:fixed;background:rgba(30,30,30,.92);color:#fff;padding:6px 10px;border-radius:4px;font-size:.76rem;pointer-events:none;display:none;z-index:500;white-space:nowrap;line-height:1.4;}
+
+#lbar{height:3px;background:linear-gradient(90deg,var(--burgundy),var(--gold));position:fixed;top:0;left:0;z-index:400;width:0%;display:none;transition:width .3s;}
+#lbar.on{display:block;}
+#dbg-btn{position:fixed;bottom:14px;right:14px;background:var(--charcoal);color:#fff;border:none;border-radius:4px;padding:5px 10px;font-size:.68rem;cursor:pointer;opacity:.3;z-index:200;}
+#dbg-btn:hover{opacity:1;}
+#dbg{position:fixed;bottom:44px;right:14px;width:560px;max-height:400px;background:#1e1e1e;color:#d4d4d4;border-radius:8px;padding:14px;font-family:monospace;font-size:.68rem;overflow:auto;display:none;z-index:200;box-shadow:0 8px 32px rgba(0,0,0,.4);}
+#dbg.on{display:block;}
+#dbg h4{color:var(--gold);margin-bottom:8px;}
+#dbg pre{white-space:pre-wrap;word-break:break-all;line-height:1.5;}
+
+@media(max-width:1100px){#summary-strip{grid-template-columns:repeat(3,1fr);}}
+@media(max-width:700px){#main{padding:14px;}#summary-strip{grid-template-columns:repeat(2,1fr);}#header{padding:0 14px;}#filter-section{padding:14px;}}
+</style>
+</head>
+<body>
+<div id="lbar"></div>
+<div id="axis-tooltip"></div>
+
+<!-- UPLOAD OVERLAY -->
+<div id="upload-overlay">
+  <div id="upload-box">
+    <h2>Load Member Data</h2>
+    <p>Export the DEI member report from Novi AMS and upload it here.<br>
+    <strong>Novi → Reporting → Report #26560 → Export CSV</strong></p>
+    <div id="drop-zone">
+      <div class="di">📂</div>
+      <div class="dl">Drop your CSV file here</div>
+      <div class="ds">or click to browse</div>
+    </div>
+    <div class="upload-note">Expected columns: Race/Ethnicity, Gender, ADA, Year of Birth, Contact Info Billing Address Country, Membership Status, Number of Professions or Occupations, When did you start working in regulation?</div>
+    <div id="upload-error"></div>
+    <input type="file" id="file-input" accept=".csv,.txt" />
+  </div>
+</div>
+
+<!-- HEADER -->
+<div id="header">
+  <div>
+    <div class="sub">CLEAR MEMBERSHIP</div>
+    <h1>Diversity, Equity &amp; Inclusion Dashboard</h1>
+  </div>
+  <div id="header-right">
+    <div id="last-loaded"></div>
+    <button id="upload-btn">⬆ Load New Data</button>
+  </div>
+</div>
+
+<div id="snap-bar"></div>
+
+<!-- FILTER SECTION -->
+<div id="filter-section">
+  <h2>Filters</h2>
+  <div id="filter-row">
+    <div class="fg" id="fg-gender"><label>Gender</label></div>
+    <div class="fg" id="fg-race"><label>Race / Ethnicity</label></div>
+    <div class="fg" id="fg-status"><label>Membership Status</label></div>
+    <div class="fg" id="fg-country"><label>Country</label></div>
+    <div class="fg" id="fg-age"><label>Age Group</label></div>
+    <div class="fg" id="fg-tenure"><label>Years in Regulation</label></div>
+    <div class="fg" id="fg-prof"><label>Professions Regulated</label></div>
+    <div id="filter-actions">
+      <span id="view-count"></span>
+      <button id="reset-btn">Reset</button>
+      <button id="apply-btn">Apply Filters</button>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div id="main">
+  <div id="empty-state">
+    <div class="ei">📊</div>
+    <h2>No Data Loaded</h2>
+    <p>Export the DEI member report from Novi AMS and upload it to populate the dashboard.</p>
+    <button onclick="document.getElementById('upload-overlay').style.display='flex'">Upload CSV File</button>
+  </div>
+
+  <div id="dashboard" style="display:none">
+    <div id="summary-strip">
+      <div class="sc c1"><div class="val" id="s-total">—</div><div class="lbl">Total Members</div><div class="sub">in current view</div></div>
+      <div class="sc c2"><div class="val" id="s-rep-pct">—</div><div class="lbl">Reporting Demographics</div><div class="sub" id="s-rep-sub"></div></div>
+      <div class="sc c3"><div class="val" id="s-countries">—</div><div class="lbl">Countries Represented</div><div class="sub">country of residence</div></div>
+      <div class="sc c4"><div class="val" id="s-races">—</div><div class="lbl">Race / Ethnicities</div><div class="sub">distinct groups represented</div></div>
+      <div class="sc c5"><div class="val" id="s-avgage">—</div><div class="lbl">Average Age</div><div class="sub">among members with DOB</div></div>
+    </div>
+
+    <div id="rep-banner">
+      <span class="rl">Overall Demographic Reporting Rate</span>
+      <div id="rep-bar-wrap"><div id="rep-bar-bg"><div id="rep-bar-fill"></div></div></div>
+      <span class="rs"><strong id="rb-pct">0%</strong> reporting</span>
+      <span class="rs" id="rb-yes">—</span>
+      <span class="rs" id="rb-no">—</span>
+    </div>
+
+    <div id="chart-grid">
+      <div class="cc" style="grid-column:span 4">
+        <h3>Gender</h3><div class="csub">Self-reported</div>
+        <div class="rep-badge" id="rep-gender"></div>
+        <div class="cw" style="height:260px"><canvas id="chart-gender"></canvas></div>
+      </div>
+      <div class="cc" style="grid-column:span 4">
+        <h3>ADA / Disability Disclosure</h3>
+        <div class="csub">Members disclosing a disability or condition</div>
+        <div class="rep-badge" id="rep-ada"></div>
+        <div id="ada-display" class="ada-stat"></div>
+      </div>
+      <div class="cc" style="grid-column:span 4">
+        <h3>Membership Status</h3><div class="csub">Non-Members &amp; Prospects excluded</div>
+        <div class="rep-badge" id="rep-status"></div>
+        <div class="cw" style="height:260px"><canvas id="chart-status"></canvas></div>
+      </div>
+      <div class="cc" style="grid-column:span 12">
+        <h3>Race / Ethnicity</h3>
+        <div class="csub">Multi-select responses split by ";" — each selection counted separately</div>
+        <div class="rep-badge" id="rep-race"></div>
+        <div class="cw" id="race-wrap"><canvas id="chart-race"></canvas></div>
+      </div>
+      <div class="cc" style="grid-column:span 7">
+        <h3>Age Distribution</h3><div class="csub">5-year bands from Year of Birth</div>
+        <div class="rep-badge" id="rep-age"></div>
+        <div class="cw" style="height:300px"><canvas id="chart-age"></canvas></div>
+      </div>
+      <div class="cc" style="grid-column:span 5">
+        <h3>Years in Regulation</h3><div class="csub">5-year bands from regulation start year</div>
+        <div class="rep-badge" id="rep-tenure"></div>
+        <div class="cw" style="height:300px"><canvas id="chart-tenure"></canvas></div>
+      </div>
+      <div class="cc" style="grid-column:span 5">
+        <h3>Professions / Occupations Regulated</h3>
+        <div class="csub">Number regulated per member</div>
+        <div class="rep-badge" id="rep-prof"></div>
+        <div class="cw" style="height:300px"><canvas id="chart-prof"></canvas></div>
+      </div>
+      <div class="cc" style="grid-column:span 7">
+        <h3>Country of Residence</h3>
+        <div class="csub">Top 25 — hover label for full name &amp; count</div>
+        <div class="rep-badge" id="rep-country"></div>
+        <div class="cw" id="country-wrap"><canvas id="chart-country"></canvas></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<button id="dbg-btn">Debug</button>
+<div id="dbg"><h4>Debug</h4><pre id="dbg-pre">No data loaded.</pre></div>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+// COLUMN MAP
+// ═══════════════════════════════════════════════════════════
+const COL={
+  race:'Race/Ethnicity:',gender:'Gender',ada:'ADA',yob:'Year of Birth',
+  country:'Contact Info Billing Address Country',status:'Membership Status',
+  professions:'Number of Professions or Occupations',
+  regStart:'When did you start working in regulation?',
+};
+
+const EXCLUDED_STATUSES=new Set(['non-member','nonmember','non member','prospect','prospects']);
+const CY=new Date().getFullYear();
+
+// ── AGE BANDS: 5-year ──
+function makeAgeBands(){
+  const b=[];for(let a=15;a<70;a+=5)b.push(`${a}–${a+4}`);b.push('70+');return b;
+}
+const AGE_BANDS=makeAgeBands();
+
+// ── TENURE BANDS: 5-year ──
+const TEN_BANDS=['0–4 yrs','5–9 yrs','10–14 yrs','15–19 yrs','20–24 yrs','25–29 yrs','30+ yrs'];
+
+// ── PROFESSION GROUPS: count-based buckets ──
+// Data shows values 1-19 and "20+" so group accordingly
+const PROF_GROUPS=['1','2','3','4','5','6–10','11–15','16–20','20+'];
+
+// ── ADA NONE PATTERN ──
+const ADA_NONE=/^(no|none|n\/a|na|n\.a\.?|nil|nill|non|nk|not\s*applicable|does\s*not\s*apply|no\s*disability|no\s*ada|nope|null|0|no\s*known|not\s*that\s*i\s*know|no\s*impairment|able[-\s]?bodied|neurotypical|healthy|not\s*disclosed?)$/i;
+function isADANone(s){return!s.trim()||ADA_NONE.test(s.trim());}
+
+// ═══════════════════════════════════════════════════════════
+// COUNTRY MAP — iso3 → fullName, plus raw→iso3 aliases
+// ═══════════════════════════════════════════════════════════
+// Each entry: [iso3, fullName, ...rawAliases]
+const CTRY_ENTRIES=[
+  ['USA','United States','usa','us','u.s.','u.s.a.','united states','united states of america','america','Usa'],
+  ['CAN','Canada','can','canada'],
+  ['GBR','United Kingdom','gbr','uk','u.k.','great britain','britain','england','scotland','wales','northern ireland','gb','united kingdom'],
+  ['AUS','Australia','aus','australia'],
+  ['NZL','New Zealand','nzl','nz','new zealand'],
+  ['IRL','Ireland','irl','ireland','republic of ireland'],
+  ['ISR','Israel','isr','israel'],
+  ['PHL','Philippines','phl','philippines'],
+  ['SAU','Saudi Arabia','sau','saudi arabia'],
+  ['VIR','U.S. Virgin Islands','vir','u.s. virgin islands','us virgin islands','usvi','virgin islands','united states virgin islands'],
+  ['MNP','Northern Mariana Islands','mnp','northern mariana islands','cnmi','commonwealth of the northern mariana islands','nmi'],
+  ['ARG','Argentina','arg','argentina'],
+  ['ARE','United Arab Emirates','are','uae','u.a.e.','united arab emirates'],
+  ['DEU','Germany','deu','germany','deutschland'],
+  ['FRA','France','fra','france'],
+  ['ITA','Italy','ita','italy'],
+  ['ESP','Spain','esp','spain'],
+  ['NLD','Netherlands','nld','netherlands','holland'],
+  ['BEL','Belgium','bel','belgium'],
+  ['CHE','Switzerland','che','switzerland'],
+  ['SWE','Sweden','swe','sweden'],
+  ['NOR','Norway','nor','norway'],
+  ['DNK','Denmark','dnk','denmark'],
+  ['FIN','Finland','fin','finland'],
+  ['PRT','Portugal','prt','portugal'],
+  ['GRC','Greece','grc','greece'],
+  ['POL','Poland','pol','poland'],
+  ['CZE','Czech Republic','cze','czech republic','czechia'],
+  ['HUN','Hungary','hun','hungary'],
+  ['ROU','Romania','rou','romania'],
+  ['RUS','Russia','rus','russia','russian federation'],
+  ['TUR','Turkey','tur','turkey','türkiye'],
+  ['CHN','China','chn','china','prc'],
+  ['JPN','Japan','jpn','japan'],
+  ['KOR','South Korea','kor','south korea','republic of korea'],
+  ['TWN','Taiwan','twn','taiwan'],
+  ['HKG','Hong Kong','hkg','hong kong'],
+  ['SGP','Singapore','sgp','singapore'],
+  ['MYS','Malaysia','mys','malaysia'],
+  ['IDN','Indonesia','idn','indonesia'],
+  ['IND','India','ind','india'],
+  ['PAK','Pakistan','pak','pakistan'],
+  ['BGD','Bangladesh','bgd','bangladesh'],
+  ['LKA','Sri Lanka','lka','sri lanka'],
+  ['ZAF','South Africa','zaf','south africa'],
+  ['NGA','Nigeria','nga','nigeria'],
+  ['KEN','Kenya','ken','kenya'],
+  ['GHA','Ghana','gha','ghana'],
+  ['MEX','Mexico','mex','mexico'],
+  ['BRA','Brazil','bra','brazil','brasil'],
+  ['COL','Colombia','col','colombia'],
+  ['CHL','Chile','chl','chile'],
+  ['PER','Peru','per','peru'],
+  ['JAM','Jamaica','jam','jamaica'],
+  ['TTO','Trinidad and Tobago','tto','trinidad','trinidad and tobago'],
+  ['PRI','Puerto Rico','pri','puerto rico'],
+  ['GUM','Guam','gum','guam'],
+  ['BMU','Bermuda','bmu','bermuda'],
+  ['CYP','Cyprus','cyp','cyprus'],
+  ['MLT','Malta','mlt','malta'],
+  ['ISL','Iceland','isl','iceland'],
+  ['LUX','Luxembourg','lux','luxembourg'],
+  ['EGY','Egypt','egy','egypt'],
+  ['MAR','Morocco','mar','morocco'],
+  ['TUN','Tunisia','tun','tunisia'],
+  ['KAZ','Kazakhstan','kaz','kazakhstan'],
+  ['UKR','Ukraine','ukr','ukraine'],
+  ['CRI','Costa Rica','cri','costa rica'],
+  ['PAN','Panama','pan','panama'],
+];
+
+const RAW_TO_ISO=new Map();
+const ISO_TO_FULL=new Map();
+CTRY_ENTRIES.forEach(([iso3,fullName,...aliases])=>{
+  ISO_TO_FULL.set(iso3,fullName);
+  // Register iso3 itself
+  RAW_TO_ISO.set(iso3.toLowerCase(),iso3);
+  RAW_TO_ISO.set(fullName.toLowerCase().trim(),iso3);
+  aliases.forEach(a=>RAW_TO_ISO.set(String(a).toLowerCase().trim(),iso3));
+});
+
+function normalizeCountry(raw){
+  if(!raw||!raw.trim())return null;
+  const key=raw.toLowerCase().trim();
+  const iso=RAW_TO_ISO.get(key);
+  if(iso)return{iso3:iso,fullName:ISO_TO_FULL.get(iso)||raw.trim()};
+  // Unknown: return as-is, use raw value as both iso and full
+  return{iso3:raw.trim(),fullName:raw.trim()};
+}
+
+// ═══════════════════════════════════════════════════════════
+// PALETTE
+// ═══════════════════════════════════════════════════════════
+const PAL=['#64092C','#084D78','#2e7d32','#e65100','#6a1b9a','#00695c','#c62828','#1565c0','#558b2f','#7b3f00','#00838f','#4527a0','#d84315','#1b5e20','#880e4f','#37474f','#283593','#6d4c41','#0277bd','#33691e','#ad1457','#0d47a1','#bf360c','#4a148c','#2e7d62','#5d4037','#01579b','#f57f17','#311b92','#004d40'];
+function pc(i){return PAL[i%PAL.length];}
+
+// ═══════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════
+let ALL=[],VIEW=[];
+let CHARTS={};
+let DD_STATE={};
+let DD_OPEN=null;
+// Store per-chart: labels → fullName+count for axis tooltip
+let CHART_META={};
+
+// ═══════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════
+window.addEventListener('DOMContentLoaded',()=>{
+  setupDrop();
+  document.getElementById('upload-btn').onclick=()=>document.getElementById('upload-overlay').style.display='flex';
+  document.getElementById('apply-btn').onclick=applyFilters;
+  document.getElementById('reset-btn').onclick=resetFilters;
+  document.getElementById('dbg-btn').onclick=()=>document.getElementById('dbg').classList.toggle('on');
+  document.addEventListener('click',e=>{if(!e.target.closest('.fg')&&DD_OPEN){closeDD(DD_OPEN);DD_OPEN=null;}});
+  document.addEventListener('mousemove',handleAxisHover);
+});
+
+// ═══════════════════════════════════════════════════════════
+// AXIS HOVER TOOLTIP (custom — overlaid on canvas)
+// ═══════════════════════════════════════════════════════════
+function handleAxisHover(e){
+  const tt=document.getElementById('axis-tooltip');
+  // Find if we're over a registered chart canvas
+  let found=false;
+  for(const[chartId,meta]of Object.entries(CHART_META)){
+    if(!CHARTS[chartId])continue;
+    const canvas=document.getElementById(chartId);
+    if(!canvas)continue;
+    const rect=canvas.getBoundingClientRect();
+    // Only for horizontal bar charts — check if mouse is left of chart area (y-axis label zone)
+    const chart=CHARTS[chartId];
+    if(!chart.scales||!chart.scales.y)continue;
+    const chartArea=chart.chartArea;
+    if(!chartArea)continue;
+    const mx=e.clientX-rect.left;
+    const my=e.clientY-rect.top;
+    // Y-axis label zone: left of chartArea.left, within chart height
+    if(mx>=0&&mx<=chartArea.left&&my>=chartArea.top&&my<=chartArea.bottom){
+      // Find nearest y tick
+      const yScale=chart.scales.y;
+      let closestLabel=null,closestDist=Infinity;
+      yScale.ticks.forEach((tick,i)=>{
+        const ty=yScale.getPixelForTick(i);
+        const dist=Math.abs(my-ty);
+        if(dist<closestDist){closestDist=dist;closestLabel=tick.label;}
+      });
+      if(closestLabel&&closestDist<20&&meta[closestLabel]){
+        const info=meta[closestLabel];
+        tt.innerHTML=`<strong>${info.fullName||closestLabel}</strong><br>${info.count.toLocaleString()} members`;
+        tt.style.display='block';
+        tt.style.left=(e.clientX+14)+'px';
+        tt.style.top=(e.clientY-10)+'px';
+        found=true;break;
+      }
+    }
+  }
+  if(!found){tt.style.display='none';}
+}
+
+// ═══════════════════════════════════════════════════════════
+// FILE HANDLING
+// ═══════════════════════════════════════════════════════════
+function setupDrop(){
+  const z=document.getElementById('drop-zone'),fi=document.getElementById('file-input');
+  z.onclick=()=>fi.click();
+  z.ondragover=e=>{e.preventDefault();z.classList.add('dragover');};
+  z.ondragleave=()=>z.classList.remove('dragover');
+  z.ondrop=e=>{e.preventDefault();z.classList.remove('dragover');if(e.dataTransfer.files[0])loadFile(e.dataTransfer.files[0]);};
+  fi.onchange=()=>{if(fi.files[0])loadFile(fi.files[0]);fi.value='';};
+}
+
+function loadFile(f){
+  const err=document.getElementById('upload-error');
+  err.style.display='none';
+  if(!f.name.match(/\.(csv|txt)$/i)){err.style.display='block';err.textContent='Please upload a CSV file.';return;}
+  lbar(true);
+  const r=new FileReader();
+  r.onload=e=>{
+    try{
+      const rows=parseCSV(e.target.result);
+      if(!rows.length)throw new Error('No data rows found.');
+      ALL=rows.filter(m=>!EXCLUDED_STATUSES.has((m.status||'').trim().toLowerCase()));
+      VIEW=[...ALL];
+      document.getElementById('dbg-pre').textContent=
+        'Raw rows: '+rows.length+'\nAfter exclusion: '+ALL.length+
+        '\nStatus values: '+[...new Set(ALL.map(m=>m.status))].join(', ')+
+        '\nCountry sample: '+[...new Set(ALL.map(m=>m._ctryIso).filter(Boolean))].slice(0,15).join(', ')+
+        '\nProf values: '+[...new Set(ALL.map(m=>m.professions).filter(Boolean))].sort().join(', ');
+      document.getElementById('upload-overlay').style.display='none';
+      document.getElementById('empty-state').style.display='none';
+      document.getElementById('dashboard').style.display='block';
+      document.getElementById('filter-section').classList.add('on');
+      document.getElementById('snap-bar').classList.add('on');
+      document.getElementById('snap-bar').textContent='📅 Snapshot: '+
+        new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'})+
+        ' · '+ALL.length.toLocaleString()+' members (Non-Members & Prospects excluded)';
+      document.getElementById('last-loaded').textContent=ALL.length.toLocaleString()+' members\n'+new Date().toLocaleTimeString();
+      buildDropdowns();
+      renderAll();
+      lbar(false);
+    }catch(ex){lbar(false);err.style.display='block';err.textContent='Parse error: '+ex.message;console.error(ex);}
+  };
+  r.onerror=()=>{lbar(false);err.style.display='block';err.textContent='Could not read file.';};
+  r.readAsText(f);
+}
+
+// ═══════════════════════════════════════════════════════════
+// CSV PARSER
+// ═══════════════════════════════════════════════════════════
+function parseCSV(txt){
+  const lines=txt.replace(/\r\n/g,'\n').replace(/\r/g,'\n').split('\n');
+  let hi=0;while(hi<lines.length&&!lines[hi].trim())hi++;
+  if(hi>=lines.length)throw new Error('Empty file.');
+  const hdrs=splitLine(lines[hi]).map(h=>h.trim());
+  const norm=s=>s.toLowerCase().replace(/[:\s]+$/,'').trim();
+  const idx={};
+  Object.entries(COL).forEach(([k,c])=>{idx[k]=hdrs.findIndex(h=>norm(h)===norm(c));});
+  const rows=[];
+  for(let i=hi+1;i<lines.length;i++){
+    const ln=lines[i];if(!ln.trim())continue;
+    const cells=splitLine(ln);
+    const row={};
+    Object.entries(idx).forEach(([k,j])=>{row[k]=j>=0?(cells[j]||'').trim():'';});
+    row._yob=parseYr(row.yob);
+    row._reg=parseYr(row.regStart);
+    const cn=normalizeCountry(row.country);
+    row._ctryIso=cn?cn.iso3:null;
+    row._ctryFull=cn?cn.fullName:null;
+    rows.push(row);
+  }
+  return rows;
+}
+function parseYr(s){
+  if(!s)return null;
+  const m=String(s).match(/\b(19[2-9]\d|200\d|201\d|202[0-5])\b/);
+  return m?parseInt(m[1]):null;
+}
+function splitLine(ln){
+  const tabs=(ln.match(/\t/g)||[]).length,commas=(ln.match(/,/g)||[]).length;
+  const dl=tabs>commas?'\t':',';
+  const cells=[];let cur='',inQ=false;
+  for(let i=0;i<ln.length;i++){
+    const c=ln[i];
+    if(c==='"'){if(inQ&&ln[i+1]==='"'){cur+='"';i++;}else inQ=!inQ;}
+    else if(c===dl&&!inQ){cells.push(cur);cur='';}
+    else cur+=c;
+  }
+  cells.push(cur);return cells;
+}
+
+// ═══════════════════════════════════════════════════════════
+// FIELD GETTERS
+// ═══════════════════════════════════════════════════════════
+const g=(m,k)=>(m[k]||'').trim();
+
+function getRaces(m){
+  const r=g(m,'race');if(!r)return[];
+  return r.split(';').map(s=>s.trim()).filter(Boolean);
+}
+
+function ageGroup(m){
+  const y=m._yob;if(!y)return null;
+  const a=CY-y;if(a<15||a>105)return null;
+  if(a>=70)return'70+';
+  const lo=Math.floor((a-15)/5)*5+15;
+  return`${lo}–${lo+4}`;
+}
+
+function tenureGroup(m){
+  const y=m._reg;if(!y)return null;
+  const yrs=CY-y;if(yrs<0||yrs>75)return null;
+  if(yrs>=30)return'30+ yrs';
+  const lo=Math.floor(yrs/5)*5;
+  return`${lo}–${lo+4} yrs`;
+}
+
+function profGroup(m){
+  const raw=g(m,'professions');
+  if(!raw||raw.toLowerCase()==='n/a')return null;
+  // Handle "20+" explicitly
+  if(raw==='20+')return'20+';
+  const n=parseInt(raw);
+  if(isNaN(n)||n<=0)return null;
+  if(n===1)return'1';
+  if(n===2)return'2';
+  if(n===3)return'3';
+  if(n===4)return'4';
+  if(n===5)return'5';
+  if(n<=10)return'6–10';
+  if(n<=15)return'11–15';
+  if(n<=20)return'16–20';
+  return'20+';
+}
+
+function hasDemo(m){
+  return!!(g(m,'gender')||g(m,'race')||g(m,'ada')||m._yob||m._reg||profGroup(m));
+}
+
+// ═══════════════════════════════════════════════════════════
+// DROPDOWN SYSTEM
+// ═══════════════════════════════════════════════════════════
+const DD_CONFIGS=[
+  {id:'gender', getter:m=>[g(m,'gender')].filter(Boolean)},
+  {id:'race',   getter:m=>getRaces(m)},
+  {id:'status', getter:m=>[g(m,'status')].filter(Boolean)},
+  {id:'country',getter:m=>m._ctryIso?[m._ctryIso]:[],isCountry:true},
+  {id:'age',    getter:m=>ageGroup(m)?[ageGroup(m)]:[], ordered:AGE_BANDS},
+  {id:'tenure', getter:m=>tenureGroup(m)?[tenureGroup(m)]:[], ordered:TEN_BANDS},
+  {id:'prof',   getter:m=>profGroup(m)?[profGroup(m)]:[], ordered:PROF_GROUPS},
+];
+
+function buildDropdowns(){
+  DD_CONFIGS.forEach(cfg=>{
+    DD_STATE[cfg.id]=new Set();
+    const counts={};
+    ALL.forEach(m=>cfg.getter(m).forEach(v=>{counts[v]=(counts[v]||0)+1;}));
+    let opts;
+    if(cfg.ordered){
+      opts=cfg.ordered.filter(k=>counts[k]).map(k=>[k,counts[k]]);
+      Object.entries(counts).forEach(([k,n])=>{if(!cfg.ordered.includes(k))opts.push([k,n]);});
+    } else {
+      opts=Object.entries(counts).sort((a,b)=>b[1]-a[1]);
+    }
+    buildDD(cfg.id,opts,cfg.isCountry||false);
+  });
+}
+
+function buildDD(id,opts,isCountry){
+  const fg=document.getElementById('fg-'+id);
+  fg.querySelectorAll('.dd-trigger,.dd-panel').forEach(el=>el.remove());
+  const trigger=document.createElement('div');
+  trigger.className='dd-trigger';trigger.id='ddt-'+id;
+  trigger.innerHTML=`<span class="dd-label">All</span><span class="arrow">▼</span>`;
+  trigger.onclick=e=>{e.stopPropagation();toggleDD(id);};
+  const panel=document.createElement('div');
+  panel.className='dd-panel';panel.id='ddp-'+id;
+  const search=document.createElement('input');
+  search.className='dd-search';search.placeholder='Search...';
+  panel.appendChild(search);
+  const list=document.createElement('div');
+  list.className='dd-list';list.id='ddl-'+id;
+  opts.forEach(([val,count])=>{
+    const displayVal=isCountry?(ISO_TO_FULL.get(val)||val):val;
+    const opt=document.createElement('label');
+    opt.className='dd-opt';opt.dataset.val=val;
+    opt.dataset.search=(isCountry?val+' '+displayVal:val).toLowerCase();
+    opt.innerHTML=`<input type="checkbox" value="${esc(val)}" /><span class="opt-lbl" title="${esc(displayVal)}">${esc(val)}${isCountry?' <small style="color:var(--charcoal-light);font-size:.7rem;">'+esc(displayVal)+'</small>':''}</span><span class="opt-cnt">${count.toLocaleString()}</span>`;
+    opt.querySelector('input').onchange=()=>updateDDLabel(id);
+    list.appendChild(opt);
+  });
+  const footer=document.createElement('div');
+  footer.className='dd-footer';
+  footer.innerHTML=`<a id="dda-${id}">Select All</a><a id="ddc-${id}">Clear All</a>`;
+  panel.appendChild(list);panel.appendChild(footer);
+  fg.appendChild(trigger);fg.appendChild(panel);
+  search.oninput=function(){
+    const q=this.value.toLowerCase();
+    list.querySelectorAll('.dd-opt').forEach(o=>{o.style.display=(!q||o.dataset.search.includes(q))?'':'none';});
+  };
+  document.getElementById('dda-'+id).onclick=e=>{
+    e.preventDefault();
+    list.querySelectorAll('.dd-opt').forEach(o=>{if(o.style.display!=='none')o.querySelector('input').checked=true;});
+    updateDDLabel(id);
+  };
+  document.getElementById('ddc-'+id).onclick=e=>{
+    e.preventDefault();
+    list.querySelectorAll('input').forEach(cb=>cb.checked=false);
+    updateDDLabel(id);
+  };
+}
+
+function toggleDD(id){
+  if(DD_OPEN&&DD_OPEN!==id)closeDD(DD_OPEN);
+  const panel=document.getElementById('ddp-'+id);
+  const trigger=document.getElementById('ddt-'+id);
+  const isOpen=panel.classList.contains('open');
+  if(isOpen){closeDD(id);DD_OPEN=null;}
+  else{panel.classList.add('open');trigger.classList.add('active');DD_OPEN=id;}
+}
+function closeDD(id){
+  document.getElementById('ddp-'+id)?.classList.remove('open');
+  document.getElementById('ddt-'+id)?.classList.remove('active');
+}
+function updateDDLabel(id){
+  const sel=new Set([...document.querySelectorAll(`#ddl-${id} input:checked`)].map(cb=>cb.value));
+  DD_STATE[id]=sel;
+  const lbl=document.getElementById('ddt-'+id)?.querySelector('.dd-label');
+  if(!lbl)return;
+  if(sel.size===0)lbl.textContent='All';
+  else if(sel.size===1)lbl.textContent=[...sel][0];
+  else lbl.textContent=sel.size+' selected';
+}
+
+// ═══════════════════════════════════════════════════════════
+// FILTER APPLICATION
+// ═══════════════════════════════════════════════════════════
+function applyFilters(){
+  if(DD_OPEN){closeDD(DD_OPEN);DD_OPEN=null;}
+  VIEW=ALL.filter(m=>{
+    if(DD_STATE.gender?.size&&!DD_STATE.gender.has(g(m,'gender')))return false;
+    if(DD_STATE.race?.size&&!getRaces(m).some(r=>DD_STATE.race.has(r)))return false;
+    if(DD_STATE.status?.size&&!DD_STATE.status.has(g(m,'status')))return false;
+    if(DD_STATE.country?.size&&!DD_STATE.country.has(m._ctryIso||''))return false;
+    if(DD_STATE.age?.size&&!DD_STATE.age.has(ageGroup(m)||''))return false;
+    if(DD_STATE.tenure?.size&&!DD_STATE.tenure.has(tenureGroup(m)||''))return false;
+    if(DD_STATE.prof?.size&&!DD_STATE.prof.has(profGroup(m)||''))return false;
+    return true;
+  });
+  renderAll();
+}
+
+function resetFilters(){
+  DD_CONFIGS.forEach(cfg=>{
+    DD_STATE[cfg.id]=new Set();
+    document.querySelectorAll(`#ddl-${cfg.id} input`).forEach(cb=>cb.checked=false);
+    const lbl=document.getElementById('ddt-'+cfg.id)?.querySelector('.dd-label');
+    if(lbl)lbl.textContent='All';
+  });
+  VIEW=[...ALL];renderAll();
+}
+
+// ═══════════════════════════════════════════════════════════
+// RENDER
+// ═══════════════════════════════════════════════════════════
+function renderAll(){
+  const M=VIEW;
+  const repCount=M.filter(hasDemo).length;
+  const pct=M.length?Math.round(repCount/M.length*100):0;
+  const raceSet=new Set(M.flatMap(m=>getRaces(m)).filter(Boolean));
+  const ctrySet=new Set(M.map(m=>m._ctryIso).filter(Boolean));
+  const ages=M.map(m=>m._yob?CY-m._yob:null).filter(a=>a&&a>=15&&a<106);
+  const avgAge=ages.length?Math.round(ages.reduce((a,b)=>a+b,0)/ages.length):null;
+
+  t('s-total',M.length.toLocaleString());
+  t('s-rep-pct',pct+'%');
+  t('s-rep-sub',repCount.toLocaleString()+' of '+M.length.toLocaleString()+' members');
+  t('s-countries',ctrySet.size.toLocaleString());
+  t('s-races',raceSet.size.toLocaleString());
+  t('s-avgage',avgAge?avgAge+' yrs':'—');
+  document.getElementById('rep-bar-fill').style.width=pct+'%';
+  t('rb-pct',pct+'%');
+  t('rb-yes',repCount.toLocaleString()+' reporting');
+  t('rb-no',(M.length-repCount).toLocaleString()+' not reporting');
+  t('view-count',M.length.toLocaleString()+' members in view');
+
+  // Gender
+  {const raw=countBy(M,m=>g(m,'gender'));delete raw[''];
+   badge('rep-gender',sum(raw),M.length);donut('chart-gender',raw);}
+
+  // ADA
+  {let disc=0;
+   M.forEach(m=>{const s=g(m,'ada');if(s&&!isADANone(s))disc++;});
+   const adaRep=M.filter(m=>g(m,'ada').trim()!=='').length;
+   const adaPct=M.length?Math.round(disc/M.length*100):0;
+   badge('rep-ada',adaRep,M.length);
+   document.getElementById('ada-display').innerHTML=`
+     <div class="ada-num">${disc.toLocaleString()}</div>
+     <div class="ada-pct">${adaPct}% of members</div>
+     <div class="ada-lbl">disclosed a disability or condition<br><small style="opacity:.7">(${adaRep.toLocaleString()} total ADA responses on file)</small></div>`;}
+
+  // Status
+  {const raw=countBy(M,m=>g(m,'status'));delete raw[''];
+   badge('rep-status',sum(raw),M.length);donut('chart-status',raw);}
+
+  // Race
+  {const raw={};
+   M.forEach(m=>getRaces(m).forEach(r=>{if(r)raw[r]=(raw[r]||0)+1;}));
+   const repR=M.filter(m=>getRaces(m).length>0).length;
+   badge('rep-race',repR,M.length);
+   const entries=Object.entries(raw).sort((a,b)=>b[1]-a[1]);
+   const h=Math.max(260,entries.length*36+50);
+   document.getElementById('race-wrap').style.height=h+'px';
+   // Meta for axis tooltip
+   const meta={};entries.forEach(([k,n])=>meta[k]={fullName:k,count:n});
+   hbar('chart-race',raw,null,meta);}
+
+  // Age
+  {const raw=countBy(M,m=>ageGroup(m));
+   const rep=M.filter(m=>ageGroup(m)!==null).length;
+   badge('rep-age',rep,M.length);
+   const lbls=AGE_BANDS.filter(b=>raw[b]);
+   const meta={};lbls.forEach(l=>meta[l]={fullName:l,count:raw[l]||0});
+   obar('chart-age',raw,lbls,meta);}
+
+  // Tenure
+  {const raw=countBy(M,m=>tenureGroup(m));
+   const rep=M.filter(m=>tenureGroup(m)!==null).length;
+   badge('rep-tenure',rep,M.length);
+   const lbls=TEN_BANDS.filter(b=>raw[b]);
+   const meta={};lbls.forEach(l=>meta[l]={fullName:l,count:raw[l]||0});
+   obar('chart-tenure',raw,lbls,meta);}
+
+  // Professions
+  {const raw=countBy(M,m=>profGroup(m));
+   const rep=M.filter(m=>profGroup(m)!==null).length;
+   badge('rep-prof',rep,M.length);
+   const lbls=PROF_GROUPS.filter(b=>raw[b]);
+   const meta={};lbls.forEach(l=>meta[l]={fullName:'Professions: '+l,count:raw[l]||0});
+   obar('chart-prof',raw,lbls,meta);}
+
+  // Country
+  {const raw={};
+   M.forEach(m=>{if(m._ctryIso)raw[m._ctryIso]=(raw[m._ctryIso]||0)+1;});
+   const rep=sum(raw);badge('rep-country',rep,M.length);
+   const top25=Object.fromEntries(Object.entries(raw).sort((a,b)=>b[1]-a[1]).slice(0,25));
+   const entries=Object.entries(top25);
+   const h=Math.max(260,entries.length*36+50);
+   document.getElementById('country-wrap').style.height=h+'px';
+   // Meta: iso3 → fullName + count
+   const meta={};
+   entries.forEach(([iso,n])=>meta[iso]={fullName:ISO_TO_FULL.get(iso)||iso,count:n});
+   hbar('chart-country',top25,null,meta);}
+}
+
+// ═══════════════════════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════════════════════
+function t(id,val){const el=document.getElementById(id);if(el)el.textContent=val;}
+function badge(id,rep,total){
+  const el=document.getElementById(id);if(!el)return;
+  el.textContent=total?Math.round(rep/total*100)+'% reporting':'—';
+}
+function countBy(arr,fn){
+  const c={};
+  arr.forEach(m=>{const v=fn(m);if(v!=null&&v!==''&&v!=='null'&&v!=='undefined'){c[v]=(c[v]||0)+1;}});
+  return c;
+}
+function sum(obj){return Object.values(obj).reduce((a,b)=>a+b,0);}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+// ═══════════════════════════════════════════════════════════
+// CHART BUILDERS
+// ═══════════════════════════════════════════════════════════
+function destroyChart(id){if(CHARTS[id]){CHARTS[id].destroy();delete CHARTS[id];}delete CHART_META[id];}
+
+const TTP={callbacks:{
+  title:ctx=>ctx[0].label,
+  label:ctx=>{
+    const tot=ctx.dataset.data.reduce((a,b)=>a+b,0);
+    const pct=tot?Math.round(ctx.raw/tot*100):0;
+    return' '+ctx.raw.toLocaleString()+' members ('+pct+'%)';
+  }
+}};
+
+function donut(id,counts){
+  destroyChart(id);
+  const entries=Object.entries(counts).sort((a,b)=>b[1]-a[1]);
+  const labels=entries.map(e=>e[0]),values=entries.map(e=>e[1]);
+  CHARTS[id]=new Chart(document.getElementById(id),{
+    type:'doughnut',
+    data:{labels,datasets:[{data:values,backgroundColor:labels.map((_,i)=>pc(i)),borderWidth:2,borderColor:'#fff',hoverBorderWidth:3}]},
+    options:{responsive:true,maintainAspectRatio:false,cutout:'52%',
+      plugins:{
+        legend:{position:'right',labels:{font:{family:'Open Sans',size:10},color:'#484848',padding:8,boxWidth:12,
+          generateLabels:ch=>ch.data.labels.map((lbl,i)=>({text:`${lbl} (${ch.data.datasets[0].data[i].toLocaleString()})`,fillStyle:ch.data.datasets[0].backgroundColor[i],strokeStyle:'#fff',lineWidth:2,index:i}))}},
+        tooltip:TTP
+      }
+    }
+  });
+}
+
+function hbar(id,counts,order,meta){
+  destroyChart(id);
+  const entries=order?order.filter(k=>counts[k]).map(k=>[k,counts[k]]):Object.entries(counts).sort((a,b)=>b[1]-a[1]);
+  const labels=entries.map(e=>e[0]),values=entries.map(e=>e[1]);
+  CHART_META[id]=meta||{};
+  CHARTS[id]=new Chart(document.getElementById(id),{
+    type:'bar',
+    data:{labels,datasets:[{data:values,backgroundColor:labels.map((_,i)=>pc(i)),borderRadius:3,borderSkipped:false}]},
+    options:{
+      indexAxis:'y',responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{
+        title:ctx=>{
+          const iso=ctx[0].label;
+          const m=meta&&meta[iso];
+          return m&&m.fullName&&m.fullName!==iso?m.fullName+' ('+iso+')':iso;
+        },
+        label:ctx=>{
+          const tot=ctx.dataset.data.reduce((a,b)=>a+b,0);
+          const pct=tot?Math.round(ctx.raw/tot*100):0;
+          return' '+ctx.raw.toLocaleString()+' members ('+pct+'%)';
+        }
+      }}},
+      scales:{
+        x:{grid:{color:'#f0f0f0'},ticks:{font:{family:'Open Sans',size:10},color:'#6b6b6b'}},
+        y:{grid:{display:false},ticks:{font:{family:'Open Sans',size:10},color:'#484848',autoSkip:false}}
+      }
+    }
+  });
+}
+
+function obar(id,counts,order,meta){
+  destroyChart(id);
+  const labels=order?order.filter(k=>counts[k]):Object.keys(counts);
+  const values=labels.map(l=>counts[l]||0);
+  CHART_META[id]=meta||{};
+  CHARTS[id]=new Chart(document.getElementById(id),{
+    type:'bar',
+    data:{labels,datasets:[{data:values,backgroundColor:labels.map((_,i)=>pc(i)),borderRadius:3,borderSkipped:false}]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{
+        title:ctx=>ctx[0].label,
+        label:ctx=>{
+          const tot=ctx.dataset.data.reduce((a,b)=>a+b,0);
+          const pct=tot?Math.round(ctx.raw/tot*100):0;
+          return' '+ctx.raw.toLocaleString()+' members ('+pct+'%)';
+        }
+      }}},
+      scales:{
+        x:{grid:{display:false},ticks:{font:{family:'Open Sans',size:10},color:'#484848',maxRotation:0,autoSkip:false}},
+        y:{grid:{color:'#f0f0f0'},ticks:{font:{family:'Open Sans',size:10},color:'#6b6b6b'}}
+      }
+    }
+  });
+}
+
+function lbar(on){
+  const b=document.getElementById('lbar');
+  b.classList.toggle('on',on);b.style.width=on?'70%':'100%';
+  if(!on)setTimeout(()=>{b.style.width='0%';b.classList.remove('on');},300);
+}
+</script>
+</body>
+</html>
