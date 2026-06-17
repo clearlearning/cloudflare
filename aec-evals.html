@@ -1,0 +1,1366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CLEAR AEC Session Feedback Dashboard</title>
+<link rel="icon" type="image/png" href="https://assets-002.noviams.com/novi-file-uploads/clear/structure/clearlogo.png">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap');
+:root{
+  --burgundy:#64092c;--burgundy-light:#8a1e4a;--gold:#dda838;--gold-faint:#fdf6e3;
+  --blue:#084d78;--blue-light:#0a6191;--charcoal:#484848;
+  --light-bg:#f7f5f2;--white:#fff;--border:#e0dcd6;--text:#333;--text-light:#6b6b6b;
+  --success:#2e7d4f;--shadow:0 2px 12px rgba(100,9,44,.08);--shadow-lg:0 8px 32px rgba(100,9,44,.12)
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Open Sans',sans-serif;background:var(--light-bg);color:var(--text);min-height:100vh}
+.header{background:linear-gradient(135deg,var(--burgundy),var(--burgundy-light));color:#fff;padding:14px 36px;display:flex;align-items:center;gap:18px;box-shadow:0 4px 20px rgba(100,9,44,.25)}
+.header img{height:60px;width:auto;flex-shrink:0}
+.header-text h1{font-size:19px;font-weight:700;letter-spacing:.4px}
+.header-text p{font-size:12px;opacity:.85;margin-top:2px}
+.header-right{margin-left:auto;display:flex;align-items:center;gap:8px;flex-shrink:0}
+.hbtn{background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.35);padding:7px 14px;border-radius:7px;font-size:12px;font-weight:600;font-family:'Open Sans',sans-serif;cursor:pointer;transition:.15s}
+.hbtn:hover{background:rgba(255,255,255,.28)}
+.container{max-width:1440px;margin:0 auto;padding:22px 36px 60px}
+.btn{padding:9px 18px;border-radius:8px;font-size:13px;font-weight:600;font-family:'Open Sans',sans-serif;cursor:pointer;border:0;transition:.2s;display:inline-flex;align-items:center;gap:6px}
+.btn-p{background:var(--burgundy);color:#fff}.btn-p:hover{background:var(--burgundy-light)}
+.btn-s{background:#fff;color:var(--charcoal);border:1px solid var(--border)}.btn-s:hover{border-color:var(--charcoal)}
+.btn-e{background:var(--blue);color:#fff}.btn-e:hover{background:var(--blue-light)}
+.btn-g{background:var(--gold);color:var(--burgundy)}.btn-g:hover{background:#c9952e}
+.btn-sm{padding:5px 12px;font-size:12px}
+/* CFG */
+.cfg-panel{background:#fff;border-radius:12px;box-shadow:var(--shadow);padding:22px 28px;margin-bottom:20px;border-left:4px solid var(--gold)}
+.cfg-panel h2{font-size:15px;font-weight:700;color:var(--burgundy);margin-bottom:4px}
+.cfg-panel .desc{font-size:13px;color:var(--text-light);margin-bottom:16px;line-height:1.5}
+.cfg-tabs{display:flex;border-bottom:1px solid var(--border);margin-bottom:16px}
+.cfg-tab{padding:7px 18px;cursor:pointer;font-size:13px;font-weight:600;color:var(--text-light);border-bottom:2px solid transparent;margin-bottom:-1px;background:none;border-top:none;border-left:none;border-right:none;font-family:'Open Sans',sans-serif}
+.cfg-tab.active{color:var(--burgundy);border-bottom-color:var(--burgundy)}
+.cfg-pane{display:none}.cfg-pane.active{display:block}
+.cfg-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px;margin-bottom:12px}
+.cgl{display:block;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--text-light);margin-bottom:4px}
+.cgi{width:100%;padding:8px 11px;border:1px solid var(--border);border-radius:7px;font-size:13px;font-family:'Open Sans',sans-serif}
+.cgi:focus{outline:0;border-color:var(--gold);box-shadow:0 0 0 3px rgba(221,168,56,.15)}
+.cfg-note{font-size:12px;color:var(--text-light);margin-top:8px;line-height:1.5}
+.upload-zone{border:2px dashed var(--border);border-radius:10px;padding:30px 20px;text-align:center;cursor:pointer;transition:.2s;background:#fafaf8}
+.upload-zone:hover,.upload-zone.drag{border-color:var(--burgundy);background:#fdf0f4}
+.upload-zone .uzi{font-size:32px;margin-bottom:8px}
+.upload-zone p{font-size:13px;color:var(--text-light);margin-bottom:4px}
+.upload-zone small{font-size:11px;color:#bbb}
+#fileInput{display:none}
+/* STATUS */
+.status-bar{background:#fff;border-radius:12px;box-shadow:var(--shadow);padding:11px 20px;margin-bottom:18px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.si{display:flex;align-items:center;gap:7px;font-size:13px}
+.sdot{width:10px;height:10px;border-radius:50%;background:#ccc;flex-shrink:0}
+.sdot.ok{background:var(--success)}.sdot.err{background:#c62828}.sdot.loading{background:var(--gold);animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+.slbl{font-weight:600;color:var(--charcoal)}.smeta{color:var(--text-light);font-size:12px}.sp{flex:1}
+/* SUMMARY */
+.data-summary{display:flex;flex-wrap:wrap;padding:13px 22px;background:var(--gold-faint);border:1px solid var(--gold);border-radius:12px;margin-bottom:20px;align-items:center}
+.dss{display:flex;flex-direction:column;align-items:center;padding:0 16px;border-right:1px solid rgba(221,168,56,.3)}
+.dss:last-child{border-right:0}
+.dssv{font-size:22px;font-weight:700;color:var(--burgundy)}
+.dssl{font-size:10px;color:var(--text-light);text-transform:uppercase;letter-spacing:.5px;margin-top:2px}
+/* MAIN TABS */
+.vtabs{display:flex;gap:4px;border-bottom:2px solid var(--border);padding:0 4px;margin-bottom:0}
+.vtab{padding:10px 22px;border-radius:8px 8px 0 0;font-size:13px;font-weight:600;cursor:pointer;border:1px solid transparent;border-bottom:0;background:none;color:var(--text-light);font-family:'Open Sans',sans-serif;transition:.15s}
+.vtab:hover{background:#f0ede8;color:var(--charcoal)}
+.vtab.active{background:#fff;color:var(--burgundy);border-color:var(--border);position:relative}
+.vtab.active::after{content:'';position:absolute;bottom:-2px;left:0;right:0;height:3px;background:#fff}
+.tc{display:none}.tc.active{display:block}
+/* FILTER PANEL */
+.fp{background:#fff;border-radius:0 12px 12px 12px;padding:22px 26px;box-shadow:var(--shadow);margin-bottom:18px}
+.fg{display:grid;grid-template-columns:repeat(auto-fit,minmax(185px,1fr));gap:11px;margin-bottom:12px}
+.fgl{display:block;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--text-light);margin-bottom:4px}
+/* MULTI SELECT */
+.ms{position:relative}
+.mst{width:100%;padding:8px 28px 8px 11px;border:1px solid var(--border);border-radius:7px;font-size:13px;font-family:'Open Sans',sans-serif;color:var(--text);background:#fff;cursor:pointer;text-align:left;-webkit-appearance:none;appearance:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:.15s}
+.mst::after{content:'';position:absolute;right:10px;top:50%;transform:translateY(-50%);border-left:5px solid transparent;border-right:5px solid transparent;border-top:5px solid var(--text-light);pointer-events:none}
+.mst:hover,.mst.open{border-color:var(--gold);box-shadow:0 0 0 3px rgba(221,168,56,.15)}
+.ph{color:var(--text-light)}
+.msd{display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;background:#fff;border:1px solid var(--border);border-radius:8px;box-shadow:var(--shadow-lg);z-index:300;max-height:250px;overflow-y:auto}
+.msd.open{display:block}
+.mss{width:calc(100% - 12px);margin:6px;padding:6px 9px;border:1px solid var(--border);border-radius:6px;font-size:12px;font-family:'Open Sans',sans-serif}
+.mss:focus{outline:0;border-color:var(--gold)}
+.mso{display:flex;align-items:center;gap:8px;padding:6px 12px;cursor:pointer;font-size:13px;transition:background .1s}
+.mso:hover{background:var(--gold-faint)}
+.mso.hid{display:none}
+.mso input[type=checkbox]{accent-color:var(--burgundy);width:14px;height:14px;cursor:pointer;flex-shrink:0}
+.mso label{cursor:pointer;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.msa{display:flex;gap:8px;padding:6px 12px;border-top:1px solid var(--border);background:#faf9f7;border-radius:0 0 8px 8px;position:sticky;bottom:0}
+.msa button{background:none;border:none;font-size:12px;font-family:'Open Sans',sans-serif;color:var(--blue);cursor:pointer;font-weight:600}
+.msa button:hover{text-decoration:underline}
+.br{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding-top:11px;border-top:1px solid var(--border)}
+.fsm{font-size:12px;color:var(--text-light);margin-left:auto}
+/* CARDS */
+.card{background:#fff;border-radius:12px;box-shadow:var(--shadow);margin-bottom:18px;overflow:hidden}
+.card-hdr{padding:12px 20px;font-size:14px;font-weight:700;display:flex;align-items:center;gap:8px;background:linear-gradient(135deg,var(--charcoal),#5a5a5a);color:#fff;flex-wrap:wrap}
+.card-hdr-note{font-weight:400;font-size:11px;opacity:.75;margin-left:4px}
+.card-body{padding:16px 20px}
+table{width:100%;border-collapse:collapse}
+thead th{background:#f9f7f4;padding:9px 12px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--text-light);text-align:center;border-bottom:2px solid var(--border)}
+thead th:first-child{text-align:left}
+tbody td{padding:8px 12px;font-size:13px;text-align:center;border-bottom:1px solid #f0ede8}
+tbody td:first-child{text-align:left;font-weight:600;color:var(--burgundy)}
+tbody tr:hover td{background:#fdfcfa}
+tbody tr:last-child td{border-bottom:none}
+.orow td{background:var(--gold-faint)!important;font-weight:700!important;color:var(--charcoal)!important;border-top:2px solid var(--gold)}
+.sb{display:inline-block;padding:3px 10px;border-radius:12px;font-weight:600;font-size:12px}
+.sh-b{background:#e8f5e9;color:#2e7d32}.sm-b{background:#fff8e1;color:#b8860b}.sl-b{background:#fce1ec;color:#c62828}.sn-b{background:#f0f0f0;color:#757575}
+.sh2{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text-light);margin:18px 0 8px;padding-bottom:5px;border-bottom:2px solid var(--border)}
+/* RATINGS */
+.rr{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid #f5f2ee}
+.rr:last-child{border-bottom:none}
+.rl{flex:0 0 255px;font-size:13px;line-height:1.4}
+.rbw{flex:1;display:flex;align-items:center;gap:8px}
+.rbb{flex:1;height:10px;background:#eee;border-radius:5px;overflow:hidden}
+.rbf{height:100%;border-radius:5px;transition:width .4s}
+.rn{font-size:11px;color:var(--text-light);min-width:36px;text-align:right}
+.rs{font-weight:700;font-size:14px;min-width:34px;text-align:right}
+.dw{display:flex;gap:3px;height:18px;border-radius:4px;overflow:hidden;margin:3px 0 3px 265px}
+.ds{display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;overflow:hidden;min-width:0}
+.dl{display:flex;flex-wrap:wrap;gap:7px;margin:3px 0 8px 265px}
+.di{display:flex;align-items:center;gap:3px;font-size:11px;color:var(--text-light)}
+.dd{width:8px;height:8px;border-radius:2px;flex-shrink:0}
+.d0{background:#2e7d32}.d1{background:#66bb6a}.d2{background:#ffa726}.d3{background:#ef5350}.d4{background:#b71c1c}
+/* MBAR */
+.mbar{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid #f5f2ee}
+.mbar:last-child{border-bottom:none}
+.mbl{flex:0 0 255px;font-size:13px;line-height:1.3}
+.mbt{flex:1;height:16px;background:#f0ede8;border-radius:4px;overflow:hidden}
+.mbf{height:100%;background:var(--gold);border-radius:4px;transition:width .4s}
+.mbp{font-size:12px;color:var(--text-light);min-width:36px;text-align:right;font-weight:600}
+.mbn{font-size:12px;color:var(--text-light);min-width:24px;text-align:right}
+/* COMMENTS */
+.csr{display:flex;gap:9px;align-items:center;padding:10px 20px;background:#fafaf8;border-bottom:1px solid var(--border);flex-wrap:wrap}
+.csi{flex:1;min-width:170px;padding:6px 10px;border:1px solid var(--border);border-radius:7px;font-size:12px;font-family:'Open Sans',sans-serif}
+.csi:focus{outline:0;border-color:var(--gold)}
+.cc{font-size:11px;color:var(--text-light);white-space:nowrap}
+table.ct thead th{background:#f9f7f4;padding:8px 12px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--text-light);text-align:left;border-bottom:2px solid var(--border)}
+table.ct tbody td{padding:8px 12px;border-bottom:1px solid #f0ede8;vertical-align:top;font-size:13px;text-align:left}
+table.ct tbody tr.cex td{opacity:.3;text-decoration:line-through}
+table.ct tbody tr.cna{background:#fefbf3}
+table.ct tbody tr:hover td{background:#fdfcfa}
+.cbc{width:30px;text-align:center!important}
+.cbc input{accent-color:var(--burgundy);width:14px;height:14px;cursor:pointer}
+.stag{display:inline-block;background:rgba(100,9,44,.08);color:var(--burgundy);padding:2px 7px;border-radius:4px;font-size:11px;font-weight:600;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* SPEAKER TABS */
+.itabs{display:flex;gap:3px;flex-wrap:wrap;padding:0 3px;margin-bottom:0}
+.itab{padding:8px 15px;border-radius:8px 8px 0 0;font-size:12px;font-weight:600;cursor:pointer;border:1px solid var(--border);border-bottom:0;background:#f0ede8;color:var(--text-light);font-family:'Open Sans',sans-serif;transition:.15s}
+.itab:hover{background:#e8e4de}
+.itab.active{background:#fff;color:var(--burgundy);position:relative}
+.itab.active::after{content:'';position:absolute;bottom:-1px;left:0;right:0;height:2px;background:#fff}
+/* EXPORT BAR */
+.ebar{background:#fff;border-radius:12px;box-shadow:var(--shadow);padding:14px 20px;margin-bottom:18px;display:none}
+.ebar.visible{display:block}
+.info-note{background:var(--gold-faint);border:1px solid var(--gold);border-radius:8px;padding:10px 14px;font-size:13px;line-height:1.5;margin-bottom:12px}
+.hidden{display:none!important}
+.empty{text-align:center;padding:44px 20px;color:var(--text-light)}
+.empty .icon{font-size:38px;margin-bottom:10px}
+.empty h3{font-size:15px;color:var(--charcoal);margin-bottom:5px}
+.err-box{background:#fce8ec;border:1px solid #f5c0cc;border-radius:8px;padding:11px 15px;color:#b00020;font-size:13px;margin-bottom:12px}
+@media(max-width:900px){.header{padding:12px 16px}.container{padding:14px 16px 40px}.rl{flex:0 0 150px}.dw,.dl{margin-left:160px}}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <img src="https://assets-002.noviams.com/novi-file-uploads/clear/structure/clearlogo.png" alt="CLEAR">
+  <div class="header-text">
+    <h1>AEC Session Feedback Dashboard</h1>
+    <p id="hdrSub">Upload your PheedLoop session feedback export to begin</p>
+  </div>
+  <div class="header-right">
+    <button class="hbtn" onclick="toggleCfg()">⚙ Settings</button>
+    <button class="hbtn" onclick="document.getElementById('fileInput').click()">↑ Upload File</button>
+    <input type="file" id="fileInput" accept=".xlsx,.xls" onchange="handleFile(this)">
+  </div>
+</div>
+
+<div class="container">
+
+<div class="cfg-panel" id="cfgPanel">
+  <h2>Dashboard Settings</h2>
+  <p class="desc">Upload a PheedLoop feedback export file, or configure live API access once Advanced SmartSight is active.</p>
+  <div class="cfg-tabs">
+    <button class="cfg-tab active" onclick="swCfg('upload')">📁 File Upload</button>
+    <button class="cfg-tab" onclick="swCfg('api')">🔌 Live API</button>
+  </div>
+  <div class="cfg-pane active" id="cpane-upload">
+    <div class="upload-zone" id="dropZone"
+      onclick="document.getElementById('fileInput').click()"
+      ondragover="event.preventDefault();this.classList.add('drag')"
+      ondragleave="this.classList.remove('drag')"
+      ondrop="event.preventDefault();this.classList.remove('drag');handleFile({files:event.dataTransfer.files})">
+      <div class="uzi">📊</div>
+      <p>Drop your PheedLoop feedback export here, or click to browse</p>
+      <small>Standard PheedLoop XLSX export — one tab per session</small>
+    </div>
+    <p class="cfg-note">📥 PheedLoop → Reporting → Custom Reports → Session Feedback report → Download</p>
+    <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border)">
+      <div style="font-size:13px;font-weight:700;color:var(--burgundy);margin-bottom:10px">Conference Details (used in email exports)</div>
+      <div class="cfg-grid" style="grid-template-columns:repeat(auto-fill,minmax(180px,1fr))">
+        <div><label class="cgl">Conference Name</label><input type="text" class="cgi" id="cfgConfName" placeholder="e.g. CLEAR Annual Educational Conference"></div>
+        <div><label class="cgl">City / Location</label><input type="text" class="cgi" id="cfgCity" placeholder="e.g. Portland, Oregon"></div>
+        <div><label class="cgl">Dates</label><input type="text" class="cgi" id="cfgDates" placeholder="e.g. September 14–17, 2026"></div>
+      </div>
+      <div style="margin-top:12px">
+        <label class="cgl">Event Logo</label>
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          <button class="btn btn-s btn-sm" onclick="document.getElementById('logoInput').click()">📷 Upload Event Logo</button>
+          <input type="file" id="logoInput" accept="image/*" style="display:none" onchange="handleLogoUpload(this)">
+          <span id="logoStatus" style="font-size:12px;color:var(--text-light)">Using default CLEAR logo</span>
+          <img id="logoPreview" style="height:36px;display:none;border:1px solid var(--border);border-radius:4px;padding:2px">
+        </div>
+      </div>
+      <button class="btn btn-p btn-sm" style="margin-top:12px" onclick="saveEventSettings()">Save Conference Settings</button>
+    </div>
+  </div>
+  <div class="cfg-pane" id="cpane-api">
+    <div class="cfg-grid">
+      <div><label class="cgl">Worker Proxy URL</label><input type="text" class="cgi" id="cfgWorker" placeholder="https://novi-pheedloop-worker.avance.workers.dev"></div>
+      <div><label class="cgl">Org Code</label><input type="text" class="cgi" id="cfgOrg" placeholder="ORG18GWFZJM2WHSC2C"></div>
+      <div><label class="cgl">Event Code</label><input type="text" class="cgi" id="cfgEvent" placeholder="EVENMCCYMPDXS"></div>
+      <div><label class="cgl">Report ID</label><input type="text" class="cgi" id="cfgReport" placeholder="REPHT1HXSHK01SD"></div>
+    </div>
+    <div class="cfg-grid" style="grid-template-columns:1fr;margin-top:8px">
+      <div><label class="cgl">Admin Secret (for saving shared settings)</label><input type="password" class="cgi" id="cfgAdminSecret" placeholder="Your Worker ADMIN_SECRET"></div>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:10px">
+      <button class="btn btn-p" onclick="saveApiCfg();loadFromApi()">Save &amp; Load via API</button>
+      <button class="btn btn-s" onclick="toggleCfg()">Cancel</button>
+    </div>
+    <p class="cfg-note">⚠ Requires PheedLoop Advanced SmartSight Power-Up for Session Feedback reports.</p>
+  </div>
+</div>
+
+<div class="status-bar hidden" id="statusBar">
+  <div class="si"><div class="sdot" id="sDot"></div><span class="slbl" id="sLbl">—</span><span class="smeta" id="sMeta"></span></div>
+  <div class="sp"></div>
+  <button class="btn btn-s btn-sm" onclick="document.getElementById('fileInput').click()">↑ New File</button>
+  <button class="btn btn-s btn-sm" onclick="toggleCfg()">⚙ Settings</button>
+</div>
+
+<div class="data-summary hidden" id="dsum"></div>
+
+<div class="hidden" id="main">
+  <div class="vtabs">
+    <button class="vtab active" onclick="swTab('a')">📊 Analyze</button>
+    <button class="vtab" onclick="swTab('s')">🎤 Speaker Reports</button>
+  </div>
+
+  <!-- ANALYZE -->
+  <div class="tc active" id="ta">
+    <div class="fp">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:13px">
+        <h2 style="font-size:15px;font-weight:700;color:var(--burgundy)">Filters</h2>
+        <span class="fsm" id="afsm"></span>
+      </div>
+      <div class="fg" id="afg"></div>
+      <div class="br">
+        <button class="btn btn-p" onclick="runAnalyze()">Apply Filters</button>
+        <button class="btn btn-s" onclick="resetFilters('a')">Reset All</button>
+      </div>
+    </div>
+    <div id="ar"></div>
+  </div>
+
+  <!-- SPEAKER REPORTS -->
+  <div class="tc" id="ts">
+    <div class="fp">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:13px">
+        <h2 style="font-size:15px;font-weight:700;color:var(--burgundy)">Speaker Report Filters</h2>
+        <span class="fsm" id="sfsm"></span>
+      </div>
+      <div class="info-note">Select one or more speakers to generate individual feedback reports. Each speaker receives their own PDF with session scores and comments.</div>
+      <div class="fg" id="sfg"></div>
+      <div class="br">
+        <button class="btn btn-p" onclick="runSpeaker()">Generate Reports</button>
+        <button class="btn btn-s" onclick="resetFilters('s')">Reset All</button>
+      </div>
+    </div>
+    <div class="ebar" id="sebar">
+      <h3 style="font-size:14px;font-weight:700;color:var(--burgundy);margin-bottom:8px">Export Speaker Reports</h3>
+      <div class="info-note">Review the report(s) below. Deselect any comments to exclude, then download. <strong>Tip:</strong> Use <em>Sync Selections to All</em> to copy your current comment selections to every co-presenter who shares the same session and comments — saves time when multiple speakers presented together.</div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn btn-e" onclick="xSpeakerEmail()">📧 Download Email File(s)</button>
+        <button class="btn btn-e" onclick="xSpeakerXLSX()">📗 Download XLSX</button>
+        <button class="btn btn-s" onclick="syncSelectionsToAll()">↔ Sync Selections to All</button>
+      </div>
+    </div>
+    <div id="stabs"></div>
+    <div id="sr"></div>
+  </div>
+</div>
+
+<div class="empty" id="placeholder">
+  <div class="icon">📋</div>
+  <h3>AEC 2026 Session Feedback Dashboard</h3>
+  <p>Upload your PheedLoop session feedback export to begin.<br>Use ⚙ Settings to configure live API access when available.</p>
+  <br>
+  <button class="btn btn-g" style="margin:0 auto" onclick="document.getElementById('fileInput').click()">↑ Upload Export File</button>
+</div>
+
+</div>
+<script>
+
+const SCALES = {
+  'How satisfied were you with the overall quality of this session?':{label:'Overall Satisfaction',sk:'satisfaction',map:{'Extremely satisfied':5,'Very satisfied':4,'Somewhat satisfied':3,'Not so satisfied':2,'Not at all satisfied':1}},
+  'How useful and/or relevant was the information presented in this session?':{label:'Usefulness / Relevance',sk:'usefulness',map:{'Extremely useful':5,'Very useful':4,'Somewhat useful':3,'Not so useful':2,'Not at all useful':1}},
+  'The session description accurately described the content of this session.':{label:'Description Accuracy',sk:'accuracy',map:{'Completely Agree':5,'Mostly Agree':4,'Somewhat Agree':3,'Somewhat Disagree':2,'Completely Disagree':1}},
+  'This session improved my understanding of this topic.':{label:'Improved Understanding',sk:'understanding',map:{'Completely Agree':5,'Mostly Agree':4,'Somewhat Agree':3,'Somewhat Disagree':2,'Completely Disagree':1}},
+  'How would you rate the speaker(s) for this session:':{label:'Speaker Rating',sk:'speaker',map:{'Excellent':5,'Very Good':4,'Satisfactory':3,'Fair':2,'Poor':1}},
+  'How would you rate the moderator(s) for this session:':{label:'Moderator Rating',sk:'moderator',map:{'Excellent':5,'Very Good':4,'Satisfactory':3,'Fair':2,'Poor':1}}
+};
+const RKEYS = Object.keys(SCALES);
+const DELIVERY_KEY = 'Would you like to see this presentation adapted to a:';
+const COMMENT_FIELDS = [
+  {key:'What did you find useful about this session?',label:'What did you find useful about this session?'},
+  {key:'What could have improved this session?',label:'What could have improved this session?'},
+  {key:'Additional Comments:',label:'Additional Comments'}
+];
+
+const FILTER_DEFS = {
+  a:[
+    {k:'session', l:'Session Title',           id:'Ses'},
+    {k:'day',     l:'Session Date',            id:'Day'},
+    {k:'slot',    l:'Start Time',              id:'Slt'},
+    {k:'track',   l:'Track',                   id:'Trk'},
+    {k:'attType', l:'Attendee Type',           id:'Atp'},
+    {k:'country', l:'Attendee Country',        id:'Ctr'},
+    {k:'_spk',    l:'Speaker',                 id:'Spk', arr:true},
+    {k:'_del',    l:'Presentation Adaptation', id:'Del', arr:true}
+  ],
+  s:[
+    {k:'_spk',   l:'Speaker',       id:'SSp', arr:true},
+    {k:'session',l:'Session Title', id:'SSe'},
+    {k:'day',    l:'Session Date',  id:'SDy'},
+    {k:'track',  l:'Track',         id:'STr'}
+  ]
+};
+
+let allRows=[], MSS={}, curSpTab=null, spReports={}, spExcl={};
+const LS={get:k=>localStorage.getItem('aec_'+k)||'',set:(k,v)=>localStorage.setItem('aec_'+k,v)};
+
+window.addEventListener('DOMContentLoaded',()=>{
+  ['Worker','Org','Event','Report'].forEach(k=>{ const el=$('cfg'+k); if(el) el.value=LS.get(k.toLowerCase()); });
+  const asEl=$('cfgAdminSecret');if(asEl)asEl.value=LS.get('adminSecret');
+  const cn=LS.get('confName'),cc=LS.get('confCity'),cd=LS.get('confDates');
+  if(cn){eventConf.name=cn;const el=$('cfgConfName');if(el)el.value=cn;}
+  if(cc){eventConf.city=cc;const el=$('cfgCity');if(el)el.value=cc;}
+  if(cd){eventConf.dates=cd;const el=$('cfgDates');if(el)el.value=cd;}
+  // Try loading shared settings from Worker
+  setTimeout(loadSharedEventSettings, 500);
+});
+
+function $(id){return document.getElementById(id);}
+function esc(s){if(!s)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function escQ(s){return esc(s).replace(/'/g,'&#39;');}
+function uniq(a){return[...new Set(a.filter(v=>v!=null&&v!==''))].sort();}
+function bdg(v){if(v==null)return'<span class="sb sn-b">N/A</span>';const d=v.toFixed(2);if(v>=3.5)return`<span class="sb sh-b">${d}</span>`;if(v>=2.5)return`<span class="sb sm-b">${d}</span>`;return`<span class="sb sl-b">${d}</span>`;}
+function sco(v){if(!v||isNaN(v))return'#999';if(v>=4)return'#2e7d32';if(v>=3)return'#e65100';return'#c62828';}
+function isBlank(s){if(!s)return true;const lc=String(s).toLowerCase().trim();return lc.length<2||['na','n/a','none','no','-','—','--','no comment','none.','no comments','no additional comments','nothing','n','.'].includes(lc);}
+
+function toggleCfg(){$('cfgPanel').classList.toggle('hidden');}
+function swCfg(t){
+  document.querySelectorAll('.cfg-tab').forEach((b,i)=>b.classList.toggle('active',['upload','api'][i]===t));
+  document.querySelectorAll('.cfg-pane').forEach(p=>p.classList.remove('active'));
+  $('cpane-'+t).classList.add('active');
+}
+function swTab(t){
+  document.querySelectorAll('.vtab').forEach((b,i)=>b.classList.toggle('active',['a','s'][i]===t));
+  document.querySelectorAll('.tc').forEach(c=>c.classList.remove('active'));
+  $('t'+t).classList.add('active');
+}
+function saveApiCfg(){['Worker','Org','Event','Report'].forEach(k=>{const el=$('cfg'+k);if(el)LS.set(k.toLowerCase(),el.value.trim());});const as=$('cfgAdminSecret');if(as&&as.value.trim())LS.set('adminSecret',as.value.trim());}
+function setStatus(state,lbl,meta){
+  const d=$('sDot');d.className='sdot '+state;
+  $('sLbl').textContent=lbl||'';$('sMeta').textContent=meta||'';
+  $('statusBar').classList.remove('hidden');
+}
+
+// ── PARSE ─────────────────────────────────────────────────────────────────────
+function sv(raw,qk){
+  if(!raw)return null;
+  const m=SCALES[qk].map;
+  if(m[raw]!==undefined)return m[raw];
+  const lc=String(raw).toLowerCase().trim();
+  for(const[k,v]of Object.entries(m))if(k.toLowerCase()===lc)return v;
+  return null;
+}
+function pd(raw){if(!raw)return[];return String(raw).split(/[,;|]+/).map(s=>s.trim()).filter(Boolean).map(normalizeDelivery);}
+const DELIVERY_MAP=[
+  {match:/CLEAR Resource/i, label:'CLEAR Resource (Resource Brief, Reference Library, Case Study)'},
+  {match:/CLEAR Publication/i, label:'CLEAR Publication (Journal of Professional Regulation, Professional Licensing Report)'},
+  {match:/Webinar/i, label:'Webinar'},
+  {match:/Podcast/i, label:'Podcast'},
+  {match:/Future|Follow.?Up|Follow Up/i, label:'Future/Follow Up Presentation'}
+];
+function normalizeDelivery(s){for(const d of DELIVERY_MAP){if(d.match.test(s))return d.label;}return s;}
+
+function parseRow(raw){
+  try{
+    const spkRaw=String(raw['Session - Speakers']||'').split(/,\s*/).map(s=>s.trim()).filter(Boolean);
+    const r={
+      session: String(raw['Session - Title']||'').trim()||'(Unknown)',
+      track:   String(raw['Session - Tracks']||'').trim()||'(No Track)',
+      day:     String(raw['Session - Date']||'').trim(),
+      slot:    String(raw['Session - Start Time']||'').trim(),
+      speakers:spkRaw,
+      _spk:    spkRaw,
+      attType: String(raw['Attendee - Is Speaker']||raw['Attendee Type']||'').trim(),
+      country: String(raw['Attendee - Country']||'').trim(),
+      delivery:pd(raw[DELIVERY_KEY]),
+      _del:    pd(raw[DELIVERY_KEY])
+    };
+    RKEYS.forEach(qk=>{r[SCALES[qk].sk]=sv(raw[qk],qk);});
+    COMMENT_FIELDS.forEach(cf=>{r[cf.key]=String(raw[cf.key]||'').trim();});
+    return r;
+  }catch(e){return null;}
+}
+
+function parseRowApi(raw){
+  const get=keys=>{for(const k of keys){if(raw[k]!==undefined&&raw[k]!=='')return String(raw[k]).trim();}return'';};
+  try{
+    const spkRaw=get(['Speakers','Session - Speakers']).split(/,\s*/).map(s=>s.trim()).filter(Boolean);
+    const r={
+      session: get(['Session Name','Title','Session - Title'])||'(Unknown)',
+      track:   get(['Tracks','Track','Session - Tracks'])||'(No Track)',
+      day:     get(['Date','Session - Date']),
+      slot:    get(['Start Time','Session - Start Time']),
+      speakers:spkRaw,_spk:spkRaw,
+      attType: get(['Attendee Type','attendee_type']),
+      country: get(['Country','Attendee - Country']),
+      delivery:pd(get([DELIVERY_KEY])),_del:pd(get([DELIVERY_KEY]))
+    };
+    RKEYS.forEach(qk=>{r[SCALES[qk].sk]=sv(get([qk]),qk);});
+    COMMENT_FIELDS.forEach(cf=>{r[cf.key]=get([cf.key]);});
+    return r;
+  }catch(e){return null;}
+}
+
+// ── FILE / API LOAD ───────────────────────────────────────────────────────────
+function handleFile(input){
+  const file=input.files?.[0];if(!file)return;
+  $('cfgPanel').classList.add('hidden');
+  setStatus('loading',file.name,'Parsing…');
+  $('placeholder').classList.add('hidden');
+  const reader=new FileReader();
+  reader.onload=e=>{
+    try{
+      const wb=XLSX.read(e.target.result,{type:'array'});
+      const rows=[];
+      wb.SheetNames.forEach(name=>{
+        const ws=wb.Sheets[name];
+        const data=XLSX.utils.sheet_to_json(ws,{defval:''});
+        if(!data.length)return;
+        if(!data[0]['How satisfied were you with the overall quality of this session?'])return;
+        data.forEach(r=>{const p=parseRow(r);if(p)rows.push(p);});
+      });
+      if(!rows.length){showError('No feedback responses found in this file.');return;}
+      allRows=rows;init(file.name);
+    }catch(err){showError('Could not parse file: '+err.message);}
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+async function loadFromApi(){
+  const worker=LS.get('worker'),org=LS.get('org'),report=LS.get('report');
+  if(!report){alert('Report ID required');return;}
+  $('cfgPanel').classList.add('hidden');setStatus('loading','API','Fetching…');$('placeholder').classList.add('hidden');
+  try{
+    let rows=[],page=1;
+    while(true){
+      const url=`${worker}/pheedloop-report?org=${encodeURIComponent(org)}&report=${encodeURIComponent(report)}&page=${page}&page_size=100`;
+      const resp=await fetch(url);if(!resp.ok)throw new Error('API error '+resp.status);
+      const data=await resp.json();const batch=data.results||data||[];
+      rows=rows.concat(batch.map(parseRowApi).filter(Boolean));
+      if(!data.next||batch.length<100)break;page++;
+    }
+    if(!rows.length){showError('No feedback data returned.');return;}
+    allRows=rows;init('Live API');
+  }catch(e){showError(e.message);}
+}
+
+function init(src){
+  const n=allRows.length,sess=uniq(allRows.map(r=>r.session)).length;
+  $('hdrSub').textContent=`${n} response${n!==1?'s':''} · ${sess} session${sess!==1?'s':''} · ${src}`;
+  setStatus('ok',src,`${n} responses`);
+  renderSummary();buildFilters('a');buildFilters('s');
+  $('main').classList.remove('hidden');
+  runAnalyze();
+}
+
+// ── SUMMARY ───────────────────────────────────────────────────────────────────
+function renderSummary(){
+  const n=allRows.length,s=uniq(allRows.map(r=>r.session)).length,sp=new Set(allRows.flatMap(r=>r.speakers)).size,t=uniq(allRows.map(r=>r.track)).length;
+  const allV=RKEYS.flatMap(qk=>allRows.map(r=>r[SCALES[qk].sk]).filter(v=>v!==null));
+  const ov=allV.length?(allV.reduce((a,b)=>a+b,0)/allV.length).toFixed(2):'—';
+  $('dsum').innerHTML=`<div class="dss"><span class="dssv">${n}</span><span class="dssl">Responses</span></div><div class="dss"><span class="dssv">${s}</span><span class="dssl">Sessions</span></div><div class="dss"><span class="dssv">${sp}</span><span class="dssl">Speakers</span></div><div class="dss"><span class="dssv">${t}</span><span class="dssl">Tracks</span></div><div class="dss"><span class="dssv" style="color:${sco(parseFloat(ov))}">${ov}</span><span class="dssl">Overall Score</span></div>`;
+  $('dsum').classList.remove('hidden');
+}
+
+// ── FILTERS ───────────────────────────────────────────────────────────────────
+function buildFilters(p){
+  const g=$(p==='a'?'afg':'sfg');g.innerHTML='';
+  FILTER_DEFS[p].forEach(d=>{
+    const fid=p+d.id;
+    const div=document.createElement('div');
+    let vals;
+    if(d.arr)vals=uniq(allRows.flatMap(r=>r[d.k]||[]));
+    else vals=uniq(allRows.map(r=>r[d.k]).filter(Boolean));
+    if(!MSS[fid])MSS[fid]={sel:new Set(),av:[]};
+    MSS[fid].av=vals;MSS[fid].sel=new Set([...MSS[fid].sel].filter(v=>vals.includes(v)));
+    div.innerHTML=`<label class="fgl">${d.l}</label><div class="ms" id="${fid}_w"><button type="button" class="mst" id="${fid}_t"><span class="ph">All</span></button><div class="msd" id="${fid}_d"><input type="text" class="mss" placeholder="Search..." oninput="msSr('${fid}',this.value)"><div id="${fid}_o"></div><div class="msa"><button onclick="msA('${fid}',1)">Select All</button><button onclick="msA('${fid}',0)">Clear</button></div></div></div>`;
+    g.appendChild(div);
+    setTimeout(()=>{bmo(fid);smt(fid);uml(fid);},0);
+  });
+}
+
+function bmo(k){
+  const c=$(k+'_o');if(!c)return;
+  const{av,sel}=MSS[k];c.innerHTML='';
+  av.forEach((v,i)=>{
+    const d=document.createElement('div');d.className='mso';d.setAttribute('data-s',v.toLowerCase());
+    const id=k+'_'+i;
+    d.innerHTML=`<input type="checkbox" id="${id}" value="${esc(v)}" ${sel.has(v)?'checked':''}><label for="${id}">${esc(v)}</label>`;
+    d.querySelector('input').onchange=function(){if(this.checked)sel.add(v);else sel.delete(v);uml(k);};
+    c.appendChild(d);
+  });
+}
+function smt(k){
+  const t=$(k+'_t'),d=$(k+'_d');if(!t||!d)return;
+  const nt=t.cloneNode(true);t.parentNode.replaceChild(nt,t);
+  nt.onclick=e=>{
+    e.stopPropagation();
+    document.querySelectorAll('.msd.open').forEach(x=>{if(x!==d){x.classList.remove('open');}});
+    document.querySelectorAll('.mst.open').forEach(x=>{if(x!==nt){x.classList.remove('open');}});
+    d.classList.toggle('open');nt.classList.toggle('open');
+    if(d.classList.contains('open')){const s=d.querySelector('.mss');if(s){s.value='';msSr(k,'');s.focus();}}
+  };
+}
+document.addEventListener('click',e=>{
+  if(!e.target.closest('.ms')){document.querySelectorAll('.msd.open').forEach(d=>d.classList.remove('open'));document.querySelectorAll('.mst.open').forEach(t=>t.classList.remove('open'));}
+});
+function uml(k){const t=$(k+'_t');if(!t)return;const{sel,av}=MSS[k];if(!sel.size||sel.size===av.length)t.innerHTML='<span class="ph">All</span>';else if(sel.size<=2)t.textContent=[...sel].sort().join(', ');else t.textContent=sel.size+' selected';}
+function msSr(k,q){const ql=q.toLowerCase();document.querySelectorAll('#'+k+'_o .mso').forEach(o=>o.classList.toggle('hid',ql&&!o.getAttribute('data-s').includes(ql)));}
+function msA(k,sa){const{sel,av}=MSS[k];if(sa)av.forEach(v=>sel.add(v));else sel.clear();document.querySelectorAll('#'+k+'_o input[type=checkbox]').forEach(c=>c.checked=!!sa);uml(k);}
+
+function getFiltered(p){
+  return allRows.filter(row=>{
+    for(const d of FILTER_DEFS[p]){
+      const fid=p+d.id;const m=MSS[fid];
+      if(!m||!m.sel.size||m.sel.size===m.av.length)continue;
+      if(d.arr){if(![...m.sel].some(v=>(row[d.k]||[]).includes(v)))return false;}
+      else{if(!m.sel.has(row[d.k]||''))return false;}
+    }
+    return true;
+  });
+}
+
+function resetFilters(p){
+  FILTER_DEFS[p].forEach(d=>{const fid=p+d.id;const m=MSS[fid];if(m){m.sel.clear();bmo(fid);uml(fid);}});
+  $(p==='a'?'afsm':'sfsm').textContent='';
+  if(p==='a'){$('ar').innerHTML='';}
+  else{$('sr').innerHTML='';$('stabs').innerHTML='';$('sebar').classList.remove('visible');spReports={};spExcl={};curSpTab=null;}
+}
+
+// ── ANALYZE ───────────────────────────────────────────────────────────────────
+function runAnalyze(){
+  const f=getFiltered('a');
+  $('afsm').textContent=f.length+' response'+(f.length!==1?'s':'')+' match';
+  if(!f.length){$('ar').innerHTML='<div class="card"><div class="card-body"><div class="empty"><div class="icon">🔍</div><h3>No responses match these filters.</h3></div></div></div>';return;}
+  let h='';
+  h+=buildScoreTable(f,'Session','session');
+  h+=buildScoreTable(f,'Track','track');
+  if(uniq(f.map(r=>r.day)).length>1)h+=buildScoreTable(f,'Day','day');
+  h+=buildRatingDetail(f);
+  h+=buildDelivery(f);
+  COMMENT_FIELDS.forEach(cf=>{h+=buildComments(f,cf.key,cf.label,'a');});
+  $('ar').innerHTML=h;
+  COMMENT_FIELDS.forEach(cf=>wireComments(cf.key,'a'));
+}
+
+// ── SPEAKER REPORTS ───────────────────────────────────────────────────────────
+function runSpeaker(){
+  const f=getFiltered('s');
+  $('sfsm').textContent=f.length+' response'+(f.length!==1?'s':'')+' match';
+  if(!f.length){$('sr').innerHTML='<div class="card"><div class="card-body"><div class="empty"><div class="icon">🔍</div><h3>No responses match.</h3></div></div></div>';$('sebar').classList.remove('visible');return;}
+  const bySpk={};
+  f.forEach(row=>row.speakers.forEach(sp=>{if(!bySpk[sp])bySpk[sp]=[];bySpk[sp].push(row);}));
+  spReports={};spExcl={};
+  Object.keys(bySpk).sort().forEach(sp=>{spReports[sp]=buildSpReport(sp,bySpk[sp]);spExcl[sp]={};});
+  curSpTab=Object.keys(spReports).sort()[0];
+  renderSpTabs();renderSpContent(spReports[curSpTab],curSpTab);
+  $('sebar').classList.add('visible');
+  COMMENT_FIELDS.forEach(cf=>wireComments(cf.key,'sp'));
+}
+
+function buildSpReport(sp,rows){
+  const bySess={};rows.forEach(r=>{(bySess[r.session]=bySess[r.session]||[]).push(r);});
+  const sessions=Object.keys(bySess).sort();
+  const gt=RKEYS.map(()=>({s:0,c:0}));
+  const tableRows=sessions.map(sess=>{
+    const rs=bySess[sess];
+    const avgs=RKEYS.map((qk,i)=>{const v=rs.map(r=>r[SCALES[qk].sk]).filter(x=>x!==null);const a=v.length?v.reduce((a,b)=>a+b,0)/v.length:null;if(v.length){gt[i].s+=v.reduce((a,b)=>a+b,0);gt[i].c+=v.length;}return a;});
+    const allV=avgs.filter(x=>x!==null);
+    return{sess,c:rs.length,avgs,o:allV.length?allV.reduce((a,b)=>a+b,0)/allV.length:null};
+  });
+  const ga=gt.map(t=>t.c?t.s/t.c:null),gv=ga.filter(x=>x!==null);
+  const cmts=[];
+  rows.forEach(r=>COMMENT_FIELDS.forEach(cf=>{const txt=r[cf.key];if(txt)cmts.push({q:cf.label,qkey:cf.key,sess:r.session,day:r.day,txt,na:isBlank(txt)});}));
+  return{sp,tableRows,ga,go:gv.length?gv.reduce((a,b)=>a+b,0)/gv.length:null,cmts,tot:rows.length};
+}
+
+function renderSpTabs(){
+  const spks=Object.keys(spReports).sort();
+  if(spks.length<=1){$('stabs').innerHTML='';return;}
+  const div=document.createElement('div');div.className='itabs';
+  spks.forEach(s=>{
+    const btn=document.createElement('button');
+    btn.className='itab'+(s===curSpTab?' active':'');
+    btn.textContent=s;
+    btn.addEventListener('click',()=>sitSpk(s));
+    div.appendChild(btn);
+  });
+  $('stabs').innerHTML='';$('stabs').appendChild(div);
+}
+
+function sitSpk(sp){
+  if(curSpTab)spExcl[curSpTab]=gSpExcl();
+  // Sync comment selections from current speaker to new speaker if they share sessions
+  if(curSpTab && curSpTab!==sp){
+    const prevRd=spReports[curSpTab];
+    const newRd=spReports[sp];
+    if(prevRd&&newRd){
+      // Find shared sessions
+      const prevSessions=new Set(prevRd.tableRows.map(r=>r.sess));
+      const sharedSessions=newRd.tableRows.filter(r=>prevSessions.has(r.sess)).map(r=>r.sess);
+      if(sharedSessions.length>0&&!spExcl[sp]){
+        // Copy exclusions from prev speaker for matching comments
+        const syncedExcl={};
+        COMMENT_FIELDS.forEach(cf=>{
+          const prevEx=spExcl[curSpTab]?.[cf.key]||new Set();
+          const prevFieldCmts=prevRd.cmts.filter(cm=>cm.qkey===cf.key);
+          const newFieldCmts=newRd.cmts.filter(cm=>cm.qkey===cf.key);
+          const newEx=new Set();
+          newFieldCmts.forEach((cm,newIdx)=>{
+            // Find same comment in prev speaker (same session + same text)
+            const prevIdx=prevFieldCmts.findIndex(pc=>pc.sess===cm.sess&&pc.txt===cm.txt);
+            if(prevIdx>=0&&prevEx.has(prevIdx)){newEx.add(newIdx);}
+          });
+          syncedExcl[cf.key]=newEx;
+        });
+        spExcl[sp]=syncedExcl;
+      }
+    }
+  }
+  curSpTab=sp;renderSpTabs();renderSpContent(spReports[sp],sp);
+  restoreSpExcl(sp);
+  COMMENT_FIELDS.forEach(cf=>wireComments(cf.key,'sp'));
+}
+
+function renderSpContent(rd,sp){
+  let h=`<div style="background:#fff;border-radius:12px;padding:12px 20px;margin-bottom:14px;box-shadow:var(--shadow);display:flex;align-items:center;gap:16px;flex-wrap:wrap"><div><span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text-light)">Speaker:</span><span style="font-size:16px;font-weight:700;color:var(--burgundy);margin-left:6px">${esc(sp)}</span></div><div><span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text-light)">Responses:</span><span style="font-size:16px;font-weight:700;color:var(--blue);margin-left:6px">${rd.tot}</span></div></div>`;
+  h+='<div class="card"><div class="card-hdr">📊 Scores by Session</div><table><thead><tr><th>Session</th><th>N</th>';
+  RKEYS.forEach(qk=>{h+=`<th>${SCALES[qk].label.split(' ').slice(0,2).join(' ')}</th>`;});
+  h+='<th>Overall</th></tr></thead><tbody>';
+  rd.tableRows.forEach(r=>{
+    h+=`<tr><td title="${esc(r.sess)}" style="max-width:230px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(r.sess)}</td><td>${r.c}</td>`;
+    r.avgs.forEach(a=>{h+=`<td>${bdg(a)}</td>`;});
+    h+=`<td>${bdg(r.o)}</td></tr>`;
+  });
+  h+=`<tr class="orow"><td>All Sessions</td><td>${rd.tot}</td>`;
+  rd.ga.forEach(a=>{h+=`<td>${bdg(a)}</td>`;});
+  h+=`<td>${bdg(rd.go)}</td></tr></tbody></table></div>`;
+  COMMENT_FIELDS.forEach(cf=>{
+    const relevant=rd.cmts.filter(cm=>cm.qkey===cf.key);
+    if(!relevant.length)return;
+    const pfx=spPfx(cf.key);
+    const spuid='spacc_'+pfx;
+    h+='<div class="sh2 acc-hdr" data-target="'+spuid+'" style="cursor:pointer;display:flex;align-items:center;gap:6px">';
+    h+='<span class="acc-arrow" id="'+spuid+'_arrow" style="font-size:10px;display:inline-block">▶</span>💬 '+esc(cf.label)+'</div>';
+    h+='<div id="'+spuid+'" class="acc-body" style="display:none">';
+    h+='<div class="card"><div class="csr">';
+    h+='<input type="text" class="csi acc-search" data-pfx="'+pfx+'" placeholder="Search...">';
+    h+='<span class="cc" id="'+pfx+'_c"></span>';
+    h+='<button class="btn btn-s btn-sm acc-sel" data-pfx="'+pfx+'" data-state="true">Select All</button>';
+    h+='<button class="btn btn-s btn-sm acc-sel" data-pfx="'+pfx+'" data-state="false">Deselect All</button>';
+    h+='</div>';
+    h+='<table class="ct" id="'+pfx+'_t"><thead><tr><th class="cbc"><input type="checkbox" id="'+pfx+'_m" checked></th><th>Session</th><th>Day</th><th>Comment</th></tr></thead><tbody>';
+    relevant.forEach((cm,i)=>{
+      h+='<tr id="'+pfx+'_r'+i+'" class="'+(cm.na?'cna cex':'')+'" data-t="'+esc(cm.txt.toLowerCase())+'" style="cursor:pointer" onclick="toggleCmtRow(this)">';
+      h+='<td class="cbc"><input type="checkbox" class="'+pfx+'_cb" data-i="'+i+'" '+(cm.na?'':'checked')+' onclick="event.stopPropagation()"></td>';
+      h+='<td><span class="stag" title="'+esc(cm.sess)+'">'+esc(cm.sess)+'</span></td>';
+      h+='<td style="font-size:11px;white-space:nowrap;color:var(--text-light)">'+esc(cm.day)+'</td>';
+      h+='<td style="font-style:italic">'+esc(cm.txt)+'</td>';
+      h+='</tr>';
+    });
+    h+='</tbody></table></div></div>';
+  });
+  $('sr').innerHTML=h;
+}
+
+function spPfx(k){return 'sp_'+k.replace(/[^a-zA-Z0-9]/g,'_').toLowerCase().slice(0,16);}
+function syncSelectionsToAll(){
+  if(!curSpTab)return;
+  // Save current tab first
+  spExcl[curSpTab]=gSpExcl();
+  const srcRd=spReports[curSpTab];
+  if(!srcRd)return;
+  let synced=0;
+  Object.keys(spReports).forEach(sp=>{
+    if(sp===curSpTab)return;
+    const tgtRd=spReports[sp];
+    const syncedExcl={};
+    COMMENT_FIELDS.forEach(cf=>{
+      const srcEx=spExcl[curSpTab]?.[cf.key]||new Set();
+      const srcFieldCmts=srcRd.cmts.filter(cm=>cm.qkey===cf.key);
+      const tgtFieldCmts=tgtRd.cmts.filter(cm=>cm.qkey===cf.key);
+      const newEx=new Set();
+      tgtFieldCmts.forEach((cm,tgtIdx)=>{
+        const srcIdx=srcFieldCmts.findIndex(sc=>sc.sess===cm.sess&&sc.txt===cm.txt);
+        if(srcIdx>=0&&srcEx.has(srcIdx)){newEx.add(tgtIdx);}
+      });
+      syncedExcl[cf.key]=newEx;
+    });
+    spExcl[sp]=syncedExcl;
+    synced++;
+  });
+  alert('Selections synced to '+synced+' other speaker'+(synced!==1?'s':'')+'. Switch tabs to verify before downloading.');
+}
+
+function gSpExcl(){const ex={};COMMENT_FIELDS.forEach(cf=>{const pfx=spPfx(cf.key);ex[cf.key]=new Set();document.querySelectorAll('.'+pfx+'_cb').forEach(cb=>{if(!cb.checked)ex[cf.key].add(+cb.dataset.i);});});return ex;}
+function restoreSpExcl(sp){const ex=spExcl[sp];if(!ex)return;Object.entries(ex).forEach(([fk,set])=>{const pfx=spPfx(fk);set.forEach(i=>{const cb=document.querySelector('.'+pfx+'_cb[data-i="'+i+'"]');if(cb){cb.checked=false;const r=$(pfx+'_r'+i);if(r)r.classList.add('cex');}});});}
+
+// ── SCORE TABLE ───────────────────────────────────────────────────────────────
+function buildScoreTable(data,gl,gk){
+  const gs={};data.forEach(r=>{const g=r[gk]||'(Blank)';(gs[g]=gs[g]||[]).push(r);});
+  const ns=Object.keys(gs).sort();const gt=RKEYS.map(()=>({s:0,c:0}));
+  const rows=ns.map(n=>{
+    const rs=gs[n];
+    const avgs=RKEYS.map((qk,i)=>{const v=rs.map(r=>r[SCALES[qk].sk]).filter(x=>x!==null);const a=v.length?v.reduce((a,b)=>a+b,0)/v.length:null;if(v.length){gt[i].s+=v.reduce((a,b)=>a+b,0);gt[i].c+=v.length;}return a;});
+    const va=avgs.filter(x=>x!==null);return{n,c:rs.length,avgs,o:va.length?va.reduce((a,b)=>a+b,0)/va.length:null};
+  });
+  const ga=gt.map(t=>t.c?t.s/t.c:null),gv=ga.filter(x=>x!==null),go=gv.length?gv.reduce((a,b)=>a+b,0)/gv.length:null;
+  let h=`<div class="card"><div class="card-hdr">📊 Scores by ${gl}</div><table><thead><tr><th>${gl}</th><th>N</th>`;
+  RKEYS.forEach(qk=>{h+=`<th>${SCALES[qk].label.split(' ').slice(0,2).join(' ')}</th>`;});
+  h+='<th>Overall</th></tr></thead><tbody>';
+  rows.forEach(r=>{h+=`<tr><td title="${esc(r.n)}" style="max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(r.n)}</td><td>${r.c}</td>`;r.avgs.forEach(a=>{h+=`<td>${bdg(a)}</td>`;});h+=`<td>${bdg(r.o)}</td></tr>`;});
+  h+=`<tr class="orow"><td>All ${gl}s</td><td>${data.length}</td>`;ga.forEach(a=>{h+=`<td>${bdg(a)}</td>`;});h+=`<td>${bdg(go)}</td></tr></tbody></table></div>`;
+  return h;
+}
+
+// ── RATING DETAIL ─────────────────────────────────────────────────────────────
+function buildRatingDetail(rows){
+  let h='<div class="card"><div class="card-hdr">📈 Rating Detail</div><table><thead><tr><th style="text-align:left">Question</th><th>Avg</th><th>N</th><th style="text-align:left;min-width:300px">Response Breakdown</th></tr></thead><tbody>';
+  RKEYS.forEach(qk=>{
+    const sk=SCALES[qk].sk;const vals=rows.map(r=>r[sk]).filter(v=>v!==null);if(!vals.length)return;
+    const avg=vals.reduce((a,b)=>a+b,0)/vals.length;
+    const dist=[0,0,0,0,0];vals.forEach(v=>{dist[5-v]++;});
+    const dp=dist.map(cnt=>vals.length?cnt/vals.length*100:0);
+    const colors=['#2e7d32','#66bb6a','#ffa726','#ef5350','#b71c1c'];
+    const labels=Object.keys(SCALES[qk].map);
+    const segs=dp.map((p,i)=>p>0?`<div style="display:inline-flex;align-items:center;justify-content:center;width:${p}%;height:20px;background:${colors[i]};font-size:10px;font-weight:700;color:#fff;overflow:hidden;min-width:0" title="${labels[i]}: ${dist[i]} (${p.toFixed(0)}%)">${p>=8?dist[i]:''}</div>`:'').join('');
+    const legend=labels.map((k,i)=>`<span style="display:inline-flex;align-items:center;gap:3px;font-size:11px;color:var(--text-light);margin-right:8px"><span style="width:8px;height:8px;border-radius:2px;background:${colors[i]};display:inline-block"></span>${k}</span>`).join('');
+    h+=`<tr><td style="text-align:left;font-weight:600;color:var(--burgundy)">${SCALES[qk].label}</td><td><span class="sb ${avg>=3.5?'sh-b':avg>=2.5?'sm-b':'sl-b'}">${avg.toFixed(2)}</span></td><td style="color:var(--text-light);font-size:12px">${vals.length}</td><td style="text-align:left"><div style="display:flex;border-radius:4px;overflow:hidden;height:20px;margin-bottom:3px">${segs}</div><div>${legend}</div></td></tr>`;
+  });
+  h+='</tbody></table></div></div></div>';return h;
+}
+
+// ── DELIVERY ──────────────────────────────────────────────────────────────────
+function buildDelivery(rows){
+  const resp=rows.filter(r=>r.delivery&&r.delivery.length>0).length;if(!resp)return'';
+  const DOPTS=[
+    'CLEAR Resource (Resource Brief, Reference Library, Case Study)',
+    'CLEAR Publication (Journal of Professional Regulation, Professional Licensing Report)',
+    'Webinar','Podcast','Future/Follow Up Presentation'
+  ];
+  const DCOLORS={'CLEAR Resource (Resource Brief, Reference Library, Case Study)':'#64092c',
+    'CLEAR Publication (Journal of Professional Regulation, Professional Licensing Report)':'#084d78',
+    'Webinar':'#dda838','Podcast':'#2e7d4f','Future/Follow Up Presentation':'#e65100'};
+  const DSHORT={'CLEAR Resource (Resource Brief, Reference Library, Case Study)':'CLEAR Resource',
+    'CLEAR Publication (Journal of Professional Regulation, Professional Licensing Report)':'CLEAR Publication',
+    'Webinar':'Webinar','Podcast':'Podcast','Future/Follow Up Presentation':'Future Presentation'};
+
+  const counts={};rows.forEach(r=>r.delivery.forEach(d=>{if(d)counts[d]=(counts[d]||0)+1;}));
+  const sessions=[...new Set(rows.map(r=>r.session))].sort();
+  const sessionData={};
+  sessions.forEach(sess=>{
+    const sRows=rows.filter(r=>r.session===sess);
+    const sResp=sRows.filter(r=>r.delivery&&r.delivery.length>0).length;
+    const sCounts={};sRows.forEach(r=>r.delivery.forEach(d=>{if(d)sCounts[d]=(sCounts[d]||0)+1;}));
+    sessionData[sess]={counts:sCounts,resp:sResp,n:sRows.length};
+  });
+  window._deliverySessionData=sessionData;
+
+  const activeOpts=DOPTS.filter(o=>counts[o]>0);
+  const uid='acc_delivery';
+
+  let h='<div class="card">';
+  h+='<div class="card-hdr acc-hdr" data-target="'+uid+'" style="cursor:pointer;user-select:none">';
+  h+='<span class="acc-arrow" id="'+uid+'_arrow" style="font-size:11px;margin-right:6px;display:inline-block">▶</span>';
+  h+='📣 Presentation Adaptation Preferences';
+  h+='<span class="card-hdr-note"> ('+resp+' of '+rows.length+' responded — multi-select) · Click to expand</span>';
+  h+='</div>';
+  h+='<div id="'+uid+'" class="acc-body" style="display:none">';
+  h+='<div class="card-body">';
+
+  // Legend
+  h+='<div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:16px">';
+  activeOpts.forEach(o=>{h+='<div style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text-light)"><div style="width:12px;height:12px;border-radius:2px;background:'+DCOLORS[o]+';flex-shrink:0"></div>'+esc(DSHORT[o])+'</div>';});
+  h+='</div>';
+
+  // Stacked bar per session
+  sessions.forEach(sess=>{
+    const sd=sessionData[sess];
+    const shortSess=sess.length>60?sess.slice(0,58)+'…':sess;
+    h+='<div style="margin-bottom:14px">';
+    h+='<div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:4px" title="'+esc(sess)+'">'+esc(shortSess)+'</div>';
+    h+='<div style="display:flex;height:24px;border-radius:5px;overflow:hidden;background:#f0ede8">';
+    if(sd.resp>0){
+      activeOpts.forEach(o=>{
+        const cnt=sd.counts[o]||0;if(!cnt)return;
+        const pct=cnt/sd.resp*100;
+        h+='<div style="width:'+pct+'%;background:'+DCOLORS[o]+';height:100%;display:flex;align-items:center;justify-content:center;overflow:hidden" title="'+esc(DSHORT[o])+': '+cnt+' ('+pct.toFixed(0)+'%)">';
+        h+='<span style="font-size:10px;font-weight:700;color:#fff;padding:0 3px">'+(pct>=10?cnt:'')+'</span></div>';
+      });
+    }
+    h+='</div>';
+    h+='<div style="font-size:11px;color:var(--text-light);margin-top:2px">'+sd.resp+' of '+sd.n+' responded</div>';
+    h+='</div>';
+  });
+
+  h+='</div></div></div>';
+  return h;
+}
+function showDeliveryModal(sess){}
+function closeDeliveryModal(){const m=document.getElementById('deliveryModal');if(m)m.style.display='none';}
+
+// ── COMMENTS ──────────────────────────────────────────────────────────────────
+function cmtPfx(k,p){return p+'_'+k.replace(/[^a-zA-Z0-9]/g,'_').toLowerCase().slice(0,14);}
+
+function buildComments(rows,fieldKey,label,p){
+  const pfx=cmtPfx(fieldKey,p);
+  const cmts=[];
+  rows.forEach((r)=>{const txt=r[fieldKey];if(!txt)return;cmts.push({txt,session:r.session,day:r.day,na:isBlank(txt)});});
+  if(!cmts.length)return'';
+  const uid='acc_'+pfx;
+  let h='<div class="card">';
+  h+='<div class="card-hdr acc-hdr" data-target="'+uid+'" style="cursor:pointer;user-select:none">';
+  h+='<span class="acc-arrow" id="'+uid+'_arrow" style="font-size:11px;margin-right:6px;display:inline-block">▶</span>';
+  h+='💬 '+esc(label)+' <span style="font-size:12px;opacity:.75">('+cmts.length+')</span>';
+  h+='<span class="card-hdr-note"> Click to expand · Click any row or checkbox to select/deselect · Blank/N/A auto-deselected.</span>';
+  h+='</div>';
+  h+='<div id="'+uid+'" class="acc-body" style="display:none">';
+  h+='<div class="csr">';
+  h+='<input type="text" class="csi acc-search" data-pfx="'+pfx+'" placeholder="Search comments...">';
+  h+='<span class="cc" id="'+pfx+'_c"></span>';
+  h+='<button class="btn btn-s btn-sm acc-sel" data-pfx="'+pfx+'" data-state="true">Select All</button>';
+  h+='<button class="btn btn-s btn-sm acc-sel" data-pfx="'+pfx+'" data-state="false">Deselect All</button>';
+  h+='</div>';
+  h+='<table class="ct" id="'+pfx+'_t"><thead><tr>';
+  h+='<th class="cbc"><input type="checkbox" id="'+pfx+'_m" checked></th>';
+  h+='<th>Session</th><th>Day</th><th>Comment</th>';
+  h+='</tr></thead><tbody>';
+  cmts.forEach((cm,i)=>{
+    h+='<tr id="'+pfx+'_r'+i+'" class="'+(cm.na?'cna cex':'')+'" data-t="'+esc(cm.txt.toLowerCase())+'" style="cursor:pointer" onclick="toggleCmtRow(this)">';
+    h+='<td class="cbc"><input type="checkbox" class="'+pfx+'_cb" data-i="'+i+'" '+(cm.na?'':'checked')+' onclick="event.stopPropagation()"></td>';
+    h+='<td><span class="stag" title="'+esc(cm.session)+'">'+esc(cm.session)+'</span></td>';
+    h+='<td style="font-size:11px;white-space:nowrap;color:var(--text-light)">'+esc(cm.day)+'</td>';
+    h+='<td style="font-style:italic">'+esc(cm.txt)+'</td>';
+    h+='</tr>';
+  });
+  h+='</tbody></table></div></div>';
+  return h;
+}
+
+function wireComments(fieldKey,p){
+  const pfx=p==='sp'?spPfx(fieldKey):cmtPfx(fieldKey,p);
+  const master=$(pfx+'_m');if(!master)return;
+  master.addEventListener('change',()=>{document.querySelectorAll('.'+pfx+'_cb').forEach(cb=>{const row=$(pfx+'_r'+cb.dataset.i);if(row&&row.style.display==='none')return;cb.checked=master.checked;row.classList.toggle('cex',!master.checked);});updCt(pfx);});
+  document.querySelectorAll('.'+pfx+'_cb').forEach(cb=>{cb.addEventListener('change',()=>{const row=$(pfx+'_r'+cb.dataset.i);if(row)row.classList.toggle('cex',!cb.checked);updCt(pfx);});});
+  updCt(pfx);
+  setTimeout(()=>addSortHeaders(pfx),50);
+}
+function filterCmts(pfx,val){const q=(val!==undefined?val:(document.querySelector('.acc-search[data-pfx="'+pfx+'"]')?.value||'')).toLowerCase();document.querySelectorAll('#'+pfx+'_t tbody tr').forEach(row=>{row.style.display=(!q||row.dataset.t.includes(q))?'':'none';});updCt(pfx);}
+function selAll(pfx,state){document.querySelectorAll('.'+pfx+'_cb').forEach(cb=>{const row=$(pfx+'_r'+cb.dataset.i);if(!row||row.style.display==='none')return;cb.checked=state;row.classList.toggle('cex',!state);});updCt(pfx);}
+function updCt(pfx){const el=$(pfx+'_c');if(!el)return;const total=document.querySelectorAll('.'+pfx+'_cb').length,checked=[...document.querySelectorAll('.'+pfx+'_cb')].filter(c=>c.checked).length;el.textContent=`${checked} of ${total} selected`;}
+
+// ── PDF ───────────────────────────────────────────────────────────────────────
+function xSpeakerEmail(){
+  if(curSpTab)spExcl[curSpTab]=gSpExcl();
+  const logoSrc=getLogoForEmail();
+  const confName=eventConf.name||'CLEAR Annual Educational Conference';
+  const confCity=eventConf.city||'';
+  const confDates=eventConf.dates||'';
+  const confLine=[confCity,confDates].filter(Boolean).join('  ·  ');
+  const genDate=new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'});
+
+  const scoreCols=RKEYS.map(qk=>({key:SCALES[qk].sk,short:SCALES[qk].label.split(' ').slice(0,2).join(' ').replace(/\s*\/$/, '')}));
+  function fmtScore(v){return(v!==null&&v!==undefined&&!isNaN(v))?v.toFixed(2):'—';}
+  function getIdx(sk){return RKEYS.indexOf(RKEYS.find(qk=>SCALES[qk].sk===sk));}
+
+  Object.entries(spReports).forEach(([sp,rd],idx)=>{
+    setTimeout(()=>{
+      const ex=spExcl[sp]||{};
+      const sessionWord=rd.tableRows.length===1?'session':'sessions';
+
+      // ── OVERALL SCORE STRIP — burgundy bg, white text ─────────────────────
+      const overallCells=scoreCols.map(col=>{
+        const ga=rd.ga[getIdx(col.key)];
+        return `<td align="center" style="padding:14px 8px;border-right:1px solid rgba(255,255,255,.2)">
+          <div style="font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:rgba(255,255,255,.75);margin-bottom:6px;font-family:'Open Sans',Arial,sans-serif;white-space:nowrap">${col.short}</div>
+          <div style="font-size:16px;font-weight:700;font-family:'Open Sans',Arial,sans-serif;color:#ffffff">${fmtScore(ga)}</div>
+        </td>`;
+      }).join('');
+      const overallAvgCell=`<td align="center" style="padding:14px 12px;border-left:2px solid #dda838;background:rgba(255,255,255,.12)">
+        <div style="font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:#ffffff;margin-bottom:6px;font-family:'Open Sans',Arial,sans-serif;white-space:nowrap;font-weight:700">Overall</div>
+        <div style="font-size:22px;font-weight:700;font-family:'Open Sans',Arial,sans-serif;color:#ffffff;line-height:1">${fmtScore(rd.go)}</div>
+        <div style="font-size:10px;color:#ffffff;font-family:'Open Sans',Arial,sans-serif;margin-top:4px;opacity:.85">out of 5.00</div>
+      </td>`;
+
+      // ── SESSION SCORE BLOCKS ──────────────────────────────────────────────
+      const scoreHeaderCells=scoreCols.map(col=>`<th style="padding:8px 6px;background:#f9f7f4;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:#484848;border-bottom:2px solid #e0dcd6;font-family:'Open Sans',Arial,sans-serif;text-align:center;white-space:nowrap">${col.short}</th>`).join('');
+
+      let sessionBlocks='';
+      rd.tableRows.forEach((r,ri)=>{
+        const cells=scoreCols.map(col=>{
+          const a=r.avgs[getIdx(col.key)];
+          return `<td align="center" style="padding:10px 8px;border-bottom:1px solid #f0ede8;font-size:13px;font-family:'Open Sans',Arial,sans-serif;color:#333333">
+            ${a!==null?a.toFixed(2):'—'}
+          </td>`;
+        }).join('');
+        const topBorder=ri>0?'border-top:2px solid #e0dcd6;':'';
+        sessionBlocks+=`
+          <tr><td colspan="100%" style="${topBorder}padding:12px 14px 6px;background:#fafaf8">
+            <div style="font-size:13px;font-weight:700;color:#333333;font-family:'Open Sans',Arial,sans-serif;line-height:1.4">${r.sess}</div>
+            <div style="font-size:11px;color:#666666;font-family:'Open Sans',Arial,sans-serif;margin-top:2px">${r.c} response${r.c!==1?'s':''}</div>
+          </td></tr>
+          <tr>
+            ${cells}
+            <td align="center" style="padding:10px 8px;border-bottom:1px solid #f0ede8;font-size:13px;font-weight:700;font-family:'Open Sans',Arial,sans-serif;color:#333333">${fmtScore(r.o)}</td>
+          </tr>`;
+      });
+
+      // ── COMMENT SECTIONS — only selected responses ────────────────────────
+      let cmtSections='';
+      COMMENT_FIELDS.forEach(cf=>{
+        const exSet=(ex[cf.key]||new Set());
+        // fieldCmts matches exactly what renderSpContent built checkboxes from
+        // (full field subset including na) so data-i indices align with exSet
+        // Same pattern as eval tool gex(): read checked checkboxes directly from DOM
+        const pfxKey=spPfx(cf.key);
+        const checkedSet=new Set();
+        document.querySelectorAll('.'+pfxKey+'_cb:checked').forEach(cb=>checkedSet.add(+cb.dataset.i));
+        const fieldCmts=rd.cmts.filter(cm=>cm.qkey===cf.key);
+        const relevant=fieldCmts.filter((cm,i)=>{
+          if(cm.na) return false;
+          // If checkboxes are in DOM use them; otherwise include all non-na
+          if(checkedSet.size>0||document.querySelectorAll('.'+pfxKey+'_cb').length>0){
+            return checkedSet.has(i);
+          }
+          return true;
+        });
+        if(!relevant.length)return;
+        // Group by session
+        const bySess={};
+        relevant.forEach(cm=>{(bySess[cm.sess]=bySess[cm.sess]||[]).push(cm);});
+        const sessKeys=Object.keys(bySess).sort();
+        let sessBlocks='';
+        sessKeys.forEach(sess=>{
+          const sessRows=bySess[sess].map((cm,i)=>{
+            const bg=i%2===0?'#fafaf8':'#ffffff';
+            return `<tr><td style="padding:11px 14px;background:${bg};border-bottom:1px solid #f0ede8;font-size:13px;color:#333333;font-family:'Open Sans',Arial,sans-serif;line-height:1.6">${cm.txt}</td></tr>`;
+          }).join('');
+          sessBlocks+=`
+            <div style="margin-bottom:14px">
+              <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#666666;font-family:'Open Sans',Arial,sans-serif;margin-bottom:6px;padding-left:2px">${sess}</div>
+              <table cellpadding="0" cellspacing="0" border="0" width="100%" style="border-radius:6px;overflow:hidden;border:1px solid #e0dcd6;border-collapse:collapse">
+                ${sessRows}
+              </table>
+            </div>`;
+        });
+        cmtSections+=`
+        <tr><td style="padding:0">
+          <table cellpadding="0" cellspacing="0" border="0" width="100%">
+            <tr><td style="padding:20px 28px 8px 28px">
+              <table cellpadding="0" cellspacing="0" border="0" width="100%">
+                <tr><td style="padding:10px 14px;background:#fdf6e3;border-left:4px solid #dda838;border-radius:0 6px 6px 0">
+                  <span style="font-size:13px;font-weight:700;color:#333333;font-family:'Open Sans',Arial,sans-serif">${cf.label}</span>
+                  <span style="font-size:11px;color:#666666;margin-left:8px;font-family:'Open Sans',Arial,sans-serif">${relevant.length} response${relevant.length!==1?'s':''}</span>
+                </td></tr>
+              </table>
+            </td></tr>
+            <tr><td style="padding:0 28px 16px 28px">${sessBlocks}</td></tr>
+          </table>
+        </td></tr>`;
+      });
+
+      // ── HTML ASSEMBLY ─────────────────────────────────────────────────────
+      const html=`<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<!--[if gte mso 9]><xml><o:OfficeDocumentSettings><o:AllowPNG/><o:PixelsPerInch>96</o:PixelsPerInch></o:OfficeDocumentSettings></xml><![endif]-->
+<title>Speaker Evaluation Report — ${sp}</title>
+<style type="text/css">
+body,table,td,p,a{-ms-text-size-adjust:100%;-webkit-text-size-adjust:100%;}
+table,td{mso-table-lspace:0pt;mso-table-rspace:0pt;}
+img{-ms-interpolation-mode:bicubic;border:0;outline:none;text-decoration:none;}
+body{margin:0;padding:0;width:100%!important;-webkit-font-smoothing:antialiased;background-color:#f7f5f2;}
+#outlook a{padding:0;}
+.ReadMsgBody{width:100%;}.ExternalClass{width:100%;}
+.ExternalClass,.ExternalClass p,.ExternalClass span,.ExternalClass font,.ExternalClass td,.ExternalClass div{line-height:100%;}
+</style>
+</head>
+<body style="margin:0;padding:0;background-color:#f7f5f2;">
+
+<!-- HEADER -->
+<table width="100%" cellpadding="0" cellspacing="0" border="0" role="presentation" style="background-color:#64092c;">
+<tr><td align="center">
+<!--[if mso]><table width="640" cellpadding="0" cellspacing="0" border="0"><tr><td><![endif]-->
+<table width="100%" cellpadding="0" cellspacing="0" border="0" role="presentation" style="max-width:640px;">
+<tr><td style="padding:20px 28px;">
+  <table cellpadding="0" cellspacing="0" border="0" role="presentation">
+    <tr>
+      <td valign="middle" style="padding-right:16px;">
+        <table cellpadding="0" cellspacing="0" border="0" role="presentation" style="background-color:#ffffff;border-radius:8px;">
+          <tr><td style="padding:6px 10px;line-height:0;">
+            <img src="${logoSrc}" alt="CLEAR" height="44" style="display:block;height:44px;width:auto;border:0;"/>
+          </td></tr>
+        </table>
+      </td>
+      <td valign="middle">
+        <table cellpadding="0" cellspacing="0" border="0" role="presentation">
+          <tr><td style="font-family:'Open Sans',Arial,sans-serif;font-size:16px;font-weight:700;color:#ffffff;line-height:22px;mso-line-height-rule:exactly;">Speaker Evaluation Report</td></tr>
+          <tr><td style="font-family:'Open Sans',Arial,sans-serif;font-size:11px;color:rgba(255,255,255,0.75);line-height:16px;mso-line-height-rule:exactly;padding-top:3px;">${confName}</td></tr>
+          ${confLine?`<tr><td style="font-family:'Open Sans',Arial,sans-serif;font-size:11px;color:rgba(255,255,255,0.6);line-height:16px;mso-line-height-rule:exactly;padding-top:1px;">${confLine}</td></tr>`:''}
+        </table>
+      </td>
+    </tr>
+  </table>
+</td></tr>
+</table>
+<!--[if mso]></td></tr></table><![endif]-->
+</td></tr></table>
+
+<!-- GOLD RULE -->
+<table width="100%" cellpadding="0" cellspacing="0" border="0" role="presentation">
+<tr><td style="height:4px;background-color:#dda838;font-size:1px;line-height:1px;mso-line-height-rule:exactly;">&nbsp;</td></tr>
+</table>
+
+<!-- BODY -->
+<table width="100%" cellpadding="0" cellspacing="0" border="0" role="presentation" style="background-color:#f7f5f2;">
+<tr><td align="center" style="padding:24px 16px;">
+<!--[if mso]><table width="640" cellpadding="0" cellspacing="0" border="0"><tr><td><![endif]-->
+<table width="100%" cellpadding="0" cellspacing="0" border="0" role="presentation" style="max-width:640px;background-color:#ffffff;border:1px solid #e0dcd6;border-radius:0 0 8px 8px;">
+
+  <!-- SPEAKER NAME -->
+  <tr><td style="padding:26px 28px 16px;">
+    <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:#666666;font-family:'Open Sans',Arial,sans-serif;margin-bottom:4px;">SPEAKER</div>
+    <div style="font-size:24px;font-weight:700;color:#64092c;font-family:'Open Sans',Arial,sans-serif;line-height:1.2;mso-line-height-rule:exactly;">${sp}</div>
+    <div style="font-size:12px;color:#666666;font-family:'Open Sans',Arial,sans-serif;margin-top:6px;">${rd.tot} response${rd.tot!==1?'s':''}  ·  Generated ${genDate}</div>
+  </td></tr>
+
+  <!-- INTRO MESSAGE -->
+  <tr><td style="padding:0 28px 22px;">
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" role="presentation">
+      <tr><td style="padding:18px 20px;background-color:#fafaf8;border:1px solid #e0dcd6;border-radius:6px;">
+        <p style="margin:0 0 12px;font-family:'Open Sans',Arial,sans-serif;font-size:14px;color:#333333;line-height:22px;mso-line-height-rule:exactly;">Thank you for your contribution as a presenter at the <strong>${confName}</strong>${confLine?' ('+confLine+')':''}. Your expertise and willingness to share your knowledge play a vital role in advancing professional regulation globally, and we are deeply grateful for the time and effort you invested in preparing and delivering your ${sessionWord}.</p>
+        <p style="margin:0 0 12px;font-family:'Open Sans',Arial,sans-serif;font-size:14px;color:#333333;line-height:22px;mso-line-height-rule:exactly;">Below you will find a summary of the attendee feedback collected for your ${sessionWord}. We hope these insights are meaningful as you continue your work in the field. If you have any questions about this report, please reach out to us at <a href="mailto:programs@clearhq.org" style="color:#064a70;font-weight:600;text-decoration:none;">programs@clearhq.org</a>.</p>
+        <p style="margin:0;font-family:'Open Sans',Arial,sans-serif;font-size:14px;color:#333333;line-height:22px;mso-line-height-rule:exactly;">We sincerely hope to welcome you back as a presenter at a future CLEAR event.</p>
+      </td></tr>
+    </table>
+  </td></tr>
+
+  <!-- DIVIDER -->
+  <tr><td style="padding:0 28px;"><div style="border-top:2px solid #e0dcd6;font-size:1px;line-height:1px;">&nbsp;</div></td></tr>
+
+  <!-- OVERALL SCORES STRIP — burgundy bg -->
+  <tr><td style="padding:20px 28px;">
+    <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#333333;font-family:'Open Sans',Arial,sans-serif;margin-bottom:10px;">Average Scores Across All Sessions</div>
+    <table cellpadding="0" cellspacing="0" border="0" role="presentation" width="100%" style="background-color:#64092c;border-radius:8px;overflow:hidden;">
+      <tr>${overallCells}${overallAvgCell}</tr>
+    </table>
+  </td></tr>
+
+  <!-- DIVIDER -->
+  <tr><td style="padding:0 28px;"><div style="border-top:2px solid #e0dcd6;font-size:1px;line-height:1px;">&nbsp;</div></td></tr>
+
+  <!-- SESSION SCORES -->
+  <tr><td style="padding:18px 28px 22px;">
+    <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#333333;font-family:'Open Sans',Arial,sans-serif;margin-bottom:10px;">Evaluation Scores by Session</div>
+    <table cellpadding="0" cellspacing="0" border="0" role="presentation" width="100%" style="border:1px solid #e0dcd6;border-radius:6px;overflow:hidden;border-collapse:collapse;">
+      <thead><tr>
+        ${scoreHeaderCells}
+        <th style="padding:8px 6px;background-color:#f9f7f4;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:#484848;border-bottom:2px solid #e0dcd6;font-family:'Open Sans',Arial,sans-serif;text-align:center;">Overall</th>
+      </tr></thead>
+      <tbody>${sessionBlocks}</tbody>
+    </table>
+  </td></tr>
+
+  ${cmtSections?`
+  <!-- DIVIDER -->
+  <tr><td style="padding:0 28px;"><div style="border-top:2px solid #e0dcd6;font-size:1px;line-height:1px;">&nbsp;</div></td></tr>
+  <!-- OPEN-ENDED FEEDBACK -->
+  <tr><td style="padding:18px 28px 4px;">
+    <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#333333;font-family:'Open Sans',Arial,sans-serif;">Open-Ended Feedback</div>
+    <div style="font-size:12px;color:#666666;font-family:'Open Sans',Arial,sans-serif;margin-top:3px;">Verbatim attendee responses, lightly curated for relevance.</div>
+  </td></tr>
+  <tr><td style="padding:0;">
+    <table cellpadding="0" cellspacing="0" border="0" width="100%">${cmtSections}</table>
+  </td></tr>`:''}
+
+  <!-- DIVIDER -->
+  <tr><td style="padding:0 28px 24px;"><div style="border-top:2px solid #e0dcd6;font-size:1px;line-height:1px;margin-bottom:0;">&nbsp;</div></td></tr>
+
+  <!-- SIGN-OFF -->
+  <tr><td style="padding:0 28px 28px;">
+    <table cellpadding="0" cellspacing="0" border="0" role="presentation" style="width:100%;max-width:580px;">
+      <tbody>
+        <tr>
+          <td style="font-family:'Open Sans',Arial,sans-serif;font-size:14px;color:#333333;line-height:21px;mso-line-height-rule:exactly;padding-bottom:16px;">Thank you,</td>
+        </tr>
+        <tr>
+          <td rowspan="4" valign="top" width="110" style="text-align:center;">
+            <a href="https://www.clearhq.org" target="_blank" rel="noopener noreferrer">
+              <img src="https://assets-002.noviams.com/novi-file-uploads/clear/TalentLMS/Email_CLEAR_Logo.png" alt="CLEAR Logo" width="100" style="display:block;width:100px;border:0;"/>
+            </a>
+          </td>
+          <td colspan="3" valign="middle">
+            <table cellpadding="0" cellspacing="0" border="0" role="presentation">
+              <tr><td style="font-family:'Open Sans',Arial,sans-serif;font-size:12px;padding:3px;">
+                <strong style="color:#64092c;font-weight:700;font-size:16px;">CLEAR Staff</strong>
+              </td></tr>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td colspan="3" valign="top">
+            <table cellpadding="0" cellspacing="0" border="0" role="presentation">
+              <tr><td style="font-family:'Open Sans',Arial,sans-serif;font-size:12px;padding:3px;line-height:18px;mso-line-height-rule:exactly;">
+                <a href="https://www.clearhq.org" target="_blank" rel="noopener noreferrer" style="color:#064a70;">www.clearhq.org</a><br/>
+                Council on Licensure, Enforcement and Regulation
+              </td></tr>
+              <tr><td style="font-family:'Open Sans',Arial,sans-serif;font-size:12px;padding:3px;line-height:18px;mso-line-height-rule:exactly;">
+                <strong style="color:#64092c;font-weight:700;">Phone</strong>: 859.269.1401<br/>
+                <strong style="color:#64092c;font-weight:700;">Email</strong>: <a href="mailto:programs@clearhq.org" style="color:#064a70;">programs@clearhq.org</a>
+              </td></tr>
+              <tr><td style="font-family:'Open Sans',Arial,sans-serif;font-size:12px;padding:3px;line-height:18px;mso-line-height-rule:exactly;">
+                108 Wind Haven Dr., Ste. A, Nicholasville, KY 40356
+              </td></tr>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" width="75">
+            <table cellpadding="0" cellspacing="0" border="0" role="presentation">
+              <tr><td style="padding:3px;">
+                <a href="https://twitter.com/CLEARHQ" target="_blank" rel="noopener noreferrer"><img src="https://assets-002.noviams.com/novi-file-uploads/clear/TalentLMS/email_x.png" alt="X" width="20" height="20" style="display:inline-block;width:20px;height:20px;vertical-align:middle;border:0;"/></a>
+                <a href="https://facebook.com/CLEARHQ/" target="_blank" rel="noopener noreferrer"><img src="https://assets-002.noviams.com/novi-file-uploads/clear/TalentLMS/email_facebook.png" alt="Facebook" width="20" height="20" style="display:inline-block;width:20px;height:20px;vertical-align:middle;border:0;"/></a>
+                <a href="https://www.linkedin.com/company/council-on-licensure-enforcement-and-regulation-clear-/" target="_blank" rel="noopener noreferrer"><img src="https://assets-002.noviams.com/novi-file-uploads/clear/TalentLMS/Email_linkedin.png" alt="LinkedIn" width="20" height="20" style="display:inline-block;width:20px;height:20px;vertical-align:middle;border:0;"/></a>
+              </td></tr>
+            </table>
+          </td>
+          <td colspan="2" valign="middle">
+            <table cellpadding="0" cellspacing="0" border="0" role="presentation">
+              <tr><td style="font-family:'Open Sans',Arial,sans-serif;font-size:12px;padding:3px;">
+                <i style="color:#64092c;">Promoting Regulatory Excellence</i>
+              </td></tr>
+            </table>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </td></tr>
+
+</table>
+<!--[if mso]></td></tr></table><![endif]-->
+</td></tr></table>
+
+</body>
+</html>`;
+
+      const blob=new Blob([html],{type:'text/html'});
+      const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+      a.download='AEC_SpeakerReport_'+sp.replace(/[^a-zA-Z0-9]/g,'_')+'.html';
+      document.body.appendChild(a);a.click();document.body.removeChild(a);
+      URL.revokeObjectURL(a.href);
+    },idx*500);
+  });
+}
+function xSpeakerXLSX(){
+  if(curSpTab)spExcl[curSpTab]=gSpExcl();
+  const wb=XLSX.utils.book_new();
+  const confLine=[eventConf.name,eventConf.city,eventConf.dates].filter(Boolean).join(' | ');
+  const genDate=new Date().toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'});
+  Object.entries(spReports).forEach(([sp,rd])=>{
+    const rows=[
+      [confLine],
+      ['Speaker Evaluation Report — '+sp],
+      ['Generated: '+genDate,'','','Total Responses: '+rd.tot],
+      [],
+      ['Session','N',...RKEYS.map(qk=>SCALES[qk].label),'Overall Avg']
+    ];
+    rd.tableRows.forEach(r=>{
+      rows.push([r.sess,r.c,...r.avgs.map(a=>a!==null?Math.round(a*100)/100:null),r.o!==null?Math.round(r.o*100)/100:null]);
+    });
+    rows.push(['All Sessions',rd.tot,...rd.ga.map(a=>a!==null?Math.round(a*100)/100:null),rd.go!==null?Math.round(rd.go*100)/100:null]);
+    rows.push([]);
+    COMMENT_FIELDS.forEach(cf=>{
+      const ex=spExcl[sp]||{};const exSet=ex[cf.key]||new Set();
+      const relevant=rd.cmts.filter((c,i)=>c.qkey===cf.key&&!c.na&&!exSet.has(i));
+      if(!relevant.length)return;
+      rows.push([cf.label]);
+      rows.push(['Session','Comment']);
+      relevant.forEach(c=>rows.push([c.sess,c.txt]));
+      rows.push([]);
+    });
+    const ws=XLSX.utils.aoa_to_sheet(rows);
+    ws['!cols']=[{wch:40},{wch:6},...RKEYS.map(()=>({wch:14})),{wch:12}];
+    const sheetName=sp.replace(/[^a-zA-Z0-9 ]/g,'').slice(0,28).trim()||'Speaker';
+    XLSX.utils.book_append_sheet(wb,ws,sheetName);
+  });
+  XLSX.writeFile(wb,'AEC_SpeakerReports.xlsx');
+}
+
+// ── EVENT SETTINGS STATE ─────────────────────────────────────────────────────
+let eventLogo = null; // base64 string or null = use default CLEAR logo
+let eventConf = {name:'CLEAR Annual Educational Conference', city:'', dates:''};
+
+function handleLogoUpload(input){
+  const file=input.files?.[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    eventLogo=e.target.result.split(',')[1]; // strip data:...;base64,
+    document.getElementById('logoStatus').textContent=file.name;
+    const prev=document.getElementById('logoPreview');
+    prev.src=e.target.result;prev.style.display='';
+  };
+  reader.readAsDataURL(file);
+}
+
+async function saveEventSettings(){
+  const name=$('cfgConfName').value.trim();
+  const city=$('cfgCity').value.trim();
+  const dates=$('cfgDates').value.trim();
+  if(name)eventConf.name=name;
+  if(city)eventConf.city=city;
+  if(dates)eventConf.dates=dates;
+  // Save locally always
+  LS.set('confName',eventConf.name);LS.set('confCity',eventConf.city);LS.set('confDates',eventConf.dates);
+  // Save to Worker KV if worker URL is set (shared across users)
+  const worker=LS.get('worker');
+  if(worker){
+    try{
+      const payload={name:eventConf.name,city:eventConf.city,dates:eventConf.dates,logoB64:eventLogo||''};
+      const resp=await fetch(worker+'/conf-settings',{
+        method:'POST',
+        headers:{'Content-Type':'application/json','X-Admin-Secret':LS.get('adminSecret')||''},
+        body:JSON.stringify(payload)
+      });
+      if(resp.ok){alert('Conference settings saved and shared with all users.');}
+      else{alert('Saved locally. Could not sync to Worker ('+resp.status+'). Check Admin Secret.');}
+    }catch(e){alert('Saved locally. Worker sync failed: '+e.message);}
+  } else {
+    alert('Conference settings saved locally. Set a Worker URL to share across users.');
+  }
+}
+
+async function loadSharedEventSettings(){
+  const worker=LS.get('worker');
+  if(!worker)return;
+  try{
+    const resp=await fetch(worker+'/conf-settings');
+    if(!resp.ok)return;
+    const data=await resp.json();
+    if(data.name){eventConf.name=data.name;const el=$('cfgConfName');if(el)el.value=data.name;}
+    if(data.city){eventConf.city=data.city;const el=$('cfgCity');if(el)el.value=data.city;}
+    if(data.dates){eventConf.dates=data.dates;const el=$('cfgDates');if(el)el.value=data.dates;}
+    // Logo
+    if(data.logoB64){eventLogo=data.logoB64;const prev=$('logoPreview');if(prev){prev.src='data:image/png;base64,'+data.logoB64;prev.style.display='';}$('logoStatus').textContent='Loaded from shared settings';}
+  }catch(e){console.log('Could not load shared conf settings:',e);}
+}
+
+function toggleAcc(id){
+  const el=document.getElementById(id);if(!el)return;
+  const arrow=document.getElementById(id+'_arrow');
+  const open=el.style.display==='none'||el.style.display==='';
+  el.style.display=open?'block':'none';
+  if(arrow)arrow.style.transform=open?'rotate(90deg)':'';
+}
+// Event delegation for accordion headers, search boxes, and sel buttons
+document.addEventListener('click',function(e){
+  const hdr=e.target.closest('.acc-hdr');
+  if(hdr){const t=hdr.getAttribute('data-target');if(t)toggleAcc(t);}
+  const sel=e.target.closest('.acc-sel');
+  if(sel){const pfx=sel.getAttribute('data-pfx');const state=sel.getAttribute('data-state')==='true';if(pfx)selAll(pfx,state);}
+});
+document.addEventListener('input',function(e){
+  if(e.target.classList.contains('acc-search')){
+    const pfx=e.target.getAttribute('data-pfx');if(pfx)filterCmts(pfx,e.target.value);
+  }
+});
+
+function getLogoForEmail(){
+  // Returns a URL or data URI for use in email HTML
+  if(eventLogo) return 'data:image/png;base64,'+eventLogo;
+  return 'https://assets-002.noviams.com/novi-file-uploads/clear/structure/clearlogo.png';
+}
+
+
+// ── COMMENT SORT ──────────────────────────────────────────────────────────────
+const sortState={};
+function sortCmtTable(pfx,col){
+  const tbl=document.getElementById(pfx+'_t');if(!tbl)return;
+  if(!sortState[pfx])sortState[pfx]={col:null,dir:1};
+  const st=sortState[pfx];
+  st.dir=(st.col===col)?-st.dir:1;st.col=col;
+  const tbody=tbl.querySelector('tbody');
+  const rows=[...tbody.querySelectorAll('tr')];
+  rows.sort((a,b)=>{
+    const ai=a.cells[col]?.textContent.trim().toLowerCase()||'';
+    const bi=b.cells[col]?.textContent.trim().toLowerCase()||'';
+    return ai<bi?-st.dir:ai>bi?st.dir:0;
+  });
+  rows.forEach(r=>tbody.appendChild(r));
+  // Update header indicators
+  tbl.querySelectorAll('thead th').forEach((th,i)=>{
+    th.style.cursor='pointer';
+    const ind=th.querySelector('.sort-ind');
+    if(ind)ind.textContent=i===col?(st.dir===1?' ↑':' ↓'):'';
+  });
+}
+function addSortHeaders(pfx){
+  const tbl=document.getElementById(pfx+'_t');if(!tbl)return;
+  const ths=tbl.querySelectorAll('thead th');
+  ths.forEach((th,i)=>{
+    if(i===0)return; // skip checkbox col
+    th.style.cursor='pointer';th.style.userSelect='none';
+    const ind=document.createElement('span');ind.className='sort-ind';ind.style.fontSize='10px';
+    th.appendChild(ind);
+    th.addEventListener('click',()=>sortCmtTable(pfx,i));
+  });
+}
+
+function toggleCmtRow(tr){
+  const cb=tr.querySelector('input[type=checkbox]');if(!cb)return;
+  cb.checked=!cb.checked;
+  tr.classList.toggle('cex',!cb.checked);
+  // find pfx from checkbox class
+  const cls=[...cb.classList].find(c=>c.endsWith('_cb'));
+  if(cls){const pfx=cls.slice(0,-3);updCt(pfx);}
+}
+
+function showError(msg){
+  $('main').classList.add('hidden');$('dsum').classList.add('hidden');
+  $('placeholder').classList.remove('hidden');
+  $('placeholder').innerHTML=`<div style="max-width:480px;margin:0 auto"><div class="err-box">⚠ ${esc(msg)}</div><div class="empty"><div class="icon">📁</div><h3>Upload a valid PheedLoop export</h3><p>The XLSX should be the Session Feedback report export from PheedLoop Reporting.</p><br><button class="btn btn-g" style="margin:0 auto" onclick="document.getElementById('fileInput').click()">↑ Try Another File</button></div></div>`;
+  setStatus('err','Error','');
+}
+</script>
+</body>
+</html>
