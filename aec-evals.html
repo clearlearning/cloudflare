@@ -184,10 +184,10 @@ table.ct tbody tr:hover td{background:#fdfcfa}
   <h2>Dashboard Settings</h2>
   <p class="desc">Upload a PheedLoop feedback export file, or configure live API access once Advanced SmartSight is active.</p>
   <div class="cfg-tabs">
-    <button class="cfg-tab active" onclick="swCfg('upload')">📁 File Upload</button>
-    <button class="cfg-tab" onclick="swCfg('api')">🔌 Live API</button>
+    <button class="cfg-tab" onclick="swCfg('upload')">📁 File Upload</button>
+    <button class="cfg-tab active" onclick="swCfg('api')">🔌 Live API</button>
   </div>
-  <div class="cfg-pane active" id="cpane-upload">
+  <div class="cfg-pane" id="cpane-upload">
     <div class="upload-zone" id="dropZone"
       onclick="document.getElementById('fileInput').click()"
       ondragover="event.preventDefault();this.classList.add('drag')"
@@ -198,6 +198,22 @@ table.ct tbody tr:hover td{background:#fdfcfa}
       <small>Standard PheedLoop XLSX export — one tab per session</small>
     </div>
     <p class="cfg-note">📥 PheedLoop → Reporting → Custom Reports → Session Feedback report → Download</p>
+  </div>
+  <div class="cfg-pane active" id="cpane-api">
+    <div class="cfg-grid">
+      <div><label class="cgl">Worker Proxy URL</label><input type="text" class="cgi" id="cfgWorker" placeholder="https://novi-pheedloop-worker.avance.workers.dev"></div>
+      <div><label class="cgl">Org Code</label><input type="text" class="cgi" id="cfgOrg" placeholder="ORG18GWFZJM2WHSC2C"></div>
+      <div><label class="cgl">Event Code</label><input type="text" class="cgi" id="cfgEvent" placeholder="EVENMCCYMPDXS"></div>
+      <div><label class="cgl">Report ID</label><input type="text" class="cgi" id="cfgReport" placeholder="REPHT1HXSHK01SD"></div>
+    </div>
+    <div class="cfg-grid" style="grid-template-columns:1fr;margin-top:8px">
+      <div><label class="cgl">Admin Secret (for saving shared settings)</label><input type="password" class="cgi" id="cfgAdminSecret" placeholder="Your Worker ADMIN_SECRET"></div>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:10px">
+      <button class="btn btn-p" onclick="saveApiCfg();loadFromApi()">Save &amp; Load via API</button>
+      <button class="btn btn-s" onclick="toggleCfg()">Cancel</button>
+    </div>
+    <p class="cfg-note">⚠ Requires PheedLoop Advanced SmartSight Power-Up for Session Feedback reports.</p>
     <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border)">
       <div style="font-size:13px;font-weight:700;color:var(--burgundy);margin-bottom:10px">Conference Details (used in email exports)</div>
       <div class="cfg-grid" style="grid-template-columns:repeat(auto-fill,minmax(180px,1fr))">
@@ -216,22 +232,6 @@ table.ct tbody tr:hover td{background:#fdfcfa}
       </div>
       <button class="btn btn-p btn-sm" style="margin-top:12px" onclick="saveEventSettings()">Save Conference Settings</button>
     </div>
-  </div>
-  <div class="cfg-pane" id="cpane-api">
-    <div class="cfg-grid">
-      <div><label class="cgl">Worker Proxy URL</label><input type="text" class="cgi" id="cfgWorker" placeholder="https://novi-pheedloop-worker.avance.workers.dev"></div>
-      <div><label class="cgl">Org Code</label><input type="text" class="cgi" id="cfgOrg" placeholder="ORG18GWFZJM2WHSC2C"></div>
-      <div><label class="cgl">Event Code</label><input type="text" class="cgi" id="cfgEvent" placeholder="EVENMCCYMPDXS"></div>
-      <div><label class="cgl">Report ID</label><input type="text" class="cgi" id="cfgReport" placeholder="REPHT1HXSHK01SD"></div>
-    </div>
-    <div class="cfg-grid" style="grid-template-columns:1fr;margin-top:8px">
-      <div><label class="cgl">Admin Secret (for saving shared settings)</label><input type="password" class="cgi" id="cfgAdminSecret" placeholder="Your Worker ADMIN_SECRET"></div>
-    </div>
-    <div style="display:flex;gap:10px;margin-top:10px">
-      <button class="btn btn-p" onclick="saveApiCfg();loadFromApi()">Save &amp; Load via API</button>
-      <button class="btn btn-s" onclick="toggleCfg()">Cancel</button>
-    </div>
-    <p class="cfg-note">⚠ Requires PheedLoop Advanced SmartSight Power-Up for Session Feedback reports.</p>
   </div>
 </div>
 
