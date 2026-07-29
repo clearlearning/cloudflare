@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CLEAR Expense Reporting Tool</title>
-    <link rel="icon" type="image/png" href="https://assets-002.noviams.com/novi-file-uploads/clear/structure/clearlogo.png">
+<link rel="icon" type="image/png" href="https://assets-002.noviams.com/novi-file-uploads/clear/structure/clearlogo.png">
 <style>
   :root {
     --burgundy: #64092C;
@@ -60,10 +60,49 @@
     display: flex; align-items: center; gap: 10px;
   }
   .site-header .logo span { color: var(--gold); }
+  .header-right { display: flex; align-items: center; gap: 12px; }
+  .mode-badge {
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.3);
+    color: white;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+  .mode-badge.admin { background: rgba(221,168,56,0.25); border-color: var(--gold); color: var(--gold-light); }
+
   /* ── LAYOUT ── */
   .main-wrap { max-width: 900px; margin: 0 auto; padding: 28px 20px 60px; }
+  .admin-wrap { max-width: 1100px; margin: 0 auto; padding: 24px 20px 60px; }
+
   /* ── TABS ── */
+  .tab-bar {
+    display: flex; gap: 0;
+    border-bottom: 2px solid var(--border);
+    margin-bottom: 24px;
+    overflow-x: auto;
+  }
+  .tab-btn {
+    padding: 10px 18px;
+    background: none;
+    border: none;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -2px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-light);
+    white-space: nowrap;
+    transition: color 0.15s, border-color 0.15s;
+  }
   .tab-btn:hover { color: var(--burgundy); }
+  .tab-btn.active { color: var(--burgundy); border-bottom-color: var(--burgundy); }
+  .tab-pane { display: none; }
+  .tab-pane.active { display: block; }
+
   /* ── CARDS ── */
   .card {
     background: white;
@@ -133,14 +172,18 @@
   .btn-primary:hover { background: var(--burgundy-dark); }
   .btn-secondary { background: white; color: var(--burgundy); border: 1.5px solid var(--burgundy); }
   .btn-secondary:hover { background: #fdf5f7; }
+  .btn-gold { background: var(--gold); color: var(--charcoal); }
+  .btn-gold:hover { background: var(--gold-light); }
   .btn-danger { background: #c62828; color: white; }
   .btn-danger:hover { background: #b71c1c; }
   .btn-sm { padding: 5px 12px; font-size: 12px; }
+  .btn-xs { padding: 3px 8px; font-size: 11px; }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
   /* ── EXPENSE LINES ── */
   .expense-entry {
     display: grid;
-    grid-template-columns: 130px 1fr 90px 28px 28px;
+    grid-template-columns: 130px 1fr 100px 28px;
     gap: 8px;
     align-items: start;
     padding: 10px;
@@ -180,6 +223,25 @@
   }
 
   /* ── TEACHING DAYS ── */
+  .teaching-day {
+    display: grid;
+    grid-template-columns: 120px 120px 1fr 28px;
+    gap: 8px;
+    align-items: center;
+    padding: 8px 10px;
+    background: #fdfcfb;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 6px;
+  }
+  .teaching-day input, .teaching-day select {
+    padding: 6px 8px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    font-size: 12px;
+    font-family: inherit;
+    width: 100%;
+  }
   .teaching-day input:focus { outline: none; border-color: var(--burgundy); }
 
   /* ── PER DIEM DAYS ── */
@@ -271,27 +333,164 @@
     margin-bottom: 12px;
     display: flex; align-items: flex-start; gap: 8px;
   }
+  .alert-success { background: var(--success-bg); color: var(--success); border: 1px solid #a5d6a7; }
+  .alert-error { background: var(--error-bg); color: var(--error); border: 1px solid #ef9a9a; }
   .alert-warn { background: var(--warn-bg); color: var(--warn); border: 1px solid #ffcc80; }
   .alert-info { background: #e3f2fd; color: var(--blue); border: 1px solid #90caf9; }
 
   /* ── DASHBOARD TABLE ── */
+  .dash-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .dash-table th {
+    background: var(--burgundy);
+    color: white;
+    padding: 9px 12px;
+    text-align: left;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+  }
+  .dash-table td { padding: 9px 12px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+  .dash-table tr:last-child td { border-bottom: none; }
   .dash-table tr:hover td { background: #fdf5f7; }
+  .dash-table .actions { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+  .empty-state {
+    text-align: center;
+    padding: 48px 20px;
+    color: var(--text-light);
+  }
+  .empty-state .empty-icon { font-size: 40px; margin-bottom: 10px; }
+  .empty-state p { font-size: 14px; }
 
   /* ── STATUS BADGES ── */
+  .badge {
+    display: inline-block;
+    padding: 2px 9px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    white-space: nowrap;
+  }
+  .badge-pending { background: #fff3e0; color: #e65100; }
+  .badge-approved { background: var(--success-bg); color: var(--success); }
+  .badge-denied { background: var(--error-bg); color: var(--error); }
+  .badge-draft { background: #f3f4f6; color: #6b7280; }
 
   /* ── SETTINGS GRID ── */
+  .settings-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+  .rate-input-group {
+    display: flex; align-items: center; gap: 6px;
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .rate-input-group .prefix {
+    padding: 8px 10px;
+    background: #f5f5f5;
+    color: var(--text-light);
+    font-weight: 700;
+    font-size: 13px;
+    border-right: 1px solid var(--border);
+  }
+  .rate-input-group input {
+    border: none !important;
+    flex: 1;
+    padding: 8px 10px !important;
+    font-size: 13px;
+  }
   .rate-input-group input:focus { outline: none; }
 
   /* ── INSTRUCTOR TABLE ── */
+  .instructor-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 120px 32px;
+    gap: 8px;
+    align-items: center;
+    padding: 8px 10px;
+    background: #fdfcfb;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 6px;
+  }
+  .instructor-row input, .instructor-row select {
+    padding: 6px 8px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    font-size: 12px;
+    font-family: inherit;
+    width: 100%;
+  }
 
   /* ── MODAL ── */
+  .modal-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 500;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
   .modal-overlay.open { display: flex; }
+  .modal {
+    background: white;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-md);
+    max-width: 640px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+  .modal-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .modal-header h2 {
+    font-family: 'Trebuchet MS', sans-serif;
+    font-size: 16px;
+    color: var(--burgundy);
+  }
+  .modal-close {
+    background: none; border: none; font-size: 20px; cursor: pointer;
+    color: var(--text-light); line-height: 1;
+  }
+  .modal-body { padding: 20px; }
+  .modal-footer { padding: 14px 20px; border-top: 1px solid var(--border); display: flex; gap: 8px; justify-content: flex-end; }
 
   /* ── REVIEW PANEL ── */
+  .review-detail { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+  .review-item .rlabel { font-size: 11px; color: var(--text-light); text-transform: uppercase; font-weight: 600; letter-spacing: 0.4px; margin-bottom: 2px; }
   .review-item .rvalue { font-size: 13px; color: var(--text); font-weight: 500; }
+  .review-section-title {
+    font-size: 12px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.5px; color: var(--burgundy);
+    margin: 14px 0 8px; padding-bottom: 4px;
+    border-bottom: 1px solid var(--border);
+  }
+  .review-expense-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 5px 8px; font-size: 13px;
+    border-bottom: 1px solid #f0ece8;
+  }
   .review-expense-row:last-child { border-bottom: none; }
 
   /* ── PDF VIEWER ── */
+  .pdf-viewer-wrap {
+    border: 1px solid var(--border); border-radius: var(--radius);
+    overflow: hidden; background: #525659;
+  }
+  .pdf-viewer-wrap iframe { width: 100%; height: 400px; border: none; display: block; }
+  .pdf-no-preview { padding: 24px; text-align: center; color: #ccc; font-size: 13px; }
 
   /* ── AUTH SCREEN ── */
   #auth-screen {
@@ -300,717 +499,1056 @@
     display: flex; align-items: center; justify-content: center;
     z-index: 999;
   }
+  .auth-card {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 36px 32px;
+    max-width: 380px;
+    width: 100%;
+    box-shadow: var(--shadow-md);
+    text-align: center;
+  }
+  .auth-logo {
+    font-family: 'Trebuchet MS', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--burgundy);
+    margin-bottom: 4px;
+  }
+  .auth-logo span { color: var(--gold); }
+  .auth-subtitle { font-size: 13px; color: var(--text-light); margin-bottom: 24px; }
   .auth-card .field { text-align: left; margin-bottom: 12px; }
   .auth-card .btn { width: 100%; justify-content: center; margin-top: 8px; }
 
   /* ── MISC ── */
+  .section-divider { height: 1px; background: var(--border); margin: 20px 0; }
+  .text-right { text-align: right; }
   .flex-row { display: flex; gap: 8px; align-items: center; }
   .flex-row.end { justify-content: flex-end; }
   .flex-row.between { justify-content: space-between; }
   .mt-8 { margin-top: 8px; }
+  .mt-12 { margin-top: 12px; }
+  .mt-16 { margin-top: 16px; }
+  .mb-8 { margin-bottom: 8px; }
+  .mb-12 { margin-bottom: 12px; }
+  .tag { font-size: 11px; background: #f0ece8; padding: 2px 7px; border-radius: 3px; color: var(--charcoal); }
+  .page-title {
+    font-family: 'Trebuchet MS', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--burgundy);
+    margin-bottom: 4px;
+  }
   .page-subtitle { font-size: 13px; color: var(--text-light); margin-bottom: 20px; }
+  .filter-bar { display: flex; gap: 10px; align-items: center; margin-bottom: 16px; flex-wrap: wrap; }
+  .filter-bar select, .filter-bar input {
+    padding: 7px 10px; border: 1px solid var(--border);
+    border-radius: var(--radius); font-size: 13px; font-family: inherit;
+  }
 
   /* ── STATS BAR ── */
+  .stats-bar {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .stat-card {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    text-align: center;
+  }
+  .stat-card .stat-num {
+    font-size: 26px;
+    font-weight: 800;
+    color: var(--burgundy);
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  .stat-card .stat-label { font-size: 11px; color: var(--text-light); text-transform: uppercase; font-weight: 600; letter-spacing: 0.4px; }
+
   /* ── IMPORT CSV ── */
+  .import-zone {
+    border: 2px dashed var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    text-align: center;
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--text-light);
+    transition: border-color 0.15s;
+    margin-bottom: 8px;
+  }
   .import-zone:hover { border-color: var(--burgundy); color: var(--burgundy); }
 
   @media (max-width: 640px) {
     .field-row, .field-row.three { grid-template-columns: 1fr; }
-    .expense-entry.staff-entry { grid-template-columns: 1fr 1fr; }
+    .settings-row { grid-template-columns: 1fr; }
+    .summary-grid { grid-template-columns: 1fr; }
+    .stats-bar { grid-template-columns: 1fr 1fr; }
+    .expense-entry { grid-template-columns: 1fr 1fr; }
+    .review-detail { grid-template-columns: 1fr; }
+  }
 </style>
 </head>
 <body>
 
-<!-- HEADER -->
-<header class="site-header">
-  <div class="logo">CLEAR &nbsp;·&nbsp; Expense Report</div>
-</header>
-
-<div id="main-view" style="display:none">
-  <div class="main-wrap">
-    <div class="page-title">Expense Report Submission</div>
-    <div class="page-subtitle">Submit expenses for travel or events on behalf of CLEAR. All fields marked <span style="color:var(--burgundy)">*</span> are required.</div>
-    <div id="submit-alert-top" class="alert alert-error" style="display:none;margin-bottom:16px"></div>
-
-    <!-- SUBMITTER INFO -->
-    <div class="card">
-      <div class="card-title"><span class="icon">👤</span> Your Information</div>
-      <div class="field-row">
-        <div class="field">
-          <label>Full Name <span class="req">*</span></label>
-          <input type="text" id="f-name" placeholder="Your full name" oninput="clearTopAlert()">
-        </div>
-        <div class="field">
-          <label>Email Address <span class="req">*</span></label>
-          <input type="email" id="f-email" placeholder="you@example.com" oninput="clearTopAlert()">
-        </div>
-      </div>
+<!-- AUTH SCREEN -->
+<div id="auth-screen">
+  <div class="auth-card">
+    <div class="auth-logo">CLEAR</div>
+    <div class="auth-subtitle">Expense Reporting — Admin</div>
+    <div class="field">
+      <label>Worker URL</label>
+      <input type="url" id="auth-worker-url" placeholder="https://your-worker.workers.dev">
     </div>
-
-    <!-- TRIP INFO -->
-    <div class="card" id="trip-details-card">
-      <div class="card-title"><span class="icon">✈️</span> Trip / Event Details</div>
-      <div class="field-row">
-        <div class="field">
-          <label>Event / Program Name <span class="req">*</span></label>
-          <input type="text" id="f-event" placeholder="e.g., CLEAR AEC 2026">
-        </div>
-        <div class="field">
-          <label>Destination <span class="req">*</span></label>
-          <input type="text" id="f-destination" placeholder="City, State">
-        </div>
-      </div>
-      <div class="field-row">
-        <div class="field">
-          <label>Departure Date <span class="req">*</span></label>
-          <input type="date" id="f-date-start" onchange="buildPerDiemRows()">
-        </div>
-        <div class="field">
-          <label>Return Date <span class="req">*</span></label>
-          <input type="date" id="f-date-end" onchange="buildPerDiemRows()">
-        </div>
-      </div>
-      <div class="field-row full">
-        <div class="field">
-          <label>Purpose / Notes</label>
-          <textarea id="f-purpose" placeholder="Business purpose of the trip. Include any pre-approvals or special circumstances here."></textarea>
-        </div>
-      </div>
+    <div class="field">
+      <label>Auth Token</label>
+      <input type="password" id="auth-token" placeholder="••••••••••••">
     </div>
-
-    <!-- PER DIEM -->
-    <div class="card" id="perdiem-card">
-      <div class="card-title"><span class="icon">🍽️</span> Meal Per Diem</div>
-      <div class="alert alert-info" id="perdiem-info-msg" style="display: none;"></div>
-      <div class="alert alert-warn" style="display: none; background: transparent; border: transparent;"></div>
-      <div id="perdiem-group-meal-note" style="display:none;margin-bottom:10px;padding:10px 12px;background:#fff8e1;border:1px solid #ffe082;border-radius:var(--radius);font-size:12px;color:var(--charcoal)">
-        <span><strong>Group meals:</strong> If you paid for meals for anyone else who is eligible for reimbursement from CLEAR, enter the number of people per meal <strong style="color: #64092c;">(not including yourself)</strong> in the shaded columns at the right of each row. Leave blank if not applicable.</span><br>
-        <span style="display:block;color:var(--warn);margin-top:10px;font-size:11px">If claiming meal expenses for any guests that were not eligible for reimbursement, but you received prior authorization, do not include them here — add that entire meal as a Miscellaneous expense line instead.</span><br><span style="display:block;color:var(--warn);margin-top:3px;font-size:11px">If a meal was provided for you, select the checkbox for the meal or meals provided for that day. This will reduce your daily per diem cap for that day.</span><br><strong>Receipts required.</strong> Reimbursement is for actual meal expenses only, up to the per diem cap. The total reimbursed across all days cannot exceed the daily rate × number of days.
-      </div>
-      <div id="perdiem-days-header" class="expense-line-header" style="grid-template-columns: 90px 110px 72px 90px 72px 72px 72px 44px 44px 44px 28px; padding: 0 4px 4px; gap:6px;">
-        <span>Date</span><span>Day Type</span><span>Allowance</span><span>Actual Spent</span>
-        <span class="perdiem-group-col" style="background:#dbeafe;border-radius:3px;padding:2px 4px;font-size:10px;text-align:center;line-height:1.3">Breakfast<br>Others</span>
-        <span class="perdiem-group-col" style="background:#dbeafe;border-radius:3px;padding:2px 4px;font-size:10px;text-align:center;line-height:1.3">Lunch<br>Others</span>
-        <span class="perdiem-group-col" style="background:#dbeafe;border-radius:3px;padding:2px 4px;font-size:10px;text-align:center;line-height:1.3">Dinner<br>Others</span>
-        <span colspan="3" style="background:#fce7f3;border-radius:3px;padding:2px 4px;font-size:10px;text-align:center;line-height:1.3;grid-column:span 3">Meals Provided by CLEAR</span>
-        <span></span>
-      </div>
-      <div class="expense-line-header" style="grid-template-columns: 90px 110px 72px 90px 72px 72px 72px 44px 44px 44px 28px; padding: 0 4px 2px; gap:6px;">
-        <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
-        <span style="background:#fce7f3;border-radius:3px;padding:2px 4px;font-size:10px;text-align:center;line-height:1.3">B</span>
-        <span style="background:#fce7f3;border-radius:3px;padding:2px 4px;font-size:10px;text-align:center;line-height:1.3">L</span>
-        <span style="background:#fce7f3;border-radius:3px;padding:2px 4px;font-size:10px;text-align:center;line-height:1.3">D</span>
-        <span></span>
-      </div>
-      <div id="perdiem-days-list"></div>
-      <div id="perdiem-trip-cap-warn" style="display:none" class="alert alert-warn mt-8"></div>
-      <button class="btn btn-secondary btn-sm mt-8" onclick="addPerDiemDay()">+ Add Day</button>
-    </div>
-
-    <!-- EXPENSES -->
-    <div class="card" id="expense-card">
-      <div class="card-title"><span class="icon">💳</span> Expense Lines</div>
-      <p style="font-size:12px;color:var(--text-light);margin-bottom:6px;">For categories like Hotel, Airfare, and Rental Car, use the Description field to record the vendor name. This field is optional for other categories.</p>
-      <div class="expense-line-header" id="expense-line-header" style="grid-template-columns: 130px 1fr 90px 28px;">
-        <span>Category</span><span>Description / Miles</span><span>Amount</span><span></span>
-      </div>
-      <div id="expense-lines-list"></div>
-    </div>
-
-    <!-- RECEIPT -->
-    <div class="card" id="receipt-card">
-      <div class="card-title"><span class="icon">📎</span> Receipt Upload</div>
-      <p style="font-size:13px;color:var(--text-light);margin-bottom:12px;">Combine all receipts into a single PDF and upload below. Required for meal per diem and any expense over $25. PDF only · Max 20 MB.</p>
-      <div class="upload-zone" id="receipt-drop-zone" onclick="document.getElementById('receipt-file-input').click()">
-        <span class="upload-icon">📄</span>
-        <p><strong>Click to upload</strong> or drag and drop</p>
-        <p>PDF files only · Max 20 MB</p>
-      </div>
-      <input type="file" id="receipt-file-input" accept=".pdf" style="display:none" onchange="handleReceiptUpload(event)">
-      <div id="receipt-preview" style="display:none"></div>
-    </div>
-
-    <!-- SUMMARY -->
-    <div class="summary-box">
-      <h3>Expense Summary</h3>
-      <div class="summary-grid" id="summary-grid"></div>
-      <div class="summary-total">
-        <span class="label">Total Reimbursement Request</span>
-        <span class="value" id="summary-total-val">$0.00</span>
-      </div>
-    </div>
-
-    <div class="flex-row end mt-16">
-      <button class="btn btn-primary" id="submit-btn" onclick="submitReport()">Submit Report →</button>
-    </div>
-    <div id="submit-alert" style="display:none;margin-top:16px"></div>
+    <div id="auth-error" class="alert alert-error" style="display:none"></div>
+    <button class="btn btn-primary" onclick="doAuth()">Connect</button>
   </div>
 </div>
 
-<div id="loading-screen" style="display:none;text-align:center;padding:60px 20px">
-  <div style="font-size:32px;margin-bottom:16px">⏳</div>
-  <p style="color:var(--text-light);font-size:15px">Submitting your report…</p>
+<!-- HEADER -->
+<header class="site-header">
+  <div class="logo">CLEAR &nbsp;·&nbsp; Expense Reporting — Admin</div>
+  <div class="header-right">
+    <button class="btn btn-sm" style="background:rgba(255,255,255,0.15);color:white;border:1px solid rgba(255,255,255,0.3)" onclick="logout()">Sign Out</button>
+  </div>
+</header>
+
+<div id="admin-view" style="display:none">
+  <div class="admin-wrap">
+    <div class="tab-bar">
+      <button class="tab-btn active" onclick="adminTab('dashboard')">Dashboard</button>
+      <button class="tab-btn" onclick="adminTab('settings')">Settings</button>
+    </div>
+
+    <div class="tab-pane active" id="admin-tab-dashboard">
+      <div class="flex-row between mb-12">
+        <div>
+          <div class="page-title">Expense Reports</div>
+          <div class="page-subtitle">Review and approve submitted expense reports.</div>
+        </div>
+        <button class="btn btn-gold" onclick="exportToExcel()">⬇ Export to Excel</button>
+      </div>
+      <div class="stats-bar" id="admin-stats"></div>
+      <div class="filter-bar">
+        <select id="filter-status" onchange="renderDashboard()">
+          <option value="">All Statuses</option>
+          <option value="pending">Pending</option>
+          <option value="approved">Approved</option>
+          <option value="denied">Denied</option>
+          <option value="draft">Draft</option>
+        </select>
+        <select id="filter-type" onchange="renderDashboard()">
+          <option value="">All Types</option>
+          <option value="staff">Staff</option>
+          <option value="instructor">Instructor</option>
+          <option value="volunteer">Volunteer</option>
+        </select>
+        <input type="text" id="filter-search" placeholder="Search by name or event…" oninput="renderDashboard()" style="min-width:200px">
+      </div>
+      <div class="card" style="padding:0; overflow:hidden">
+        <div id="dashboard-table-wrap"></div>
+      </div>
+    </div>
+
+    <div class="tab-pane" id="admin-tab-settings">
+      <div class="page-title">Settings</div>
+      <div class="page-subtitle">Configure rates and manage rosters. Changes save to KV.</div>
+
+      <div class="card">
+        <div class="card-title"><span class="icon">⚙️</span> Reimbursement Rates</div>
+        <div class="settings-row">
+          <div class="field">
+            <label>Daily Per Diem Cap</label>
+            <div class="rate-input-group"><span class="prefix">$</span><input type="number" id="cfg-perdiem" step="0.01" min="0" placeholder="75.00"></div>
+            <span class="hint">Maximum meal reimbursement per full day</span>
+          </div>
+          <div class="field">
+            <label>Travel Day % of Per Diem</label>
+            <div class="rate-input-group"><input type="number" id="cfg-travel-pct" step="1" min="0" max="100" placeholder="75" style="text-align:right"><span class="prefix">%</span></div>
+            <span class="hint">Applied to departure/return days</span>
+          </div>
+          <div class="field">
+            <label>Mileage Rate</label>
+            <div class="rate-input-group"><span class="prefix">$</span><input type="number" id="cfg-mileage" step="0.001" min="0" placeholder="0.670"></div>
+            <span class="hint">Per mile reimbursement</span>
+          </div>
+        </div>
+        <div class="settings-row">
+          <div class="field">
+            <label>Instructor Tier 1 Rate</label>
+            <div class="rate-input-group"><span class="prefix">$</span><input type="number" id="cfg-tier1" step="0.01" min="0" placeholder="0.00"></div>
+            <span class="hint">Hourly rate — Tier 1</span>
+          </div>
+          <div class="field">
+            <label>Instructor Tier 2 Rate</label>
+            <div class="rate-input-group"><span class="prefix">$</span><input type="number" id="cfg-tier2" step="0.01" min="0" placeholder="0.00"></div>
+            <span class="hint">Hourly rate — Tier 2</span>
+          </div>
+        </div>
+        <div class="flex-row end mt-8">
+          <button class="btn btn-primary" onclick="saveRates()">Save Rates</button>
+        </div>
+        <div id="rates-save-msg" style="display:none" class="alert alert-success mt-8">✓ Rates saved successfully.</div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span class="icon">👥</span> Staff Roster</div>
+        <div class="flex-row between mb-12">
+          <p style="font-size:13px; color:var(--text-light)">Manage staff members.</p>
+          <div class="flex-row">
+            <label class="import-zone" style="margin:0; padding:6px 12px; font-size:12px; cursor:pointer">📂 Import CSV<input type="file" accept=".csv" style="display:none" onchange="importStaffCSV(event)"></label>
+            <button class="btn btn-primary btn-sm" onclick="addStaff()">+ Add Staff</button>
+          </div>
+        </div>
+        <div style="display:grid; grid-template-columns: 1fr 1fr 32px; gap:8px; padding: 0 10px 6px; font-size:11px; font-weight:600; color:var(--text-light); text-transform:uppercase; letter-spacing:0.4px;">
+          <span>Name</span><span>Email</span><span></span>
+        </div>
+        <div id="staff-list"></div>
+        <div id="staff-save-msg" style="display:none" class="alert alert-success mt-8">✓ Staff roster saved.</div>
+        <div class="flex-row end mt-8"><button class="btn btn-primary" onclick="saveStaff()">Save Roster</button></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span class="icon">🎓</span> Instructor Roster</div>
+        <div class="flex-row between mb-12">
+          <p style="font-size:13px; color:var(--text-light)">Manage contract instructors and their pay tiers.</p>
+          <div class="flex-row">
+            <label class="import-zone" style="margin:0; padding:6px 12px; font-size:12px; cursor:pointer">📂 Import CSV<input type="file" accept=".csv" style="display:none" onchange="importInstructorCSV(event)"></label>
+            <button class="btn btn-primary btn-sm" onclick="addInstructor()">+ Add Instructor</button>
+          </div>
+        </div>
+        <div style="display:grid; grid-template-columns: 1fr 1fr 120px 32px; gap:8px; padding: 0 10px 6px; font-size:11px; font-weight:600; color:var(--text-light); text-transform:uppercase; letter-spacing:0.4px;">
+          <span>Name</span><span>Email</span><span>Tier</span><span></span>
+        </div>
+        <div id="instructor-list"></div>
+        <div id="instructors-save-msg" style="display:none" class="alert alert-success mt-8">✓ Instructor roster saved.</div>
+        <div class="flex-row end mt-8"><button class="btn btn-primary" onclick="saveInstructors()">Save Roster</button></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- REVIEW MODAL -->
+<div class="modal-overlay" id="review-modal">
+  <div class="modal" style="max-width:700px">
+    <div class="modal-header">
+      <h2>Review Expense Report</h2>
+      <button class="modal-close" onclick="closeModal()">×</button>
+    </div>
+    <div class="modal-body" id="review-modal-body"></div>
+    <div class="modal-footer">
+      <button class="btn btn-danger" onclick="decideReport('Denied')">✗ Deny</button>
+      <button class="btn btn-secondary" onclick="closeModal()">Close</button>
+      <button class="btn btn-primary" onclick="decideReport('Approved')">✓ Approve</button>
+    </div>
+  </div>
 </div>
 
 <script>
 // ═══════════════════════════════════════════════════════
-//  CONFIG — set your Worker URL here
+//  STATE
 // ═══════════════════════════════════════════════════════
-const WORKER_URL = 'https://clear-lms-proxy.avance.workers.dev';
-const SUBMIT_ENDPOINT = WORKER_URL + '/expense/volunteer-submit';
+let workerUrl = '';
+let authToken = '';
+let currentReviewId = null;
+let reports = [];
 
-// Per diem config — loaded from KV on init, fallback defaults
-let cfg = { perdiem: 75.00, travelPct: 75, mileage: 0.670 };
-let receiptBase64 = null;
-let receiptFileName = null;
+const FLOWS = {
+  update:    () => `${workerUrl}/expense/update`,
+  getAll:    () => `${workerUrl}/expense/getall`,
+  getDetail: () => `${workerUrl}/expense/getdetail`,
+};
+
+let cfg = { perdiem: 75.00, travelPct: 75, mileage: 0.670, tier1: 0, tier2: 0 };
+let instructors = [];
+let staff = [];
+
+// ═══════════════════════════════════════════════════════
+//  AUTH
+// ═══════════════════════════════════════════════════════
+function doAuth() {
+  const url   = document.getElementById('auth-worker-url').value.trim();
+  const token = document.getElementById('auth-token').value.trim();
+  if (!url || !token) { showAuthError('Please enter both a Worker URL and Auth Token.'); return; }
+  workerUrl = url.replace(/\/$/, '');
+  authToken = token;
+  localStorage.setItem('clear_worker_url', workerUrl);
+  localStorage.setItem('clear_auth_token', authToken);
+  initApp();
+}
+function logout() { location.reload(); }
+function showAuthError(msg) {
+  const el = document.getElementById('auth-error');
+  el.textContent = msg; el.style.display = 'flex';
+}
+
+// ═══════════════════════════════════════════════════════
+//  KV
+// ═══════════════════════════════════════════════════════
+async function kvGet(key) {
+  if (!workerUrl) return null;
+  try {
+    const res = await fetch(`${workerUrl}/kv?key=${encodeURIComponent(key)}`, { headers: { 'X-Auth-Token': authToken } });
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data.value !== undefined ? data.value : null;
+  } catch { return null; }
+}
+async function kvSet(key, value) {
+  if (!workerUrl) return false;
+  try {
+    const res = await fetch(`${workerUrl}/kv`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', 'X-Auth-Token': authToken },
+      body: JSON.stringify({ key, value })
+    });
+    return res.ok;
+  } catch { return false; }
+}
+
+// ═══════════════════════════════════════════════════════
+//  FLOW HELPER
+// ═══════════════════════════════════════════════════════
+async function callFlow(flowKey, payload) {
+  try {
+    const res = await fetch(FLOWS[flowKey](), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Auth-Token': authToken },
+      body: JSON.stringify(payload)
+    });
+    const text = await res.text();
+    if (!res.ok) throw new Error(`Flow ${flowKey} returned ${res.status}: ${text}`);
+    if (!text || !text.trim()) return { success: true };
+    try { return JSON.parse(text); }
+    catch { return { success: true }; } // non-JSON response still means success if status was ok
+  } catch (e) { console.error('Flow error:', e); throw e; }
+}
 
 // ═══════════════════════════════════════════════════════
 //  INIT
 // ═══════════════════════════════════════════════════════
 async function initApp() {
-  // Load current rates from public config endpoint (no auth required)
-  try {
-    const res = await fetch(`${WORKER_URL}/expense/config`);
-    if (res.ok) {
-      const data = await res.json();
-      if (data.perdiem)   cfg.perdiem   = data.perdiem;
-      if (data.travelPct) cfg.travelPct = data.travelPct;
-      if (data.mileage)   cfg.mileage   = data.mileage;
-    }
-  } catch(e) { console.warn('Config fetch failed, using defaults:', e.message); }
-
-  document.getElementById('perdiem-info-msg').textContent =
-    `Full-day per diem cap: $${cfg.perdiem.toFixed(2)} · Travel day allowance: ${cfg.travelPct}% ($${(cfg.perdiem * cfg.travelPct / 100).toFixed(2)})`;
-
-  // Show group meal note
-  const gn = document.getElementById('perdiem-group-meal-note');
-  if (gn) gn.style.display = 'block';
-
-  // Initialize per diem placeholder
-  document.getElementById('perdiem-days-list').innerHTML =
-    '<p style="font-size:13px;color:var(--text-light);padding:10px 0">Enter departure and return dates above to populate per diem days.</p>';
-
-  // Initialize expense lines
-  addExpenseLine();
-  updateSummary();
-  document.getElementById('main-view').style.display = 'block';
-}
-
-window.addEventListener('DOMContentLoaded', initApp);
-
-// ═══════════════════════════════════════════════════════
-//  PER DIEM
-// ═══════════════════════════════════════════════════════
-function buildPerDiemRows() {
-  const startVal = document.getElementById('f-date-start').value;
-  const endVal   = document.getElementById('f-date-end').value;
-  const list     = document.getElementById('perdiem-days-list');
-
-  if (!startVal || !endVal || startVal > endVal) {
-    list.innerHTML = '<p style="font-size:13px;color:var(--text-light);padding:10px 0">Enter departure and return dates above to populate per diem days.</p>';
-    updateSummary(); return;
+  document.getElementById('auth-screen').style.display = 'none';
+  if (!workerUrl) {
+    workerUrl = localStorage.getItem('clear_worker_url') || '';
+    authToken  = localStorage.getItem('clear_auth_token') || '';
   }
-
-  // Preserve existing values
-  const existing = {};
-  list.querySelectorAll('.perdiem-day').forEach(row => {
-    const d = row.querySelector('.pd-date')?.value;
-    if (d) existing[d] = {
-      type:        row.querySelector('.pd-type')?.value || '',
-      actualSpent: row.querySelector('.pd-actual')?.value || '',
-      bfast:       row.querySelector('.pd-bfast')?.value || '',
-      lunch:       row.querySelector('.pd-lunch')?.value || '',
-      dinner:      row.querySelector('.pd-dinner')?.value || '',
-    };
-  });
-
-  const dates = [];
-  const cur = new Date(startVal + 'T00:00:00');
-  const end = new Date(endVal   + 'T00:00:00');
-  while (cur <= end) { dates.push(cur.toISOString().slice(0,10)); cur.setDate(cur.getDate()+1); }
-
-  list.innerHTML = '';
-  const isSameDay = dates.length === 1;
-
-  dates.forEach((dateStr, idx) => {
-    const defaultType = (isSameDay || idx === 0 || idx === dates.length - 1) ? 'travel' : 'full';
-    const dayType     = existing[dateStr]?.type || defaultType;
-    const baseAllow   = dayType === 'full' ? cfg.perdiem
-      : dayType === 'travel' ? cfg.perdiem * cfg.travelPct / 100
-      : cfg.perdiem;
-
-    let dayLabel = '';
-    if (isSameDay)              dayLabel = '';
-    else if (idx === 0)         dayLabel = '';
-    else if (idx === dates.length-1) dayLabel = '';
-
-    const ex = existing[dateStr] || {};
-    const actualSpent = ex.actualSpent || '';
-    const bfast  = ex.bfast  || '';
-    const lunch  = ex.lunch  || '';
-    const dinner = ex.dinner || '';
-
-    const div = document.createElement('div');
-    div.className = 'perdiem-day';
-    div.style.cssText = 'margin-bottom:12px;padding:10px;background:#fdfcfb;border:1px solid var(--border);border-radius:var(--radius)';
-
-    div.innerHTML = `
-      <div style="display:grid;grid-template-columns:90px 110px 72px 90px 72px 72px 72px 44px 44px 44px 28px;gap:6px;align-items:center;margin-bottom:10px">
-        <input type="date" class="pd-date" value="${dateStr}" readonly style="background:#f5f5f5;color:var(--charcoal);font-size:11px;padding:5px 6px;border:1px solid var(--border);border-radius:4px;width:100%">
-        <div>
-          <select class="pd-type" onchange="calcPerdiem(this)" style="padding:5px 6px;border:1px solid var(--border);border-radius:4px;font-size:11px;width:100%">
-            <option value="travel" ${dayType==='travel'?'selected':''}>Travel Day</option>
-            <option value="full"   ${dayType==='full'  ?'selected':''}>Full Day</option>
-            <option value="custom" ${dayType==='custom'?'selected':''}>Custom</option>
-          </select>
-          ${dayLabel ? `<div style="font-size:10px;color:var(--text-light);margin-top:2px">${dayLabel}</div>` : ''}
-        </div>
-        <input type="number" class="pd-allowance" step="0.01" value="${baseAllow.toFixed(2)}"
-          ${dayType !== 'custom' ? 'readonly style="background:#f5f5f5;color:var(--text-light);padding:5px 6px;border:1px solid var(--border);border-radius:4px;font-size:11px;width:100%;text-align:right"' : 'style="padding:5px 6px;border:1px solid var(--border);border-radius:4px;font-size:11px;width:100%;text-align:right"'}
-          oninput="updateSummary()">
-        <input type="number" class="pd-actual" step="0.01" min="0" placeholder="0.00" value="${actualSpent}"
-          style="padding:5px 6px;border:1px solid var(--border);border-radius:4px;font-size:11px;width:100%;text-align:right"
-          oninput="updateTripCapWarn();updateSummary()">
-        <input type="number" class="pd-bfast perdiem-group-col" min="0" step="1" placeholder="0" value="${bfast}"
-          style="padding:5px 6px;border:1px solid #bfdbfe;border-radius:4px;font-size:11px;width:100%;background:#eff6ff;text-align:center"
-          oninput="calcGroupMeal(this);updateSummary()">
-        <input type="number" class="pd-lunch perdiem-group-col" min="0" step="1" placeholder="0" value="${lunch}"
-          style="padding:5px 6px;border:1px solid #bfdbfe;border-radius:4px;font-size:11px;width:100%;background:#eff6ff;text-align:center"
-          oninput="calcGroupMeal(this);updateSummary()">
-        <input type="number" class="pd-dinner perdiem-group-col" min="0" step="1" placeholder="0" value="${dinner}"
-          style="padding:5px 6px;border:1px solid #bfdbfe;border-radius:4px;font-size:11px;width:100%;background:#eff6ff;text-align:center"
-          oninput="calcGroupMeal(this);updateSummary()">
-        <div style="display:flex;align-items:center;justify-content:center;background:#fdf2f8;border-radius:4px;border:1px solid #f9a8d4">
-          <input type="checkbox" class="pd-clear-b" style="width:16px;height:16px;accent-color:#be185d;cursor:pointer" onchange="calcGroupMeal(this);updateTripCapWarn();updateSummary()" title="Breakfast provided by CLEAR">
-        </div>
-        <div style="display:flex;align-items:center;justify-content:center;background:#fdf2f8;border-radius:4px;border:1px solid #f9a8d4">
-          <input type="checkbox" class="pd-clear-l" style="width:16px;height:16px;accent-color:#be185d;cursor:pointer" onchange="calcGroupMeal(this);updateTripCapWarn();updateSummary()" title="Lunch provided by CLEAR">
-        </div>
-        <div style="display:flex;align-items:center;justify-content:center;background:#fdf2f8;border-radius:4px;border:1px solid #f9a8d4">
-          <input type="checkbox" class="pd-clear-d" style="width:16px;height:16px;accent-color:#be185d;cursor:pointer" onchange="calcGroupMeal(this);updateTripCapWarn();updateSummary()" title="Dinner provided by CLEAR">
-        </div>
-        <button class="remove-btn" onclick="this.closest('.perdiem-day').remove();updateTripCapWarn();updateSummary()">×</button>
-      </div>
-`;
-    setTimeout(() => calcGroupMeal(div.querySelector('.pd-bfast')), 0);
-    list.appendChild(div);
-  });
-  updateTripCapWarn();
-  updateSummary();
+  const cfgKV = await kvGet('expense_cfg');
+  if (cfgKV) Object.assign(cfg, typeof cfgKV === 'string' ? JSON.parse(cfgKV) : cfgKV);
+  const instrKV = await kvGet('expense_instructors');
+  if (instrKV) instructors = typeof instrKV === 'string' ? JSON.parse(instrKV) : instrKV;
+  const staffKV = await kvGet('expense_staff');
+  if (staffKV) staff = typeof staffKV === 'string' ? JSON.parse(staffKV) : staffKV;
+  document.getElementById('admin-view').style.display = 'block';
+  renderSettings();
+  renderDashboard();
 }
 
-function calcPerdiem(el) {
-  const row = el.closest('.perdiem-day');
-  const type = row.querySelector('.pd-type')?.value;
-  const allowanceInput = row.querySelector('.pd-allowance');
-  if (!allowanceInput) return;
-  const bfast  = parseInt(row.querySelector('.pd-bfast')?.value)  || 0;
-  const lunch  = parseInt(row.querySelector('.pd-lunch')?.value)  || 0;
-  const dinner = parseInt(row.querySelector('.pd-dinner')?.value) || 0;
-  const extra  = (bfast * 0.20 + lunch * 0.30 + dinner * 0.50) * cfg.perdiem;
-  let base = type === 'full' ? cfg.perdiem : type === 'travel' ? cfg.perdiem * cfg.travelPct / 100 : parseFloat(allowanceInput.value) || cfg.perdiem;
-  if (type !== 'custom') {
-    allowanceInput.value = (base + extra).toFixed(2);
-    allowanceInput.readOnly = true;
-    allowanceInput.style.background = '#f5f5f5';
-    allowanceInput.style.color = 'var(--text-light)';
-  } else {
-    allowanceInput.readOnly = false;
-    allowanceInput.style.background = 'white';
-    allowanceInput.style.color = '';
+window.addEventListener('DOMContentLoaded', () => {
+  const stored_url   = localStorage.getItem('clear_worker_url');
+  const stored_token = localStorage.getItem('clear_auth_token');
+  if (stored_url && stored_token) {
+    document.getElementById('auth-worker-url').value = stored_url;
+    document.getElementById('auth-token').value = stored_token;
+    workerUrl = stored_url; authToken = stored_token;
+    initApp();
   }
-  updateTripCapWarn();
-  updateSummary();
-}
-
-function calcGroupMeal(input) {
-  if (!input) return;
-  const row = input.closest('.perdiem-day');
-  if (!row) return;
-  const bfast  = parseInt(row.querySelector('.pd-bfast')?.value)  || 0;
-  const lunch  = parseInt(row.querySelector('.pd-lunch')?.value)  || 0;
-  const dinner = parseInt(row.querySelector('.pd-dinner')?.value) || 0;
-  // CLEAR-provided meal checkboxes — each reduces cap by same % as one "other"
-  const clearB = row.querySelector('.pd-clear-b')?.checked ? 1 : 0;
-  const clearL = row.querySelector('.pd-clear-l')?.checked ? 1 : 0;
-  const clearD = row.querySelector('.pd-clear-d')?.checked ? 1 : 0;
-  const dayType = row.querySelector('.pd-type')?.value || 'full';
-  const base = dayType === 'full' ? cfg.perdiem : dayType === 'travel' ? cfg.perdiem * cfg.travelPct / 100 : cfg.perdiem;
-  // Others add to cap; CLEAR meals reduce from cap
-  const groupAdj  = (bfast * 0.20 + lunch * 0.30 + dinner * 0.50) * cfg.perdiem;
-  const clearAdj  = (clearB * 0.20 + clearL * 0.30 + clearD * 0.50) * cfg.perdiem;
-  const allowanceInput = row.querySelector('.pd-allowance');
-  if (allowanceInput && dayType !== 'custom') {
-    allowanceInput.value = Math.max(0, base + groupAdj - clearAdj).toFixed(2);
-  }
-  const note = row.querySelector('.pd-group-note');
-  if (note) {
-    const parts = [];
-    if (groupAdj > 0) parts.push(`+$${groupAdj.toFixed(2)} group meals`);
-    if (clearAdj > 0) parts.push(`-$${clearAdj.toFixed(2)} CLEAR provided`);
-    if (parts.length) { note.style.display = 'block'; note.textContent = parts.join(' · '); }
-    else { note.style.display = 'none'; }
-  }
-  updateTripCapWarn();
-}
-
-function addPerDiemDay() {
-  const list = document.getElementById('perdiem-days-list');
-  const placeholder = list.querySelector('p');
-  if (placeholder) placeholder.remove();
-  const div = document.createElement('div');
-  div.className = 'perdiem-day';
-  div.style.cssText = 'margin-bottom:12px;padding:10px;background:#fdfcfb;border:1px solid var(--border);border-radius:var(--radius)';
-  div.innerHTML = `
-    <div style="display:grid;grid-template-columns:90px 110px 72px 90px 72px 72px 72px 44px 44px 44px 28px;gap:6px;align-items:center">
-      <input type="date" class="pd-date" style="padding:5px 6px;border:1px solid var(--border);border-radius:4px;font-size:11px;width:100%">
-      <select class="pd-type" onchange="calcPerdiem(this)" style="padding:5px 6px;border:1px solid var(--border);border-radius:4px;font-size:11px;width:100%">
-        <option value="travel">Travel Day</option>
-        <option value="full">Full Day</option>
-        <option value="custom">Custom</option>
-      </select>
-      <input type="number" class="pd-allowance" step="0.01" value="${cfg.perdiem.toFixed(2)}" readonly style="background:#f5f5f5;color:var(--text-light);padding:5px 6px;border:1px solid var(--border);border-radius:4px;font-size:11px;width:100%;text-align:right">
-      <input type="number" class="pd-actual" step="0.01" min="0" placeholder="0.00" style="padding:5px 6px;border:1px solid var(--border);border-radius:4px;font-size:11px;width:100%;text-align:right" oninput="updateTripCapWarn();updateSummary()">
-      <input type="number" class="pd-bfast perdiem-group-col" min="0" step="1" placeholder="0" style="padding:5px 6px;border:1px solid #bfdbfe;border-radius:4px;font-size:11px;width:100%;background:#eff6ff;text-align:center" oninput="calcGroupMeal(this);updateSummary()">
-      <input type="number" class="pd-lunch perdiem-group-col"  min="0" step="1" placeholder="0" style="padding:5px 6px;border:1px solid #bfdbfe;border-radius:4px;font-size:11px;width:100%;background:#eff6ff;text-align:center" oninput="calcGroupMeal(this);updateSummary()">
-      <input type="number" class="pd-dinner perdiem-group-col" min="0" step="1" placeholder="0" style="padding:5px 6px;border:1px solid #bfdbfe;border-radius:4px;font-size:11px;width:100%;background:#eff6ff;text-align:center" oninput="calcGroupMeal(this);updateSummary()">
-      <div style="display:flex;align-items:center;justify-content:center;background:#fdf2f8;border-radius:4px;border:1px solid #f9a8d4">
-        <input type="checkbox" class="pd-clear-b" style="width:16px;height:16px;accent-color:#be185d;cursor:pointer" onchange="calcGroupMeal(this);updateTripCapWarn();updateSummary()" title="Breakfast provided by CLEAR">
-      </div>
-      <div style="display:flex;align-items:center;justify-content:center;background:#fdf2f8;border-radius:4px;border:1px solid #f9a8d4">
-        <input type="checkbox" class="pd-clear-l" style="width:16px;height:16px;accent-color:#be185d;cursor:pointer" onchange="calcGroupMeal(this);updateTripCapWarn();updateSummary()" title="Lunch provided by CLEAR">
-      </div>
-      <div style="display:flex;align-items:center;justify-content:center;background:#fdf2f8;border-radius:4px;border:1px solid #f9a8d4">
-        <input type="checkbox" class="pd-clear-d" style="width:16px;height:16px;accent-color:#be185d;cursor:pointer" onchange="calcGroupMeal(this);updateTripCapWarn();updateSummary()" title="Dinner provided by CLEAR">
-      </div>
-      <button class="remove-btn" onclick="this.closest('.perdiem-day').remove();updateTripCapWarn();updateSummary()">×</button>
-    </div>
-    <div class="pd-group-note" style="display:none;"></div>`;
-  list.appendChild(div);
-  updateSummary();
-}
-
-function updateTripCapWarn() {
-  let totalActual = 0, totalCap = 0;
-  document.querySelectorAll('.perdiem-day').forEach(row => {
-    totalActual += parseFloat(row.querySelector('.pd-actual')?.value) || 0;
-    totalCap    += parseFloat(row.querySelector('.pd-allowance')?.value) || cfg.perdiem;
-  });
-  const warn = document.getElementById('perdiem-trip-cap-warn');
-  if (totalActual > totalCap) {
-    warn.style.display = 'flex';
-    warn.textContent = `⚠ Total actual spent ($${totalActual.toFixed(2)}) exceeds the trip per diem cap ($${totalCap.toFixed(2)}). You may still submit — overages are reviewed on a case-by-case basis.`;
-  } else { warn.style.display = 'none'; }
-}
-
-// ═══════════════════════════════════════════════════════
-//  EXPENSE LINES
-// ═══════════════════════════════════════════════════════
-const EXPENSE_CATS = ['Airfare','Baggage Fees','Gasoline','Gratuities','Hotel','Mileage','Miscellaneous','Parking','Public Transportation','Rental Car','Uber / Rideshare'];
-
-function addExpenseLine() {
-  const list = document.getElementById('expense-lines-list');
-  const div  = document.createElement('div');
-  div.className = 'expense-entry';
-
-  const sel = document.createElement('select');
-  sel.className = 'el-cat';
-  sel.setAttribute('style', 'padding:7px 8px;border:1px solid var(--border);border-radius:4px;font-size:12px;font-family:inherit;width:100%');
-  const blankOpt = document.createElement('option');
-  blankOpt.value = ''; blankOpt.textContent = '— Category —';
-  sel.appendChild(blankOpt);
-  EXPENSE_CATS.forEach(c => {
-    const opt = document.createElement('option');
-    opt.value = c; opt.textContent = c;
-    sel.appendChild(opt);
-  });
-  sel.onchange = function() { handleExpenseCat(this); ensureBlankExpenseLine(); };
-
-  const descWrap = document.createElement('div');
-  descWrap.className = 'el-desc-wrap';
-  descWrap.style.cssText = 'display:grid;grid-template-columns:1fr;gap:4px';
-  const descInput = document.createElement('input');
-  descInput.type = 'text'; descInput.className = 'el-desc';
-  descInput.placeholder = 'Vendor / description (optional)';
-  descInput.setAttribute('style', 'padding:7px 8px;border:1px solid var(--border);border-radius:4px;font-size:12px;font-family:inherit;width:100%');
-  descInput.addEventListener('input', ensureBlankExpenseLine);
-  descWrap.appendChild(descInput);
-
-  const amtInput = document.createElement('input');
-  amtInput.type = 'number'; amtInput.className = 'el-amt';
-  amtInput.step = '0.01'; amtInput.min = '0'; amtInput.placeholder = '0.00';
-  amtInput.setAttribute('style', 'padding:7px 8px;border:1px solid var(--border);border-radius:4px;font-size:12px;font-family:inherit;width:100%');
-  amtInput.addEventListener('input', () => { ensureBlankExpenseLine(); updateSummary(); });
-
-  const removeBtn = document.createElement('button');
-  removeBtn.className = 'remove-btn'; removeBtn.textContent = '×';
-  removeBtn.onclick = function() { removeExpenseLine(this); };
-
-  div.appendChild(sel);
-  div.appendChild(descWrap);
-  div.appendChild(amtInput);
-  div.appendChild(removeBtn);
-  list.appendChild(div);
-}
-
-function ensureBlankExpenseLine() {
-  const list = document.getElementById('expense-lines-list');
-  const rows = list.querySelectorAll('.expense-entry');
-  const lastRow = rows[rows.length - 1];
-  if (!lastRow) { addExpenseLine(); return; }
-  const lastCat  = lastRow.querySelector('.el-cat')?.value;
-  const lastDesc = lastRow.querySelector('.el-desc')?.value;
-  const lastAmt  = lastRow.querySelector('.el-amt')?.value;
-  if (lastCat || lastDesc || lastAmt) addExpenseLine();
-}
-
-function removeExpenseLine(btn) {
-  const row  = btn.closest('.expense-entry');
-  const list = document.getElementById('expense-lines-list');
-  if (list.querySelectorAll('.expense-entry').length > 1) {
-    row.remove();
-  } else {
-    row.querySelector('.el-cat').value = '';
-    row.querySelector('.el-desc-wrap').innerHTML = `<input type="text" class="el-desc" placeholder="Vendor / description (optional)" style="padding:7px 8px;border:1px solid var(--border);border-radius:4px;font-size:12px;font-family:inherit;width:100%">`;
-    row.querySelector('.el-amt').value = '';
-    row.querySelector('.el-amt').readOnly = false;
-    row.querySelector('.el-amt').style.background = '';
-  }
-  updateSummary();
-}
-
-function handleExpenseCat(sel) {
-  const row = sel.closest('.expense-entry');
-  const descWrap = row.querySelector('.el-desc-wrap');
-  const amtInput = row.querySelector('.el-amt');
-  if (sel.value === 'Mileage') {
-    descWrap.style.gridTemplateColumns = '1fr 90px';
-    descWrap.innerHTML = `
-      <input type="text" class="el-desc" placeholder="Description (e.g., home to airport and return)"
-        style="padding:7px 8px;border:1px solid var(--border);border-radius:4px;font-size:12px;font-family:inherit;width:100%">
-      <input type="number" class="el-miles" step="0.1" min="0" placeholder="Miles"
-        style="padding:7px 8px;border:1px solid var(--border);border-radius:4px;font-size:12px;font-family:inherit;width:100%"
-        oninput="calcMileage(this)" title="Miles driven">`;
-    amtInput.readOnly = true; amtInput.style.background = '#f5f5f5';
-    amtInput.style.color = 'var(--text-light)'; amtInput.placeholder = 'Calculated';
-    amtInput.title = `$${cfg.mileage.toFixed(3)}/mi`;
-  } else {
-    descWrap.style.gridTemplateColumns = '1fr';
-    descWrap.innerHTML = `<input type="text" class="el-desc" placeholder="Vendor / description (optional)"
-      style="padding:7px 8px;border:1px solid var(--border);border-radius:4px;font-size:12px;font-family:inherit;width:100%">`;
-    descWrap.querySelector('.el-desc').addEventListener('input', ensureBlankExpenseLine);
-    amtInput.readOnly = false; amtInput.style.background = '';
-    amtInput.style.color = ''; amtInput.placeholder = '0.00'; amtInput.title = '';
-    updateSummary();
-  }
-  ensureBlankExpenseLine();
-}
-
-function calcMileage(milesInput) {
-  const row = milesInput.closest('.expense-entry');
-  row.querySelector('.el-amt').value = ((parseFloat(milesInput.value) || 0) * cfg.mileage).toFixed(2);
-  updateSummary();
-}
-
-// ═══════════════════════════════════════════════════════
-//  SUMMARY
-// ═══════════════════════════════════════════════════════
-function updateSummary() {
-  let perDiemTotal = 0;
-  document.querySelectorAll('.perdiem-day').forEach(row => {
-    perDiemTotal += parseFloat(row.querySelector('.pd-actual')?.value) || 0;
-  });
-  let expenseTotal = 0;
-  document.querySelectorAll('.expense-entry').forEach(row => {
-    expenseTotal += parseFloat(row.querySelector('.el-amt')?.value) || 0;
-  });
-  const total = perDiemTotal + expenseTotal;
-  document.getElementById('summary-grid').innerHTML = `
-    <div class="summary-item"><span class="label">Meal Per Diem</span><span class="value">$${perDiemTotal.toFixed(2)}</span></div>
-    <div class="summary-item"><span class="label">Other Expenses</span><span class="value">$${expenseTotal.toFixed(2)}</span></div>`;
-  document.getElementById('summary-total-val').textContent = `$${total.toFixed(2)}`;
-}
-
-// ═══════════════════════════════════════════════════════
-//  RECEIPT UPLOAD
-// ═══════════════════════════════════════════════════════
-const dropZone = document.getElementById('receipt-drop-zone');
-dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
-dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
-dropZone.addEventListener('drop', e => {
-  e.preventDefault(); dropZone.classList.remove('dragover');
-  const file = e.dataTransfer.files[0]; if (file) processReceiptFile(file);
 });
-function handleReceiptUpload(e) { const file = e.target.files[0]; if (file) processReceiptFile(file); }
-function processReceiptFile(file) {
-  if (!file.name.toLowerCase().endsWith('.pdf')) { alert('Please upload a PDF file.'); return; }
-  if (file.size > 20 * 1024 * 1024) { alert('File must be 20 MB or smaller.'); return; }
-  receiptFileName = file.name;
-  const reader = new FileReader();
-  reader.onload = e => {
-    receiptBase64 = e.target.result.split(',')[1];
-    const preview = document.getElementById('receipt-preview');
-    preview.innerHTML = `
-      <div class="receipt-preview">
-        <span class="file-icon">📄</span>
-        <div class="file-info">
-          <div class="file-name">${file.name}</div>
-          <div class="file-size">${(file.size/1024).toFixed(1)} KB</div>
-        </div>
-        <button class="btn btn-secondary btn-sm" onclick="previewReceipt()">Preview</button>
-        <button class="btn btn-sm btn-danger" onclick="removeReceipt()">Remove</button>
-      </div>`;
-    preview.style.display = 'block';
-    document.getElementById('receipt-drop-zone').style.display = 'none';
+
+// ═══════════════════════════════════════════════════════
+//  ADMIN TABS
+// ═══════════════════════════════════════════════════════
+function adminTab(tab) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+  document.querySelector(`[onclick="adminTab('${tab}')"]`).classList.add('active');
+  document.getElementById(`admin-tab-${tab}`).classList.add('active');
+  if (tab === 'dashboard') renderDashboard();
+  if (tab === 'settings')  renderSettings();
+}
+
+// ═══════════════════════════════════════════════════════
+//  DASHBOARD
+// ═══════════════════════════════════════════════════════
+async function renderDashboard() {
+  const wrap    = document.getElementById('dashboard-table-wrap');
+  const statsEl = document.getElementById('admin-stats');
+  wrap.innerHTML = `<div class="empty-state"><div class="empty-icon">⏳</div><p>Loading reports from SharePoint…</p></div>`;
+  try {
+    // Always load all reports — filter client-side (OData filter on SP choice fields is unreliable)
+    const data = await callFlow('getAll', {});
+    reports = Array.isArray(data) ? data : (data.value || data.items || []);
+    reports = reports.map(normalizeReport);
+  } catch (e) {
+    wrap.innerHTML = `<div class="empty-state"><div class="empty-icon">⚠️</div><p>Could not load reports. Check your connection.</p></div>`;
+    return;
+  }
+
+  const statusFilter = document.getElementById('filter-status')?.value || '';
+  const typeFilter   = document.getElementById('filter-type')?.value   || '';
+  const search       = (document.getElementById('filter-search')?.value || '').toLowerCase();
+  const filtered = reports.filter(r => {
+    if (statusFilter && (r.status||'').toLowerCase() !== statusFilter.toLowerCase()) return false;
+    if (typeFilter   && (r.type||'').toLowerCase()   !== typeFilter) return false;
+    if (search && !(r.name||'').toLowerCase().includes(search) && !(r.event||'').toLowerCase().includes(search)) return false;
+    return true;
+  });
+
+  const pending  = reports.filter(r => (r.status||'').toLowerCase() === 'pending').length;
+  const approved = reports.filter(r => (r.status||'').toLowerCase() === 'approved').length;
+  const totalAmt = reports.filter(r => (r.status||'').toLowerCase() === 'approved').reduce((s,r) => s + (r.grandTotal||0), 0);
+  statsEl.innerHTML = `
+    <div class="stat-card"><div class="stat-num">${reports.length}</div><div class="stat-label">Total Reports</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:#e65100">${pending}</div><div class="stat-label">Pending Review</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:var(--success)">${approved}</div><div class="stat-label">Approved</div></div>
+    <div class="stat-card"><div class="stat-num" style="font-size:18px">$${totalAmt.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</div><div class="stat-label">Total Approved $</div></div>`;
+
+  if (!filtered.length) {
+    wrap.innerHTML = `<div class="empty-state"><div class="empty-icon">📋</div><p>No reports found.</p></div>`;
+    return;
+  }
+
+  wrap.innerHTML = `
+    <table class="dash-table">
+      <thead><tr>
+        <th>Submitted</th><th>Name</th><th>Type</th>
+        <th>Event</th><th>Dates</th><th>Total</th><th>Status</th><th>Actions</th>
+      </tr></thead>
+      <tbody>
+        ${filtered.map(r => `
+          <tr>
+            <td style="white-space:nowrap">${formatDate(r.submittedAt)}</td>
+            <td>${escHtml(r.name||'')}</td>
+            <td><span class="tag">${escHtml(r.type||'')}</span></td>
+            <td>${escHtml(r.event||'')}</td>
+            <td style="white-space:nowrap;font-size:12px">${formatDateOnly(r.dateStart)} – ${formatDateOnly(r.dateEnd)}</td>
+            <td style="font-weight:700">${buildTotalCell(r)}</td>
+            <td><span class="badge badge-${(r.status||'').toLowerCase()}">${r.status||''}</span></td>
+            <td>
+              <div class="actions">
+                <button class="btn btn-secondary btn-xs" onclick="openReview('${r.id}')">Review</button>
+                ${(r.status||'').toLowerCase() === 'pending' ? `
+                  <button class="btn btn-xs" style="background:var(--success-bg);color:var(--success);border:1px solid #a5d6a7" onclick="quickApprove('${r.id}')">✓</button>
+                  <button class="btn btn-xs" style="background:var(--error-bg);color:var(--error);border:1px solid #ef9a9a" onclick="quickDeny('${r.id}')">✗</button>
+                ` : ''}
+              </div>
+            </td>
+          </tr>`).join('')}
+      </tbody>
+    </table>
+    <div style="margin-top:12px;padding:10px 14px;background:#f7f5f2;border:1px solid var(--border);border-radius:var(--radius);font-size:11px;color:var(--text-light);display:flex;gap:20px;flex-wrap:wrap;align-items:center">
+      <span style="font-weight:700;color:var(--charcoal);text-transform:uppercase;letter-spacing:0.4px;font-size:10px">Legend</span>
+      <span style="display:flex;align-items:center;gap:5px"><span class="badge badge-pending">Pending</span> Awaiting review</span>
+      <span style="display:flex;align-items:center;gap:5px"><span class="badge badge-approved">Approved</span> Approved at submitted amount</span>
+      <span style="display:flex;align-items:center;gap:5px"><span class="badge badge-denied">Denied</span> Not approved</span>
+      <span style="display:flex;align-items:center;gap:5px"><span class="badge badge-draft">Draft</span> Saved but not submitted</span>
+      <span style="display:flex;align-items:center;gap:5px"><span style="background:#fff9c4;padding:2px 8px;border-radius:3px;border:1px solid #f0c040;font-weight:700;font-size:11px">$0.00</span> Approved at adjusted amount</span>
+    </div>`;
+}
+
+function getChoiceValue(field) {
+  if (!field) return '';
+  if (typeof field === 'string') return field;
+  if (Array.isArray(field)) {
+    const first = field[0]; if (!first) return '';
+    if (typeof first === 'string') return first;
+    return first.Value || first.value || '';
+  }
+  if (typeof field === 'object') return field.Value || field.value || '';
+  return String(field);
+}
+
+function normalizeReport(r) {
+  return {
+    id:             r.Title          || r.id             || '',
+    status:         getChoiceValue(r.field_18) || getChoiceValue(r.Status) || r.status || 'Pending',
+    submittedAt:    r.field_1        || r.SubmittedAt    || r.submittedAt   || '',
+    decidedAt:      r.field_20       || r.DecidedAt      || r.decidedAt     || '',
+    name:           r.field_2        || r.SubmitterName  || r.name          || '',
+    email:          r.field_3        || r.SubmitterEmail || r.email         || '',
+    type:           getChoiceValue(r.field_4) || getChoiceValue(r.SubmitterType) || r.type || '',
+    instructorName: r.field_5        || r.InstructorName || r.instructorName|| '',
+    instructorTier: r.field_6        || r.InstructorTier || r.instructorTier|| '',
+    instructorRate: r.field_7        || r.InstructorRate || r.instructorRate|| 0,
+    event:          r.field_8        || r.EventName      || r.event         || '',
+    destination:    r.field_9        || r.Destination    || r.destination   || '',
+    dateStart:      r.field_10       || r.DateStart      || r.dateStart     || '',
+    dateEnd:        r.field_11       || r.DateEnd        || r.dateEnd       || '',
+    purpose:        r.field_12       || r.Purpose        || r.purpose       || '',
+    perDiemTotal:   r.field_13       || r.PerDiemTotal   || r.perDiemTotal  || 0,
+    expenseTotal:   r.field_14       || r.ExpenseTotal   || r.expenseTotal  || 0,
+    totalHours:     r.field_15       || r.TeachingHours  || r.totalHours    || 0,
+    teachingPay:    r.field_16       || r.TeachingPay    || r.teachingPay   || 0,
+    grandTotal:     r.field_17       || r.GrandTotal     || r.grandTotal    || 0,
+    adminNotes:     r.field_19       || r.AdminNotes     || r.adminNotes    || '',
+    receiptURL:     r.field_21       || r.ReceiptURL     || r.receiptURL    || '',
+    approvedTotal:  r.ApprovedTotal  || r.approvedTotal  || null,
+    personalMeals:  r.PersonalMeals  || r.personalMeals  || null,
+    spItemId:       r.ID             || r.spItemId       || null,
   };
-  reader.readAsDataURL(file);
 }
-function removeReceipt() {
-  receiptBase64 = null; receiptFileName = null;
-  document.getElementById('receipt-preview').style.display = 'none';
-  document.getElementById('receipt-drop-zone').style.display = 'block';
-  document.getElementById('receipt-file-input').value = '';
+
+function formatDate(iso) {
+  if (!iso) return '—';
+  try { const d = new Date(iso); if (isNaN(d)) return iso; return d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}); }
+  catch { return iso; }
 }
-function previewReceipt() {
-  if (!receiptBase64) return;
-  const bin = atob(receiptBase64); const arr = new Uint8Array(bin.length);
+function formatDateOnly(iso) {
+  if (!iso) return '—';
+  try {
+    const d = new Date(iso); if (isNaN(d)) return iso;
+    const local = new Date(d.getTime() + d.getTimezoneOffset() * 60000);
+    return local.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+  } catch { return iso; }
+}
+
+async function quickApprove(id) {
+  try { await callFlow('update', { reportId: id, status: 'Approved', adminNotes: '', decidedAt: new Date().toISOString() }); renderDashboard(); }
+  catch { alert('Could not update report. Please try again.'); }
+}
+async function quickDeny(id) {
+  try { await callFlow('update', { reportId: id, status: 'Denied', adminNotes: '', decidedAt: new Date().toISOString() }); renderDashboard(); }
+  catch { alert('Could not update report. Please try again.'); }
+}
+
+// ═══════════════════════════════════════════════════════
+//  REVIEW MODAL
+// ═══════════════════════════════════════════════════════
+function openPDFViewer(b64, name) {
+  const bin = atob(b64); const arr = new Uint8Array(bin.length);
   for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
   const blob = new Blob([arr], { type: 'application/pdf' });
   const url  = URL.createObjectURL(blob);
   const win  = window.open('', '_blank');
-  win.document.write(`<html><head><title>${receiptFileName||'Receipt'}</title></head><body style="margin:0"><iframe src="${url}" width="100%" height="100%" style="border:none;position:fixed;inset:0"></iframe></body></html>`);
+  win.document.write(`<html><head><title>${name||'Receipt'}</title></head><body style="margin:0"><iframe src="${url}" width="100%" height="100%" style="border:none;position:fixed;inset:0"></iframe></body></html>`);
 }
 
-// ═══════════════════════════════════════════════════════
-//  VALIDATION & SUBMISSION
-// ═══════════════════════════════════════════════════════
-function validateForm() {
-  const name  = document.getElementById('f-name')?.value?.trim();
-  const email = document.getElementById('f-email')?.value?.trim();
-  const event = document.getElementById('f-event')?.value?.trim();
-  const dest  = document.getElementById('f-destination')?.value?.trim();
-  const ds    = document.getElementById('f-date-start')?.value;
-  const de    = document.getElementById('f-date-end')?.value;
-  if (!name)  return 'Please enter your full name.';
-  if (!email) return 'Please enter your email address.';
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return 'Please enter a valid email address.';
-  if (!event) return 'Please enter the event or program name.';
-  if (!dest)  return 'Please enter the destination.';
-  if (!ds || !de) return 'Please enter your departure and return dates.';
-  if (ds > de) return 'Return date must be after departure date.';
-  return null;
-}
-
-async function submitReport() {
-  clearTopAlert();
-  const err = validateForm();
-  if (err) { showTopAlert(err); window.scrollTo({ top: 0, behavior: 'smooth' }); return; }
-
-  // Collect per diem days
-  const perDiemDays = [];
-  document.querySelectorAll('.perdiem-day').forEach(row => {
-    perDiemDays.push({
-      date:        row.querySelector('.pd-date')?.value || '',
-      type:        row.querySelector('.pd-type')?.value || 'full',
-      allowance:   parseFloat(row.querySelector('.pd-allowance')?.value) || 0,
-      actualSpent: parseFloat(row.querySelector('.pd-actual')?.value) || 0,
-      groupBfast:  parseInt(row.querySelector('.pd-bfast')?.value) || 0,
-      groupLunch:  parseInt(row.querySelector('.pd-lunch')?.value) || 0,
-      groupDinner: parseInt(row.querySelector('.pd-dinner')?.value) || 0,
-    });
-  });
-
-  // Collect expense lines
-  const expenseLines = [];
-  document.querySelectorAll('.expense-entry').forEach(row => {
-    const cat = row.querySelector('.el-cat')?.value;
-    if (!cat) return;
-    const isMileage = cat === 'Mileage';
-    expenseLines.push({
-      category:     cat,
-      description:  row.querySelector('.el-desc')?.value || '',
-      amount:       parseFloat(row.querySelector('.el-amt')?.value) || 0,
-      miles:        isMileage ? (parseFloat(row.querySelector('.el-miles')?.value) || 0) : 0,
-      reimbursable: true,
-    });
-  });
-
-  const perDiemTotal  = perDiemDays.reduce((s,d) => s + d.actualSpent, 0);
-  const expenseTotal  = expenseLines.reduce((s,e) => s + e.amount, 0);
-  const grandTotal    = perDiemTotal + expenseTotal;
-
-  const report = {
-    id:           'EXP-' + Date.now(),
-    status:       'Pending',
-    submittedAt:  new Date().toISOString(),
-    name:         document.getElementById('f-name').value.trim(),
-    email:        document.getElementById('f-email').value.trim(),
-    type:         'volunteer',
-    event:        document.getElementById('f-event').value.trim(),
-    destination:  document.getElementById('f-destination').value.trim(),
-    dateStart:    document.getElementById('f-date-start').value,
-    dateEnd:      document.getElementById('f-date-end').value,
-    purpose:      document.getElementById('f-purpose').value.trim(),
-    perDiemDays, expenseLines,
-    perDiemTotal, expenseTotal, grandTotal,
-    teachingDays: [], totalHours: 0, teachingPay: 0,
-    receiptBase64:   receiptBase64 || null,
-    receiptFileName: receiptFileName || null,
-    personalMeals: 0, totalAmex: 0, reimbursementTotal: grandTotal,
-  };
-
-  // Show loading
-  document.getElementById('main-view').style.display = 'none';
-  document.getElementById('loading-screen').style.display = 'block';
-
+async function openReview(id) {
+  currentReviewId = id;
+  const body = document.getElementById('review-modal-body');
+  body.innerHTML = `<div style="text-align:center;padding:32px;color:var(--text-light)">⏳ Loading report detail…</div>`;
+  document.getElementById('review-modal').classList.add('open');
   try {
-    const res = await fetch(SUBMIT_ENDPOINT, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(report)
-    });
-    if (!res.ok) throw new Error('Server error ' + res.status);
-    showSuccessScreen(report.id);
+    const data = await callFlow('getDetail', { reportId: id });
+    const r    = normalizeReport(data.report || data);
+    const expenseLines  = data.expenseLines  || [];
+    const perDiemDays   = data.perDiemDays   || [];
+    const teachingHours = data.teachingHours || [];
+
+    const isStaffReport = (r.type||'').toLowerCase() === 'staff';
+
+    const lineHeaderPerdiem = `
+      <div style="display:grid;grid-template-columns:1fr 90px 90px 90px;gap:8px;padding:4px 8px;font-size:10px;font-weight:700;color:var(--text-light);text-transform:uppercase;letter-spacing:0.4px;margin-top:4px">
+        <span>Item</span><span style="text-align:right">Cap</span><span style="text-align:right">Claimed</span><span style="text-align:right">Approved</span>
+      </div>`;
+    const expColLabel = isStaffReport ? 'Approved / Reimb.' : 'Reimbursement Amt';
+    const lineHeader = '<div style="display:grid;grid-template-columns:1fr 90px 90px;gap:8px;padding:4px 8px;font-size:10px;font-weight:700;color:var(--text-light);text-transform:uppercase;letter-spacing:0.4px;margin-top:4px">'
+      + '<span>Item' + (isStaffReport ? ' &nbsp;<span style="font-size:9px;font-weight:400">(green=personal · blue=amex)</span>' : '') + '</span>'
+      + '<span style="text-align:right">Submitted</span>'
+      + '<span style="text-align:right">' + expColLabel + '</span>'
+      + '</div>';
+
+    const perDiemRows = perDiemDays.map((d, i) => {
+      const dayType   = getChoiceValue(d.field_2||d.DayType||d.type||'');
+      const baseAllow = Number(d.field_3||d.Allowance||d.allowance||0);
+      const actual    = Number(d.ActualSpent||d.actualSpent||d.field_4||d.Claimed||d.claimed||0);
+      const bfast     = Number(d.GroupBreakfast||d.groupBfast||0);
+      const lunch     = Number(d.GroupLunch||d.groupLunch||0);
+      const dinner    = Number(d.GroupDinner||d.groupDinner||0);
+      // Reconstruct adjusted cap from stored base allowance — the base already has group adjustments baked in from the form
+      // (form calculates allowance including group meals before storing)
+      const allowance = baseAllow;
+      const groupParts = [];
+      if (bfast  > 0) groupParts.push(`Breakfast +${bfast}`);
+      if (lunch  > 0) groupParts.push(`Lunch +${lunch}`);
+      if (dinner > 0) groupParts.push(`Dinner +${dinner}`);
+      const groupNote = groupParts.length
+        ? `<span style="font-size:10px;color:var(--blue);margin-left:8px;white-space:nowrap">${groupParts.join(' · ')}</span>` : '';
+      return `<div class="pd-review-row" data-cap="${allowance}" data-claimed="${actual}"
+        style="display:grid;grid-template-columns:1fr 90px 90px 90px;gap:8px;align-items:center;padding:6px 8px;border-bottom:1px solid #f0ece8">
+        <span style="display:flex;align-items:center;flex-wrap:wrap;gap:4px">
+          <span>${formatDateOnly(d.field_1||d.TripDate||d.date||'')} · ${dayType}</span>${groupNote}
+        </span>
+        <span style="text-align:right">$${allowance.toFixed(2)}</span>
+        <span style="text-align:right">$${actual.toFixed(2)}</span>
+        <input type="number" class="admin-line-approved" data-type="perdiem" data-sp-id="${d.ID||d.id||''}" step="0.01" min="0"
+          value="${d.ApprovedAmount != null ? Number(d.ApprovedAmount).toFixed(2) : actual.toFixed(2)}"
+          style="padding:4px 6px;border:1px solid var(--border);border-radius:4px;font-size:12px;text-align:right"
+          oninput="calcApprovedTotal()">
+      </div>`;
+    }).join('');
+
+    const expRows = expenseLines.map((e, i) => {
+      const cat          = getChoiceValue(e.field_1||e.Category||e.category||'');
+      const desc         = e.field_2||e.Description||e.description||'';
+      const miles        = e.field_4||e.Miles||e.miles||0;
+      const amount       = Number(e.field_3||e.Amount||e.amount||0);
+      const isMileage    = cat === 'Mileage';
+      const reimbursable = e.Reimbursable != null ? e.Reimbursable : (isMileage ? true : null);
+      const isPersonal   = reimbursable === true || isMileage;
+      const isAmex       = reimbursable === false && !isMileage;
+      // Default approved: AmEx lines → submitted amount (reviewer adjusts down if needed)
+      //                   Personal lines → submitted amount
+      const savedApproved = e.ApprovedAmount != null ? Number(e.ApprovedAmount) : null;
+      const defaultApproved = savedApproved != null ? savedApproved : amount;
+      const payTag = isStaffReport && !isMileage
+        ? (isPersonal
+            ? '<span style="font-size:10px;background:#e8f5e9;color:#2e7d32;border:1px solid #a5d6a7;border-radius:3px;padding:1px 5px;margin-left:6px;white-space:nowrap">Personal</span>'
+            : isAmex
+              ? '<span style="font-size:10px;background:#e3f2fd;color:#084D78;border:1px solid #90caf9;border-radius:3px;padding:1px 5px;margin-left:6px;white-space:nowrap">AmEx</span>'
+              : '<span style="font-size:10px;background:#f5f5f5;color:#999;border:1px solid #ddd;border-radius:3px;padding:1px 5px;margin-left:6px;white-space:nowrap">?</span>')
+        : '';
+      const reimburseLabel = isStaffReport
+        ? (isAmex ? 'Approved AmEx' : 'Reimbursement Amt')
+        : 'Reimbursement Amt';
+      return '<div style="display:grid;grid-template-columns:1fr 90px 90px;gap:8px;align-items:center;padding:6px 8px;border-bottom:1px solid #f0ece8">'
+        + '<span style="display:flex;align-items:center;flex-wrap:wrap;gap:2px">' + cat + (desc?' · '+desc:'') + (miles?' · '+miles+' mi':'') + payTag + '</span>'
+        + '<span style="text-align:right">$' + amount.toFixed(2) + '</span>'
+        + '<input type="number" class="admin-line-approved" data-type="expense" data-sp-id="' + (e.ID||e.id||'') + '"'
+        + ' data-reimbursable="' + reimbursable + '" data-submitted="' + amount + '" step="0.01" min="0"'
+        + ' value="' + defaultApproved.toFixed(2) + '"'
+        + ' style="padding:4px 6px;border:1px solid var(--border);border-radius:4px;font-size:12px;text-align:right"'
+        + ' oninput="calcApprovedTotal()">'
+        + '</div>';
+    }).join('');
+
+    const teachRows = teachingHours.map((d, i) => {
+      const hrs = Number(d.field_3||d.Hours||d.hours||0);
+      const pay = Number(d.field_5||d.Pay||d.pay||0);
+      return `<div style="display:grid;grid-template-columns:1fr 90px 90px;gap:8px;align-items:center;padding:6px 8px;border-bottom:1px solid #f0ece8">
+        <span>${formatDateOnly(d.field_1||d.TripDate||d.date||'')} · ${d.field_2||d.ProgramName||d.program||'—'} · ${hrs} hrs</span>
+        <span style="text-align:right">$${pay.toFixed(2)}</span>
+        <input type="number" class="admin-line-approved" data-type="teaching" data-sp-id="${d.ID||d.id||''}" step="0.01" min="0"
+          value="${d.ApprovedAmount != null ? Number(d.ApprovedAmount).toFixed(2) : pay.toFixed(2)}"
+          style="padding:4px 6px;border:1px solid var(--border);border-radius:4px;font-size:12px;text-align:right"
+          oninput="calcApprovedTotal()">
+      </div>`;
+    }).join('');
+
+    const staffBreakdownHtml = '<div style="border-top:1px solid #ddd;padding-top:10px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">'
+      + '<div><div style="font-size:10px;color:var(--text-light);text-transform:uppercase;font-weight:600;letter-spacing:0.4px;margin-bottom:2px">Total Approved Meals</div>'
+      + '<div style="font-size:14px;font-weight:700;color:var(--charcoal)" id="modal-pd-total">$' + Number(r.perDiemTotal||0).toFixed(2) + '</div></div>'
+      + '<div><div style="font-size:10px;color:var(--text-light);text-transform:uppercase;font-weight:600;letter-spacing:0.4px;margin-bottom:2px">Total Charged to AmEx</div>'
+      + '<div style="font-size:14px;font-weight:700;color:var(--blue)" id="modal-amex-total">—</div></div>'
+      + '<div><div style="font-size:10px;color:var(--text-light);text-transform:uppercase;font-weight:600;letter-spacing:0.4px;margin-bottom:2px">Net to Submitter</div>'
+      + '<div style="font-size:14px;font-weight:700;color:var(--burgundy)" id="modal-reimburse-total">—</div></div>'
+      + '</div>';
+
+    const personalMealsVal = r.personalMeals != null ? Number(r.personalMeals).toFixed(2) : '0.00';
+    const staffMealsHtml = '<div class="review-section-title">Meal Reimbursement</div>'
+      + '<div style="display:grid;grid-template-columns:1fr 200px;gap:8px;align-items:center;padding:8px;background:#f7f5f2;border-radius:var(--radius);margin-bottom:8px">'
+      + '<span style="font-size:12px;color:var(--charcoal)">Meals paid for in cash or with a personal credit card to be included in the requested reimbursement</span>'
+      + '<div style="display:flex;align-items:center;gap:6px"><span style="font-size:13px;font-weight:600;color:var(--text-light)">$</span>'
+      + '<input type="number" id="modal-personal-meals-input" step="0.01" min="0" placeholder="0.00" value="' + personalMealsVal + '"'
+      + ' style="padding:6px 8px;border:1px solid var(--border);border-radius:var(--radius);font-size:13px;font-family:inherit;width:120px"'
+      + ' oninput="calcApprovedTotal()"></div></div>';
+
+    body.innerHTML = `
+      <span class="badge badge-${(r.status||'').toLowerCase()}" style="margin-bottom:12px;display:inline-block">${r.status}</span>
+      <div class="review-detail">
+        <div class="review-item"><div class="rlabel">Name</div><div class="rvalue">${escHtml(r.name)}</div></div>
+        <div class="review-item"><div class="rlabel">Email</div><div class="rvalue">${escHtml(r.email)}</div></div>
+        <div class="review-item"><div class="rlabel">Type</div><div class="rvalue">${escHtml(r.type)}</div></div>
+        <div class="review-item"><div class="rlabel">Submitted</div><div class="rvalue">${formatDate(r.submittedAt)}</div></div>
+        <div class="review-item"><div class="rlabel">Event</div><div class="rvalue">${escHtml(r.event)}</div></div>
+        <div class="review-item"><div class="rlabel">Destination</div><div class="rvalue">${escHtml(r.destination)}</div></div>
+        <div class="review-item"><div class="rlabel">Travel Dates</div><div class="rvalue">${formatDateOnly(r.dateStart)} – ${formatDateOnly(r.dateEnd)}</div></div>
+        <div class="review-item"><div class="rlabel">Decided</div><div class="rvalue">${r.decidedAt ? formatDate(r.decidedAt) : '—'}</div></div>
+        ${r.purpose ? `<div class="review-item" style="grid-column:1/-1"><div class="rlabel">Purpose</div><div class="rvalue">${escHtml(r.purpose)}</div></div>` : ''}
+      </div>
+
+      ${perDiemDays.length ? `<div class="review-section-title">Meal Per Diem</div>${lineHeaderPerdiem}${perDiemRows}
+        <div id="perdiem-subtotal" style="display:grid;grid-template-columns:1fr 90px 90px 90px;gap:8px;align-items:center;padding:8px 8px;background:#f7f5f2;border-top:2px solid var(--border);font-weight:700;font-size:12px">
+          <span style="color:var(--text-light);text-transform:uppercase;font-size:10px;letter-spacing:0.4px">Per Diem Totals</span>
+          <span id="pd-sub-cap" style="text-align:right"></span>
+          <span id="pd-sub-claimed" style="text-align:right"></span>
+          <span id="pd-sub-approved" style="text-align:right;color:var(--burgundy)"></span>
+        </div>` : ''}
+      ${isStaffReport ? staffMealsHtml : ''}
+      ${expenseLines.length ? `<div class="review-section-title">Expenses</div>${lineHeader}${expRows}` : ''}
+      ${r.type === 'instructor' && teachingHours.length ? `<div class="review-section-title">Teaching Hours — ${r.totalHours} hrs @ $${Number(r.instructorRate).toFixed(2)}/hr</div>${lineHeader}${teachRows}` : ''}
+
+      <div style="margin-top:14px;padding:12px;background:#f5f5f5;border-radius:var(--radius)">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:${isStaffReport ? '10px' : '0'}">
+          <div>
+            <div style="font-size:11px;color:var(--text-light);text-transform:uppercase;font-weight:600;letter-spacing:0.4px;margin-bottom:2px">${isStaffReport ? 'Total Expenses' : 'Submitted Total'}</div>
+            <div style="font-size:18px;font-weight:700;color:var(--charcoal)">$${Number(r.grandTotal).toFixed(2)}</div>
+          </div>
+          <div>
+            <div style="font-size:11px;color:var(--text-light);text-transform:uppercase;font-weight:600;letter-spacing:0.4px;margin-bottom:2px">${isStaffReport ? 'Total Approved Expenses' : 'Approved Total'}</div>
+            <div style="font-size:18px;font-weight:700;color:var(--success)" id="modal-approved-total">$${r.approvedTotal != null ? Number(r.approvedTotal).toFixed(2) : Number(r.grandTotal).toFixed(2)}</div>
+          </div>
+        </div>
+        ${isStaffReport ? staffBreakdownHtml : ''}
+      </div>
+
+      ${r.receiptURL
+        ? `<div class="review-section-title">Receipts</div>
+           <div class="flex-row mt-8">
+             <span style="font-size:13px">📄 Receipt PDF</span>
+             <a href="${buildSharePointViewerUrl(r.receiptURL)}" target="_blank" class="btn btn-secondary btn-sm">View in SharePoint</a>
+           </div>`
+        : '<div class="alert alert-warn mt-8">⚠ No receipt PDF attached.</div>'}
+
+      <div class="review-section-title">Admin Notes</div>
+      <textarea id="review-admin-notes" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:var(--radius);font-family:inherit;font-size:13px;min-height:64px;margin-top:4px" placeholder="Internal notes (optional)…">${escHtml(r.adminNotes)}</textarea>`;
+    // Initialize subtotals
+    setTimeout(calcApprovedTotal, 50);
   } catch(e) {
-    document.getElementById('loading-screen').style.display = 'none';
-    document.getElementById('main-view').style.display = 'block';
-    showTopAlert('There was a problem submitting your report. Please try again or contact your CLEAR staff liaison.');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    console.error('openReview error:', e);
+    body.innerHTML = `<div class="alert alert-error">Could not load report details. Please try again. Error: ${e.message}</div>`;
   }
 }
 
-function showSuccessScreen(reportId) {
-  document.getElementById('loading-screen').style.display = 'none';
-  document.getElementById('main-view').style.display = 'none';
-  const body = document.querySelector('body');
-  const div = document.createElement('div');
-  div.style.cssText = 'max-width:600px;margin:80px auto;text-align:center;padding:40px 20px';
-  div.innerHTML = `
-    <div style="font-size:48px;margin-bottom:16px">✅</div>
-    <h2 style="color:var(--burgundy);font-family:'Trebuchet MS',sans-serif;margin-bottom:12px">Report Submitted</h2>
-    <p style="color:var(--charcoal);font-size:15px;margin-bottom:8px">Your expense report has been submitted successfully.</p>
-    <p style="color:var(--text-light);font-size:13px;margin-bottom:24px">You will be notified once your report has been reviewed. If you have questions, contact your CLEAR staff liaison.</p>
-    <p style="font-size:12px;color:var(--text-light)">Report ID: <strong>${reportId}</strong></p>
-    <p style="font-size:12px;color:var(--text-light);margin-top:8px">To submit another report, please refresh this page.</p>`;
-  body.appendChild(div);
+function calcApprovedTotal() {
+  let total = 0;
+  let pdCap = 0, pdClaimed = 0, pdApproved = 0;
+  let expenseAmex = 0, expensePersonal = 0;
+
+  // Read cap and claimed from data attributes on each row (accurate, not from rendered text)
+  document.querySelectorAll('.pd-review-row').forEach(row => {
+    pdCap     += parseFloat(row.dataset.cap)     || 0;
+    pdClaimed += parseFloat(row.dataset.claimed) || 0;
+  });
+
+  // Sum approved inputs
+  document.querySelectorAll('.admin-line-approved').forEach(input => {
+    const val = parseFloat(input.value) || 0;
+    total += val;
+    if (input.dataset.type === 'perdiem') pdApproved += val;
+    if (input.dataset.type === 'expense') {
+      const reimb = input.dataset.reimbursable;
+      if (reimb === 'true') expensePersonal += val;
+      else if (reimb === 'false') expenseAmex += val;
+      else expensePersonal += val; // unknown = treat as personal (mileage etc)
+    }
+  });
+
+  // Staff AmEx/personal breakdown
+  const personalMeals = parseFloat(document.getElementById('modal-personal-meals-input')?.value) || 0;
+
+  // Per diem: approved total split between AmEx and personal
+  const pdPersonal = personalMeals;
+  const pdAmex     = Math.max(0, pdApproved - pdPersonal);
+
+  // Expenses: separate AmEx approved vs submitted (overage = submitter owes back)
+  // and personal reimbursement amounts
+  let expAmexApproved  = 0;
+  let expAmexSubmitted = 0;
+  let expPersonalReimb = 0;
+  document.querySelectorAll('.admin-line-approved').forEach(input => {
+    if (input.dataset.type !== 'expense') return;
+    const val       = parseFloat(input.value) || 0;
+    const submitted = parseFloat(input.dataset.submitted) || 0;
+    const reimb     = input.dataset.reimbursable;
+    const isMileageRow = input.dataset.reimbursable === 'true' && submitted > 0; // rough check
+    if (reimb === 'false') {
+      // AmEx line
+      expAmexApproved  += val;
+      expAmexSubmitted += submitted;
+    } else {
+      // Personal or mileage
+      expPersonalReimb += val;
+    }
+  });
+
+  const expAmexOverage   = Math.max(0, expAmexSubmitted - expAmexApproved); // submitter owes back
+  const totalPersonalOwed = pdPersonal + expPersonalReimb;  // CLEAR owes submitter
+  const netToSubmitter    = totalPersonalOwed - expAmexOverage; // negative = submitter owes CLEAR
+  const totalAmex         = pdAmex + expAmexApproved;
+
+  const amexEl      = document.getElementById('modal-amex-total');
+  const reimburseEl = document.getElementById('modal-reimburse-total');
+  if (amexEl)      amexEl.textContent = '$' + totalAmex.toFixed(2);
+  if (reimburseEl) {
+    reimburseEl.textContent = (netToSubmitter < 0 ? '-$' : '$') + Math.abs(netToSubmitter).toFixed(2);
+    reimburseEl.style.color = netToSubmitter < 0 ? 'var(--error)' : 'var(--burgundy)';
+    reimburseEl.title = netToSubmitter < 0
+      ? 'Submitter owes CLEAR $' + Math.abs(netToSubmitter).toFixed(2)
+      : '';
+  }
+
+  // Color coding: red if over cap, green if at or under
+  const claimedOver  = pdClaimed  > pdCap + 0.01;
+  const approvedOver = pdApproved > pdCap + 0.01;
+  const greenStyle = 'color:var(--success);font-weight:700';
+  const redStyle   = 'color:var(--error);font-weight:700';
+
+  const subCap      = document.getElementById('pd-sub-cap');
+  const subClaimed  = document.getElementById('pd-sub-claimed');
+  const subApproved = document.getElementById('pd-sub-approved');
+  if (subCap)      { subCap.textContent = `$${pdCap.toFixed(2)}`; subCap.style = 'text-align:right;font-weight:700'; }
+  if (subClaimed)  { subClaimed.textContent  = `$${pdClaimed.toFixed(2)}`;  subClaimed.setAttribute('style',  `text-align:right;${claimedOver  ? redStyle : greenStyle}`); }
+  if (subApproved) {
+    subApproved.textContent = `$${pdApproved.toFixed(2)}`;
+    subApproved.setAttribute('style', `text-align:right;${approvedOver ? redStyle : greenStyle}`);
+    subApproved.title = approvedOver ? `Exceeds trip cap of $${pdCap.toFixed(2)}` : '';
+  }
+
+  const el = document.getElementById('modal-approved-total');
+  if (el) el.textContent = `$${total.toFixed(2)}`;
 }
 
-function showTopAlert(msg) {
-  const el = document.getElementById('submit-alert-top');
-  el.textContent = msg; el.style.display = 'flex';
-}
-function clearTopAlert() {
-  const el = document.getElementById('submit-alert-top');
-  if (el) el.style.display = 'none';
+async function decideReport(decision) {
+  if (!currentReviewId) return;
+  const notes = document.getElementById('review-admin-notes')?.value || '';
+  const decidedAt = new Date().toISOString();
+  let approvedTotal = 0;
+  const perDiemApproved = [];
+  const expenseLinesApproved = [];
+  const teachingApproved = [];
+
+  document.querySelectorAll('.admin-line-approved').forEach(input => {
+    const val  = parseFloat(input.value) || 0;
+    const spId = parseInt(input.dataset.spId) || 0;
+    approvedTotal += val;
+    if (input.dataset.type === 'perdiem')  perDiemApproved.push({ id: spId, approvedAmount: val });
+    if (input.dataset.type === 'expense')  expenseLinesApproved.push({ id: spId, approvedAmount: val });
+    if (input.dataset.type === 'teaching') teachingApproved.push({ id: spId, approvedAmount: val });
+  });
+
+  try {
+    const personalMealsVal = parseFloat(document.getElementById('modal-personal-meals-input')?.value) || 0;
+    await callFlow('update', {
+      reportId: currentReviewId,
+      status: decision,
+      adminNotes: notes,
+      decidedAt,
+      approvedTotal: approvedTotal.toFixed(2),
+      personalMeals: personalMealsVal,
+      perDiemApproved,
+      expenseLinesApproved,
+      teachingApproved,
+    });
+    closeModal(); renderDashboard();
+  } catch(e) {
+    console.error('Decision error:', e);
+    closeModal();
+    renderDashboard();
+  }
 }
 
-// Guaranteed expense row fallback
-function ensureExpenseRowVisible() {
-  const list = document.getElementById('expense-lines-list');
-  if (!list) return;
-  if (list.querySelectorAll('.expense-entry').length === 0) addExpenseLine();
+function closeModal() {
+  document.getElementById('review-modal').classList.remove('open');
+  currentReviewId = null;
 }
-document.addEventListener('DOMContentLoaded', () => { setTimeout(ensureExpenseRowVisible, 800); });
+document.getElementById('review-modal').addEventListener('click', e => {
+  if (e.target === document.getElementById('review-modal')) closeModal();
+});
+
+// ═══════════════════════════════════════════════════════
+//  SETTINGS
+// ═══════════════════════════════════════════════════════
+function renderSettings() {
+  const fields = ['cfg-perdiem','cfg-travel-pct','cfg-mileage','cfg-tier1','cfg-tier2'];
+  const cfgKeys = ['perdiem','travelPct','mileage','tier1','tier2'];
+  fields.forEach((f,i) => {
+    const el = document.getElementById(f);
+    if (el) el.value = cfg[cfgKeys[i]] || '';
+  });
+  renderStaffList();
+  renderInstructorList();
+}
+
+async function saveRates() {
+  cfg.perdiem   = parseFloat(document.getElementById('cfg-perdiem').value)    || 75;
+  cfg.travelPct = parseFloat(document.getElementById('cfg-travel-pct').value) || 75;
+  cfg.mileage   = parseFloat(document.getElementById('cfg-mileage').value)    || 0.670;
+  cfg.tier1     = parseFloat(document.getElementById('cfg-tier1').value)      || 0;
+  cfg.tier2     = parseFloat(document.getElementById('cfg-tier2').value)      || 0;
+  await kvSet('expense_cfg', JSON.stringify(cfg));
+  const msg = document.getElementById('rates-save-msg');
+  msg.style.display = 'flex'; setTimeout(() => msg.style.display = 'none', 3000);
+}
+
+function renderStaffList() {
+  const list = document.getElementById('staff-list'); if (!list) return;
+  list.innerHTML = '';
+  staff.forEach((s, idx) => {
+    const div = document.createElement('div');
+    div.style.cssText = 'display:grid;grid-template-columns:1fr 1fr 32px;gap:8px;align-items:center;padding:6px 10px;background:#fdfcfb;border:1px solid var(--border);border-radius:var(--radius);margin-bottom:6px';
+    div.innerHTML = `
+      <input type="text"  value="${escHtml(s.name)}"  placeholder="Full name"         onchange="staff[${idx}].name=this.value"  style="padding:6px 8px;border:1px solid var(--border);border-radius:4px;font-size:12px;font-family:inherit;width:100%">
+      <input type="email" value="${escHtml(s.email)}" placeholder="email@example.com" onchange="staff[${idx}].email=this.value" style="padding:6px 8px;border:1px solid var(--border);border-radius:4px;font-size:12px;font-family:inherit;width:100%">
+      <button class="remove-btn" onclick="removeStaff(${idx})">×</button>`;
+    list.appendChild(div);
+  });
+}
+function addStaff() { staff.push({ name:'', email:'' }); renderStaffList(); }
+function removeStaff(idx) { staff.splice(idx, 1); renderStaffList(); }
+async function saveStaff() {
+  await kvSet('expense_staff', JSON.stringify(staff));
+  const msg = document.getElementById('staff-save-msg');
+  msg.style.display = 'flex'; setTimeout(() => msg.style.display = 'none', 3000);
+}
+function importStaffCSV(e) {
+  const file = e.target.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const lines = ev.target.result.split('\n').map(l => l.trim()).filter(Boolean);
+    const startIdx = lines[0].toLowerCase().includes('name') ? 1 : 0;
+    let added = 0;
+    for (let i = startIdx; i < lines.length; i++) {
+      const parts = lines[i].split(',').map(p => p.trim().replace(/^"|"$/g,''));
+      if (parts.length >= 2) { staff.push({ name: parts[0], email: parts[1] }); added++; }
+    }
+    renderStaffList();
+    alert(`Imported ${added} staff member(s). Click "Save Roster" to persist.`);
+  };
+  reader.readAsText(file); e.target.value = '';
+}
+
+function renderInstructorList() {
+  const list = document.getElementById('instructor-list'); if (!list) return;
+  list.innerHTML = '';
+  instructors.forEach((instr, idx) => {
+    const div = document.createElement('div');
+    div.className = 'instructor-row';
+    div.innerHTML = `
+      <input type="text"  value="${escHtml(instr.name)}"  placeholder="Full name"          onchange="instructors[${idx}].name=this.value">
+      <input type="email" value="${escHtml(instr.email)}" placeholder="email@example.com"  onchange="instructors[${idx}].email=this.value">
+      <select onchange="instructors[${idx}].tier=this.value">
+        <option value="1" ${instr.tier==='1'?'selected':''}>Tier 1</option>
+        <option value="2" ${instr.tier==='2'?'selected':''}>Tier 2</option>
+      </select>
+      <button class="remove-btn" onclick="removeInstructor(${idx})">×</button>`;
+    list.appendChild(div);
+  });
+}
+function addInstructor() { instructors.push({ name:'', email:'', tier:'1' }); renderInstructorList(); }
+function removeInstructor(idx) { instructors.splice(idx, 1); renderInstructorList(); }
+async function saveInstructors() {
+  await kvSet('expense_instructors', JSON.stringify(instructors));
+  const msg = document.getElementById('instructors-save-msg');
+  msg.style.display = 'flex'; setTimeout(() => msg.style.display = 'none', 3000);
+}
+function importInstructorCSV(e) {
+  const file = e.target.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const lines = ev.target.result.split('\n').map(l => l.trim()).filter(Boolean);
+    const startIdx = lines[0].toLowerCase().includes('name') ? 1 : 0;
+    let added = 0;
+    for (let i = startIdx; i < lines.length; i++) {
+      const parts = lines[i].split(',').map(p => p.trim().replace(/^"|"$/g,''));
+      if (parts.length >= 2) {
+        const tier = parts[2] ? (parts[2].includes('2') ? '2' : '1') : '1';
+        instructors.push({ name: parts[0], email: parts[1], tier }); added++;
+      }
+    }
+    renderInstructorList();
+    alert(`Imported ${added} instructor(s). Click "Save Roster" to persist.`);
+  };
+  reader.readAsText(file); e.target.value = '';
+}
+
+// ═══════════════════════════════════════════════════════
+//  UTILITIES
+// ═══════════════════════════════════════════════════════
+function buildTotalCell(r) {
+  const submitted = (r.grandTotal||0).toFixed(2);
+  const approved  = r.approvedTotal != null ? Number(r.approvedTotal).toFixed(2) : null;
+  if (approved != null && approved !== submitted) {
+    return `<span style="font-weight:700;background:#fff9c4;padding:2px 6px;border-radius:3px;border:1px solid #f0c040">$${approved}</span>`;
+  }
+  return `<span style="font-weight:700">$${submitted}</span>`;
+}
+
+function buildSharePointViewerUrl(storedUrl) {
+  if (!storedUrl) return '#';
+  // The stored URL may be missing /sites/CLEARStaff — normalize it
+  // Pattern: https://clearorg.sharepoint.com/Shared Documents/...
+  // Should be: https://clearorg.sharepoint.com/sites/CLEARStaff/Shared Documents/...
+  let filePath;
+  if (storedUrl.includes('/sites/CLEARStaff/')) {
+    // Already correct — extract server-relative path
+    filePath = storedUrl.replace('https://clearorg.sharepoint.com', '');
+  } else if (storedUrl.startsWith('https://clearorg.sharepoint.com/Shared')) {
+    // Missing /sites/CLEARStaff — insert it
+    filePath = storedUrl.replace('https://clearorg.sharepoint.com/', '/sites/CLEARStaff/');
+  } else if (storedUrl.startsWith('/sites/')) {
+    filePath = storedUrl;
+  } else if (storedUrl.startsWith('/Shared')) {
+    filePath = '/sites/CLEARStaff' + storedUrl;
+  } else {
+    // Fallback — just open whatever URL we have
+    return storedUrl;
+  }
+  const encodedPath = encodeURIComponent(filePath);
+  const lastSlash = filePath.lastIndexOf('/');
+  const parentPath = filePath.substring(0, lastSlash);
+  const encodedParent = encodeURIComponent(parentPath);
+  return `https://clearorg.sharepoint.com/sites/CLEARStaff/Shared%20Documents/Forms/AllItems.aspx?id=${encodedPath}&parent=${encodedParent}`;
+}
+
+function escHtml(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function exportToExcel() {
+  if (!reports || reports.length === 0) {
+    alert('No reports loaded to export. Load the dashboard first.');
+    return;
+  }
+
+  const headers = [
+    'Report ID', 'Status', 'Submitted', 'Decided',
+    'Name', 'Email', 'Type',
+    'Instructor Name', 'Instructor Tier', 'Hourly Rate',
+    'Event', 'Destination', 'Date Start', 'Date End', 'Purpose',
+    'Per Diem Total', 'Expense Total', 'Teaching Hours', 'Teaching Pay',
+    'Submitted Total', 'Approved Total',
+    'Receipt Attached', 'Admin Notes'
+  ];
+
+  const rows = reports.map(r => [
+    r.id,
+    r.status,
+    r.submittedAt ? new Date(r.submittedAt).toLocaleDateString('en-US') : '',
+    r.decidedAt   ? new Date(r.decidedAt).toLocaleDateString('en-US')   : '',
+    r.name,
+    r.email,
+    r.type,
+    r.instructorName || '',
+    r.instructorTier || '',
+    r.instructorRate  || '',
+    r.event,
+    r.destination,
+    r.dateStart ? formatDateOnly(r.dateStart) : '',
+    r.dateEnd   ? formatDateOnly(r.dateEnd)   : '',
+    r.purpose   || '',
+    Number(r.perDiemTotal  || 0).toFixed(2),
+    Number(r.expenseTotal  || 0).toFixed(2),
+    Number(r.totalHours    || 0),
+    Number(r.teachingPay   || 0).toFixed(2),
+    Number(r.grandTotal    || 0).toFixed(2),
+    r.approvedTotal != null ? Number(r.approvedTotal).toFixed(2) : Number(r.grandTotal || 0).toFixed(2),
+    r.receiptURL ? 'Yes' : 'No',
+    r.adminNotes || '',
+  ]);
+
+  const csv = [headers, ...rows]
+    .map(row => row.map(v => `"${String(v).replace(/"/g, '""')}"`).join(','))
+    .join('\r\n');
+
+  const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = `CLEAR_Expense_Reports_${new Date().toISOString().slice(0,10)}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
 </script>
 </body>
 </html>
