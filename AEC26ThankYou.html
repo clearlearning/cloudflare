@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Thank You - CLEAR</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --burgundy: #64092C;
+    --gold: #DDA838;
+    --charcoal: #484848;
+    --blue: #084D78;
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    font-family: 'Montserrat', 'Open Sans', Arial, sans-serif;
+    background-color: #f5f3f1;
+    color: var(--charcoal);
+    line-height: 1.6;
+  }
+
+  .page-wrap {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 40px 20px 60px;
+  }
+
+  .header-bar {
+    height: 8px;
+    background: linear-gradient(90deg, var(--burgundy) 0%, var(--burgundy) 70%, var(--gold) 70%, var(--gold) 100%);
+    margin-bottom: 40px;
+    border-radius: 4px;
+  }
+
+  .thank-you-box {
+    background: #ffffff;
+    border-left: 6px solid var(--burgundy);
+    border-radius: 6px;
+    padding: 32px 36px;
+    margin-bottom: 48px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+    display: flex;
+    align-items: center;
+    gap: 28px;
+  }
+
+  .thank-you-box .logo-wrap {
+    flex-shrink: 0;
+  }
+
+  .thank-you-box .logo-wrap img {
+    width: 100px;
+    height: auto;
+    display: block;
+  }
+
+  .thank-you-box .text-wrap h1 {
+    font-family: 'Montserrat', 'Open Sans', sans-serif;
+    color: var(--burgundy);
+    font-size: 26px;
+    margin-bottom: 14px;
+  }
+
+  .thank-you-box .text-wrap p {
+    font-size: 16px;
+    color: var(--charcoal);
+  }
+
+  @media (max-width: 560px) {
+    .thank-you-box {
+      flex-direction: column;
+      text-align: center;
+    }
+  }
+
+  .section-heading {
+    text-align: center;
+    margin-bottom: 6px;
+  }
+
+  .section-heading h2 {
+    font-family: 'Montserrat', 'Open Sans', sans-serif;
+    color: var(--burgundy);
+    font-size: 22px;
+    letter-spacing: 0.3px;
+  }
+
+  .section-heading .divider {
+    width: 60px;
+    height: 3px;
+    background-color: var(--gold);
+    margin: 10px auto 40px;
+    border-radius: 2px;
+  }
+
+  .events-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 28px;
+  }
+
+  @media (max-width: 640px) {
+    .events-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .event-card {
+    background: #ffffff;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    border: 0px solid #e4e0dc;
+    border-top: 5px solid var(--burgundy);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .event-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+  }
+
+  .event-card a.image-link {
+    display: block;
+    padding: 15px;
+  }
+
+  .event-card img {
+    width: 100%;
+    height: 160px;
+    object-fit: contain;
+    display: block;
+    background-color: #ffffff;
+  }
+
+  .event-card .event-info {
+    padding: 18px 20px 22px;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+  }
+
+  .event-card .event-info h3 {
+    font-family: 'Montserrat', 'Open Sans', sans-serif;
+    color: var(--burgundy);
+    font-size: 17px;
+    margin-bottom: 8px;
+  }
+
+  .event-card .event-info p.event-details {
+    font-size: 14px;
+    color: var(--charcoal);
+    margin-bottom: 14px;
+  }
+
+  .register-btn {
+    display: inline-block;
+    background-color: var(--burgundy);
+    color: #ffffff !important;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 600;
+    padding: 9px 18px;
+    border-radius: 4px;
+    transition: background-color 0.15s ease;
+    margin-top: auto;
+    align-self: flex-start;
+  }
+
+  .register-btn:hover {
+    background-color: var(--blue);
+  }
+
+  footer {
+    text-align: center;
+    margin-top: 60px;
+    font-size: 13px;
+    color: #8a8a8a;
+  }
+
+  footer .footer-divider {
+    width: 100%;
+    height: 1px;
+    background-color: #ddd6d0;
+    margin-bottom: 20px;
+  }
+</style>
+</head>
+<body>
+
+<div class="page-wrap">
+
+  <div class="header-bar"></div>
+
+  <div class="thank-you-box">
+    <div class="logo-wrap">
+      <img src="https://assets-002.noviams.com/novi-file-uploads/clear/2025_AEC/CLEAR25_PortlandLogo_FullColor.png" alt="CLEAR Logo" style="width: 200px">
+    </div>
+    <div class="text-wrap">
+      <h1>Thank You!</h1>
+      <p>
+        Thank you for completing the <strong style="color: #64092c;">2026 CLEAR Annual Educational Conference program survey</strong>. Your contribution helps <strong style="color: #64092c;">CLEAR</strong> continue to improve education and programming for the global regulatory community. We appreciate you taking the time to share your feedback.
+      </p>
+    </div>
+  </div>
+
+  <div class="section-heading">
+    <h2>Join Us at an Upcoming CLEAR Event</h2>
+    <div class="divider"></div>
+  </div>
+
+  <div class="events-grid">
+
+    <!-- 2027 Winter Symposium & Midyear Business Meeting -->
+    <div class="event-card">
+      <a class="image-link" href="https://www.clearhq.org/winter-symposium" target="_blank" rel="noopener">
+        <img src="https://assets-002.noviams.com/novi-file-uploads/clear/events/clear_neworleans_logo-1.jpg" alt="2027 CLEAR Winter Symposium and Midyear Business Meeting">
+      </a>
+      <div class="event-info">
+        <h3>Winter Symposium &amp; Midyear Business Meeting</h3>
+        <p class="event-details">
+          New Orleans, Louisiana<br>
+          Symposium: January 6, 2027 &bull; Business Meeting: January 7&ndash;8, 2027
+        </p>
+        <a class="register-btn" href="https://www.clearhq.org/winter-symposium" target="_blank" rel="noopener">Learn More &amp; Register</a>
+      </div>
+    </div>
+
+    <!-- Regional Symposia Series -->
+    <div class="event-card">
+      <a class="image-link" href="https://www.clearhq.org/regional-symposia" target="_blank" rel="noopener">
+        <img src="https://assets-002.noviams.com/novi-file-uploads/clear/auto-files/image_1706200461370.png" alt="2027 Regional Symposia Series">
+      </a>
+      <div class="event-info">
+        <h3>Regional Symposia Series</h3>
+        <p class="event-details">
+          Toronto &bull; Halifax &bull; United States<br>
+          Spring 2027
+        </p>
+        <a class="register-btn" href="https://www.clearhq.org/regional-symposia" target="_blank" rel="noopener">Learn More &amp; Register</a>
+      </div>
+    </div>
+
+    <!-- International Congress & Regulatory Research Day -->
+    <div class="event-card">
+      <a class="image-link" href="https://www.clearhq.org/icpor-rrd" target="_blank" rel="noopener">
+        <img src="https://assets-002.noviams.com/novi-file-uploads/clear/auto-files/image_1779217806534.jpg" alt="2027 International Congress and Regulatory Research Day">
+      </a>
+      <div class="event-info">
+        <h3>International Congress &amp; Regulatory Research Day</h3>
+        <p class="event-details">
+          Belfast, Northern Ireland<br>
+          June 9&ndash;11, 2027
+        </p>
+        <a class="register-btn" href="https://www.clearhq.org/icpor-rrd" target="_blank" rel="noopener">Learn More &amp; Register</a>
+      </div>
+    </div>
+
+    <!-- Annual Educational Conference -->
+    <div class="event-card">
+      <a class="image-link" href="https://www.clearhq.org/events/2027aec" target="_blank" rel="noopener">
+        <img src="https://assets-002.noviams.com/novi-file-uploads/clear/events/clear25_vancouverlogo_final-1.jpg" alt="2027 Annual Educational Conference">
+      </a>
+      <div class="event-info">
+        <h3>Annual Educational Conference</h3>
+        <p class="event-details">
+          Vancouver, BC<br>
+          September 20&ndash;23, 2027
+        </p>
+        <a class="register-btn" href="https://www.clearhq.org/events/2027aec" target="_blank" rel="noopener">Learn More &amp; Register</a>
+      </div>
+    </div>
+
+  </div>
+
+  <footer>
+    <div class="footer-divider"></div>
+    <img src="https://assets-002.noviams.com/novi-file-uploads/clear/structure/clearlogo.png" style="width: 15%;">
+    <p style="font-weight: 700; color: var(--burgundy); font-size: 1.1rem;">Council on Licensure, Enforcement & Regulation</p>
+    <p style="font-weight: 600;">Promoting Regulatory Excellence</p>
+  </footer>
+
+</div>
+
+</body>
+</html>
