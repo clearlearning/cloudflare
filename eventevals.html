@@ -403,6 +403,15 @@ function normalizeDelivery(s){for(const d of DELIVERY_MAP){if(d.match.test(s))re
 function parseRow(raw){
   try{
     const spkRaw=String(raw['Session - Speakers']||'').split(/,\s*/).map(s=>s.trim()).filter(Boolean);
+    const emailRaw=String(raw['Session - Speakers Emails']||'').split(/,\s*/).map(s=>s.trim()).filter(Boolean);
+    let spkEmails=[];
+    if(emailRaw.length){
+      if(emailRaw.length===spkRaw.length){
+        spkEmails=emailRaw;
+      } else {
+        console.warn('Speaker/email count mismatch — skipping email pairing for this row.',{speakers:spkRaw,emails:emailRaw});
+      }
+    }
     const r={
       session: String(raw['Session - Title']||'').trim()||'(Unknown)',
       track:   String(raw['Session - Tracks']||'').trim()||'(No Track)',
@@ -410,6 +419,7 @@ function parseRow(raw){
       slot:    String(raw['Session - Start Time']||'').trim(),
       speakers:spkRaw,
       _spk:    spkRaw,
+      _spkEmails: spkEmails,
       attType: String(raw['Attendee - Is Speaker']||raw['Attendee Type']||'').trim(),
       country: String(raw['Attendee - Country']||'').trim(),
       delivery:pd(raw[DELIVERY_KEY]),
@@ -425,12 +435,27 @@ function parseRowApi(raw){
   const get=keys=>{for(const k of keys){if(raw[k]!==undefined&&raw[k]!=='')return String(raw[k]).trim();}return'';};
   try{
     const spkRaw=get(['Speakers','Session - Speakers']).split(/,\s*/).map(s=>s.trim()).filter(Boolean);
+    // Speaker emails, comma-separated in the same order as Speakers. Only zip them
+    // together when the counts match — if PheedLoop ever returns a mismatched count
+    // (e.g. a blank email for one speaker shifts the rest), pairing by position would
+    // silently assign the wrong email to the wrong speaker, which is worse than just
+    // not having an email at all. So on any mismatch we drop the whole row's emails
+    // and log it for a quick check instead of guessing.
+    const emailRaw=get(['Session - Speakers Emails','Speaker Emails','Speakers - Email']).split(/,\s*/).map(s=>s.trim()).filter(Boolean);
+    let spkEmails=[];
+    if(emailRaw.length){
+      if(emailRaw.length===spkRaw.length){
+        spkEmails=emailRaw;
+      } else {
+        console.warn('Speaker/email count mismatch — skipping email pairing for this row.',{speakers:spkRaw,emails:emailRaw});
+      }
+    }
     const r={
       session: get(['Session Name','Title','Session - Title'])||'(Unknown)',
       track:   get(['Tracks','Track','Session - Tracks'])||'(No Track)',
       day:     get(['Date','Session - Date']),
       slot:    get(['Start Time','Session - Start Time']),
-      speakers:spkRaw,_spk:spkRaw,
+      speakers:spkRaw,_spk:spkRaw,_spkEmails:spkEmails,
       attType: get(['Attendee Type','attendee_type']),
       country: get(['Country','Attendee - Country']),
       delivery:pd(get([DELIVERY_KEY])),_del:pd(get([DELIVERY_KEY]))
@@ -640,14 +665,39 @@ function runSpeaker(){
 // Speaker email lookup — keyed by speaker display name, populated at Generate Reports time
 let spEmails={};
 
+// Primary source: emails captured straight from the report itself (Session - Speakers
+// Emails column), zipped to speaker names by position. This is authoritative — it's
+// the exact same row that produced the ratings, so there's no name-matching to get wrong.
+function buildSpeakerEmailMapFromReport(){
+  const map={};
+  allRows.forEach(r=>{
+    const names=r._spk||[];
+    const emails=r._spkEmails||[];
+    if(!emails.length||names.length!==emails.length)return;
+    names.forEach((n,i)=>{ if(emails[i]&&!map[n])map[n]=emails[i]; });
+  });
+  return map;
+}
+
 async function fetchSpeakerEmails(){
-  spEmails={};
+  // Primary: pull directly from the report data already loaded.
+  spEmails=buildSpeakerEmailMapFromReport();
+
+  const stillMissing=Object.keys(spReports).filter(sp=>!spEmails[sp]);
+  if(!stillMissing.length){
+    console.log('Speaker emails resolved for all '+Object.keys(spReports).length+' speaker(s) directly from the report.');
+    return;
+  }
+  console.log('Speaker emails missing from the report for:',stillMissing,'— trying PheedLoop attendee lookup as a fallback.');
+
+  // Fallback: for speakers the report didn't cover, try matching against the
+  // PheedLoop attendee list by exact name (less reliable — speakers aren't always
+  // registered as attendees, or may use a different name format).
   const worker=LS.get('worker');
   const org=LS.get('org');
   const event=LS.get('event');
   if(!worker||!org||!event)return;
 
-  // Fetch all attendees in one paginated call, build name→email map
   const nameMap={};
   let page=1;
   try{
@@ -666,13 +716,12 @@ async function fetchSpeakerEmails(){
       if(!data.next)break;
       page++;
     }
-  }catch(e){console.log('Speaker email fetch failed:',e);return;}
+  }catch(e){console.log('Speaker email fallback lookup failed:',e);return;}
 
-  // Match each speaker by exact full name (case-insensitive)
-  Object.keys(spReports).forEach(sp=>{
+  stillMissing.forEach(sp=>{
     const key=sp.trim().toLowerCase();
     if(nameMap[key])spEmails[sp]=nameMap[key];
-    else console.log('No email match found for speaker:',sp);
+    else console.log('No email found for speaker (report or attendee lookup):',sp);
   });
 }
 
@@ -741,7 +790,7 @@ function renderSpContent(rd,sp){
       const searchStr=[cm.txt,cm.sess,cm.track||'',cm.day].join(' ').toLowerCase();
       const isExcl=(spExcl[sp]?.[cf.key]||new Set()).has(i);
       h+='<tr id="'+pfx+'_r'+i+'" class="'+(cm.na?'cna':'')+' '+(isExcl?'cex':'')+'" data-t="'+esc(searchStr)+'" style="cursor:pointer" onclick="spRowClick(this,\''+esc(sp)+'\',\''+esc(cf.key)+'\','+i+')">';
-      h+='<td class="cbc"><input type="checkbox" class="'+pfx+'_cb" data-i="'+i+'" '+(isExcl?'':'checked')+' onclick="event.stopPropagation();spCbChange(this,\''+esc(sp)+'\',\''+esc(cf.key)+'\','+i+')"></td>';
+    h+='<td class="cbc"><input type="checkbox" class="'+pfx+'_cb" data-i="'+i+'" '+(isExcl?'':'checked')+' onclick="event.stopPropagation();spCbChange(this,\''+esc(sp)+'\',\''+esc(cf.key)+'\','+i+')"></td>';
       h+='<td><span class="stag" title="'+esc(cm.sess)+'">'+esc(cm.sess)+'</span></td>';
       h+='<td style="font-size:11px;color:var(--text-light)">'+esc(cm.track||'')+'</td>';
       h+='<td style="font-size:11px;white-space:nowrap;color:var(--text-light)">'+esc(cm.day)+'</td>';
