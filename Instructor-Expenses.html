@@ -379,6 +379,7 @@
     <!-- SUBMITTER INFO -->
     <div class="card">
       <div class="card-title"><span class="icon">👤</span> Your Information</div>
+      <div class="alert alert-info" id="PII Check" style="display: block;">Select your name from the list and verify your contact and billing information. If your name is not listed, or your information is out of date, please contact <a href="mailto:clearlearning@clearhq.org">clearlearning@clearhq.org</a> for assistance.</div>
       <div class="field-row">
         <div class="field">
           <label>Select Your Name <span class="req">*</span></label>
@@ -544,7 +545,7 @@
       <div class="card" id="perdiem-card">
         <div class="card-title"><span class="icon">🍽️</span> Meal Per Diem</div>
         <div class="alert alert-info" id="perdiem-info-msg"></div>
-        <div class="alert alert-info" style="margin-bottom:10px">🎓 <strong>Instructor per diem:</strong> Your full per diem is automatically applied for each day. No receipts required for meals.</div>
+        <div class="alert alert-info" style="margin-bottom:10px; display: block;">🎓 <strong>Instructor per diem:</strong> Your full per diem is automatically applied for each day. No receipts are required for meals. If a meal is provided for you by CLEAR or the program host, select the checkbox in the <strong>Meal Provided</strong> column and indicate which meal or meals was/were provided in the <strong>Which Meal(s)</strong> drop down menu for that day. This will adjust your per diem amount for that day to reflect any meals not already provided.</div>
         <div id="perdiem-days-header" class="expense-line-header" style="grid-template-columns:110px 130px 90px 90px 160px 28px;padding:0 4px 4px;gap:6px">
           <span>Date</span><span>Day Type</span><span>Per Diem</span>
           <span style="background:#fce7f3;border-radius:3px;padding:2px 4px;font-size:10px;text-align:center;line-height:1.3">Meal Provided?</span>
@@ -562,6 +563,7 @@
       <!-- EXPENSES -->
       <div class="card" id="expense-card">
         <div class="card-title"><span class="icon">💳</span> Expense Lines</div>
+        <div class="alert alert-info" style="margin-bottom:10px; display: block;">If paying expenses in a currency other than USD, select the correct currency in the provided drop-down menu and enter your expense item in the ORIGINAL CURRENCY field. This will calculate the USD amount at the current exchange rate (shown below the row). Repeat these steps for any line items paid for in a currency other than USD; otherwise, enter your expense amount in the Amount (USD) field.</div>
         <p style="font-size:12px;color:var(--text-light);margin-bottom:6px">For categories like Hotel, Airfare, and Rental Car, use the Description field to record the vendor name.</p>
         <div style="display:grid;grid-template-columns:130px 100px 1fr 90px 90px 28px;gap:8px;padding:0 4px 4px;font-size:11px;font-weight:600;color:var(--text-light);text-transform:uppercase;letter-spacing:0.4px;align-items:center;text-align:center">
           <span style="text-align:left">Category</span><span>Currency</span><span style="text-align:left">Description / Miles</span><span style="background:#fef9c3;border-radius:3px;padding:2px 4px">Original Currency</span><span>Amount (USD)</span><span></span>
@@ -716,12 +718,13 @@ function handleInstructorSelect() {
   const instr = instructors.find(i => i.name === sel.value);
   if (instr) {
     document.getElementById('f-email').value = instr.email || '';
-    if (instr.phone) document.getElementById('f-phone').value = instr.phone;
-    if (instr.address) {
-      // Pre-fill address fields if stored as a combined string
-      document.getElementById('f-addr-street').value = instr.address || '';
-      syncAddress();
-    }
+    if (instr.phone)   document.getElementById('f-phone').value        = instr.phone;
+    if (instr.street)  document.getElementById('f-addr-street').value  = instr.street;
+    if (instr.city)    document.getElementById('f-addr-city').value    = instr.city;
+    if (instr.state)   document.getElementById('f-addr-state').value   = instr.state;
+    if (instr.zip)     document.getElementById('f-addr-zip').value     = instr.zip;
+    if (instr.country) document.getElementById('f-addr-country').value = instr.country;
+    syncAddress();
     const rate = String(instr.tier).includes('1') ? cfg.tier1 : cfg.tier2;
     const infoMsg = document.getElementById('teaching-info-msg');
     if (infoMsg && rate) {
