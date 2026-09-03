@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CLEAR | Content Idea Dashboard</title>
+<link rel="icon" type="image/png" href="https://assets-002.noviams.com/novi-file-uploads/clear/structure/clearlogo.png">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+  :root {
+    --burgundy: #64092C;
+    --gold: #DDA838;
+    --charcoal: #484848;
+    --blue: #084D78;
+    --light-bg: #FAF8F6;
+    --border: #E0DAD5;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: 'Open Sans', 'Trebuchet MS', Arial, sans-serif;
+    background: var(--light-bg);
+    color: var(--charcoal);
+    margin: 0;
+  }
+  header.brandbar {
+    background: var(--burgundy);
+    border-bottom: 6px solid var(--gold);
+    padding: 22px 28px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  header.brandbar h1 { color: #fff; font-size: 21px; margin: 0; }
+  header.brandbar p { color: #EFD9DE; margin: 2px 0 0; font-size: 13px; }
+  .header-actions { display: flex; gap: 10px; align-items: center; }
+  .icon-btn {
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.35);
+    color: #fff;
+    padding: 8px 14px;
+    border-radius: 4px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .icon-btn:hover { background: rgba(255,255,255,0.22); }
+
+  .wrap { max-width: 1200px; margin: 0 auto; padding: 24px 20px 60px; }
+
+  /* ---------- Setup panel ---------- */
+  .setup-card {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-left: 5px solid var(--gold);
+    border-radius: 5px;
+    padding: 22px 26px;
+    max-width: 520px;
+    margin: 60px auto;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  }
+  .setup-card h2 { color: var(--burgundy); font-size: 17px; margin-top: 0; }
+  .setup-card label { display: block; font-size: 13px; font-weight: 600; margin: 14px 0 6px; }
+  .setup-card input {
+    width: 100%; padding: 9px 11px; border: 1px solid #C9C2BC; border-radius: 4px; font-size: 14px;
+  }
+  .setup-card .save-btn {
+    margin-top: 18px; background: var(--burgundy); color: #fff; border: none;
+    padding: 10px 20px; border-radius: 4px; font-weight: 700; cursor: pointer; font-size: 14px;
+  }
+  .setup-note { font-size: 12px; color: #888; margin-top: 10px; }
+
+  /* ---------- Toolbar ---------- */
+  .toolbar {
+    display: flex; gap: 12px; flex-wrap: wrap; align-items: center;
+    margin-bottom: 18px;
+  }
+  .toolbar input[type="text"], .toolbar select {
+    padding: 9px 12px; border: 1px solid #C9C2BC; border-radius: 4px; font-size: 13.5px;
+  }
+  .toolbar input[type="text"] { flex: 1; min-width: 180px; }
+  .btn {
+    padding: 9px 16px; border-radius: 4px; font-size: 13.5px; font-weight: 600; cursor: pointer; border: 1.5px solid var(--blue); background: #fff; color: var(--blue);
+  }
+  .btn:hover { background: var(--blue); color: #fff; }
+  .btn.primary { background: var(--burgundy); border-color: var(--burgundy); color: #fff; }
+  .btn.primary:hover { background: #4d0722; }
+  .count-badge { font-size: 13px; color: #888; margin-left: auto; }
+
+  /* ---------- Table ---------- */
+  .table-scroll { overflow-x: auto; background: #fff; border: 1px solid var(--border); border-radius: 6px; }
+  table { border-collapse: collapse; width: 100%; font-size: 13.5px; }
+  thead th {
+    background: var(--burgundy); color: #fff; text-align: left; padding: 10px 12px;
+    position: sticky; top: 0; white-space: nowrap; font-size: 12.5px; letter-spacing: 0.2px;
+  }
+  tbody td { padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  tbody tr:hover { background: #FBF6EF; cursor: pointer; }
+  .pill {
+    display: inline-block; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 10px;
+  }
+  .pill.high { background: #FBEAEA; color: #A0342A; }
+  .pill.medium { background: #FFF3DD; color: #91650A; }
+  .pill.low { background: #EAF1F4; color: #295A70; }
+  .pill.none { background: #EEE; color: #888; }
+  .topic-cell { max-width: 260px; }
+  .empty-state { text-align: center; padding: 60px 20px; color: #999; }
+
+  /* ---------- Detail modal ---------- */
+  .modal-backdrop {
+    display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 50;
+    align-items: flex-start; justify-content: center; overflow-y: auto; padding: 40px 16px;
+  }
+  .modal-backdrop.show { display: flex; }
+  .modal {
+    background: #fff; border-radius: 6px; max-width: 760px; width: 100%; padding: 0; overflow: hidden;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.25);
+  }
+  .modal-head {
+    background: var(--burgundy); border-bottom: 6px solid var(--gold); padding: 22px 28px; color: #fff;
+    display: flex; justify-content: space-between; align-items: flex-start; gap: 16px;
+  }
+  .modal-head h2 { margin: 0 0 4px; font-size: 19px; }
+  .modal-head p { margin: 0; color: #EFD9DE; font-size: 13px; }
+  .modal-head .close-btn { background: none; border: none; color: #fff; font-size: 22px; cursor: pointer; line-height: 1; }
+  .modal-body { padding: 24px 28px 30px; }
+  .modal-actions { padding: 16px 28px; border-top: 1px solid var(--border); display: flex; gap: 10px; justify-content: flex-end; }
+  .detail-section { margin-bottom: 20px; }
+  .detail-section h3 {
+    color: var(--burgundy); font-size: 14px; text-transform: uppercase; letter-spacing: 0.4px;
+    border-bottom: 1px solid var(--border); padding-bottom: 6px; margin: 0 0 10px;
+  }
+  .detail-row { display: flex; gap: 8px; font-size: 14px; margin-bottom: 6px; }
+  .detail-row .label { font-weight: 700; min-width: 150px; flex-shrink: 0; }
+  .detail-block { font-size: 14px; white-space: pre-wrap; }
+  .section-item { background: #FFFDFB; border: 1px dashed #C9C2BC; border-radius: 5px; padding: 12px 14px; margin-bottom: 10px; }
+  .section-item .sec-title { font-weight: 700; color: var(--blue); margin-bottom: 4px; }
+  .objective-item { font-size: 14px; margin-bottom: 4px; }
+  .danger-link { color: #A0342A; font-size: 12.5px; background: none; border: none; cursor: pointer; text-decoration: underline; padding: 0; }
+
+  @media print {
+    body * { visibility: hidden; }
+    #printArea, #printArea * { visibility: visible; }
+    #printArea { position: absolute; top: 0; left: 0; width: 100%; padding: 20px; }
+    .modal-actions, .close-btn { display: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<header class="brandbar">
+  <div>
+    <h1>Content Idea Dashboard</h1>
+    <p>CLEAR &mdash; internal review of submitted content ideas</p>
+  </div>
+  <div class="header-actions" id="headerActions" style="display:none;">
+    <button class="icon-btn" id="refreshBtn">Refresh</button>
+    <button class="icon-btn" id="settingsBtn">Connection Settings</button>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <!-- SETUP / CONNECTION PANEL -->
+  <div class="setup-card" id="setupCard">
+    <h2>Connect to Worker</h2>
+    <label>Worker URL</label>
+    <input type="text" id="workerUrlInput" placeholder="https://clear-content-ideas.avance.workers.dev">
+    <label>Auth Token (X-Auth-Token)</label>
+    <input type="text" id="authTokenInput" placeholder="Your shared CLEAR auth token">
+    <button class="save-btn" id="saveConnBtn">Save &amp; Load Submissions</button>
+    <p class="setup-note">Saved locally in this browser only. Use "Connection Settings" any time to change it.</p>
+  </div>
+
+  <!-- MAIN DASHBOARD -->
+  <div id="dashboardArea" style="display:none;">
+    <div class="toolbar">
+      <input type="text" id="searchInput" placeholder="Search topic, contact, or keyword...">
+      <select id="committeeFilter"><option value="">All Committees</option></select>
+      <select id="priorityFilter">
+        <option value="">All Priorities</option>
+        <option>High — Address soon</option>
+        <option>Medium — Good for upcoming cycle</option>
+        <option>Low — Idea for future consideration</option>
+      </select>
+      <button class="btn" id="exportCsvBtn">Export CSV</button>
+      <button class="btn" id="exportXlsxBtn">Export Excel</button>
+      <span class="count-badge" id="countBadge"></span>
+    </div>
+
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>Received</th>
+            <th>Committee</th>
+            <th>Contact</th>
+            <th>Main Topic</th>
+            <th>Priority</th>
+            <th>Delivery</th>
+            <th>Sections</th>
+            <th>Objectives</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+      <div class="empty-state" id="emptyState" style="display:none;">No submissions match your filters.</div>
+    </div>
+  </div>
+</div>
+
+<!-- DETAIL MODAL -->
+<div class="modal-backdrop" id="modalBackdrop">
+  <div class="modal">
+    <div id="printArea">
+      <div class="modal-head">
+        <div>
+          <h2 id="modalTopic"></h2>
+          <p id="modalMeta"></p>
+        </div>
+        <button class="close-btn" id="closeModalBtn">&times;</button>
+      </div>
+      <div class="modal-body" id="modalBody"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="danger-link" id="deleteBtn">Delete this submission</button>
+      <span style="flex:1;"></span>
+      <button class="btn" id="printOneBtn">Print / Save as PDF</button>
+      <button class="btn primary" id="closeModalBtn2">Close</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  let WORKER_URL = localStorage.getItem('clear_content_ideas_worker_url') || '';
+  let AUTH_TOKEN = localStorage.getItem('clear_auth_token') || '';
+  let allSubmissions = [];
+  let filteredSubmissions = [];
+  let activeSubmission = null;
+
+  const setupCard = document.getElementById('setupCard');
+  const dashboardArea = document.getElementById('dashboardArea');
+  const headerActions = document.getElementById('headerActions');
+
+  function showSetup() {
+    document.getElementById('workerUrlInput').value = WORKER_URL;
+    document.getElementById('authTokenInput').value = AUTH_TOKEN;
+    setupCard.style.display = 'block';
+    dashboardArea.style.display = 'none';
+  }
+
+  document.getElementById('saveConnBtn').addEventListener('click', async () => {
+    WORKER_URL = document.getElementById('workerUrlInput').value.trim().replace(/\/$/, '');
+    AUTH_TOKEN = document.getElementById('authTokenInput').value.trim();
+    if (!WORKER_URL || !AUTH_TOKEN) { alert('Please enter both the Worker URL and the auth token.'); return; }
+    localStorage.setItem('clear_content_ideas_worker_url', WORKER_URL);
+    localStorage.setItem('clear_auth_token', AUTH_TOKEN);
+    await loadSubmissions();
+  });
+
+  document.getElementById('settingsBtn').addEventListener('click', showSetup);
+  document.getElementById('refreshBtn').addEventListener('click', loadSubmissions);
+
+  async function loadSubmissions() {
+    if (!WORKER_URL || !AUTH_TOKEN) { showSetup(); return; }
+    try {
+      const res = await fetch(`${WORKER_URL}/list`, { headers: { 'X-Auth-Token': AUTH_TOKEN } });
+      if (res.status === 401) { alert('Auth token was rejected. Please check your Connection Settings.'); showSetup(); return; }
+      if (!res.ok) throw new Error('Failed to load');
+      const data = await res.json();
+      allSubmissions = data.submissions || [];
+      populateCommitteeFilter();
+      applyFilters();
+      setupCard.style.display = 'none';
+      dashboardArea.style.display = 'block';
+      headerActions.style.display = 'flex';
+    } catch (err) {
+      alert('Could not load submissions. Check the Worker URL and your connection, then try again.');
+      showSetup();
+    }
+  }
+
+  function populateCommitteeFilter() {
+    const sel = document.getElementById('committeeFilter');
+    const current = sel.value;
+    const committees = [...new Set(allSubmissions.map(s => s.committee).filter(Boolean))].sort();
+    sel.innerHTML = '<option value="">All Committees</option>' + committees.map(c => `<option>${c}</option>`).join('');
+    sel.value = current;
+  }
+
+  function applyFilters() {
+    const q = document.getElementById('searchInput').value.toLowerCase();
+    const committee = document.getElementById('committeeFilter').value;
+    const priority = document.getElementById('priorityFilter').value;
+
+    filteredSubmissions = allSubmissions.filter(s => {
+      if (committee && s.committee !== committee) return false;
+      if (priority && s.priority !== priority) return false;
+      if (q) {
+        const haystack = [
+          s.mainTopic, s.submitterName, s.submitterEmail, s.speakers, s.resources, s.whyNow, s.notes,
+          ...(s.sections || []).map(sec => `${sec.title} ${sec.description}`),
+          ...(s.objectives || [])
+        ].join(' ').toLowerCase();
+        if (!haystack.includes(q)) return false;
+      }
+      return true;
+    });
+    renderTable();
+  }
+
+  document.getElementById('searchInput').addEventListener('input', applyFilters);
+  document.getElementById('committeeFilter').addEventListener('change', applyFilters);
+  document.getElementById('priorityFilter').addEventListener('change', applyFilters);
+
+  function priorityPillClass(p) {
+    if (!p) return 'none';
+    if (p.startsWith('High')) return 'high';
+    if (p.startsWith('Medium')) return 'medium';
+    if (p.startsWith('Low')) return 'low';
+    return 'none';
+  }
+
+  function fmtDate(iso) {
+    if (!iso) return '';
+    const d = new Date(iso);
+    if (isNaN(d)) return iso;
+    return d.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+  }
+
+  function renderTable() {
+    const tbody = document.getElementById('tableBody');
+    const emptyState = document.getElementById('emptyState');
+    document.getElementById('countBadge').textContent = `${filteredSubmissions.length} of ${allSubmissions.length} submissions`;
+
+    if (!filteredSubmissions.length) {
+      tbody.innerHTML = '';
+      emptyState.style.display = 'block';
+      return;
+    }
+    emptyState.style.display = 'none';
+
+    tbody.innerHTML = filteredSubmissions.map((s, i) => `
+      <tr data-id="${s.id}">
+        <td>${fmtDate(s.receivedAt)}</td>
+        <td>${s.committee || ''}</td>
+        <td>${s.submitterName || ''}<br><span style="color:#888;font-size:12px;">${s.submitterEmail || ''}</span></td>
+        <td class="topic-cell">${s.mainTopic || ''}</td>
+        <td>${s.priority ? `<span class="pill ${priorityPillClass(s.priority)}">${s.priority.split(' —')[0]}</span>` : ''}</td>
+        <td>${(s.delivery || []).join(', ')}</td>
+        <td>${(s.sections || []).length}</td>
+        <td>${(s.objectives || []).length}</td>
+      </tr>
+    `).join('');
+
+    tbody.querySelectorAll('tr').forEach(tr => {
+      tr.addEventListener('click', () => openDetail(tr.getAttribute('data-id')));
+    });
+  }
+
+  function openDetail(id) {
+    activeSubmission = allSubmissions.find(s => s.id === id);
+    if (!activeSubmission) return;
+    const s = activeSubmission;
+
+    document.getElementById('modalTopic').textContent = s.mainTopic || '(Untitled topic)';
+    document.getElementById('modalMeta').textContent = `${s.committee || ''} — submitted ${fmtDate(s.receivedAt)}`;
+
+    const sectionsHtml = (s.sections || []).length
+      ? s.sections.map((sec, i) => `
+          <div class="section-item">
+            <div class="sec-title">Section ${i + 1}: ${sec.title || '(untitled)'}</div>
+            <div class="detail-block">${sec.description || '<span style="color:#aaa;">No details provided.</span>'}</div>
+          </div>`).join('')
+      : '<p style="color:#aaa;">No sections listed.</p>';
+
+    const objectivesHtml = (s.objectives || []).length
+      ? s.objectives.map((o, i) => `<div class="objective-item">${i + 1}. ${o}</div>`).join('')
+      : '<p style="color:#aaa;">No objectives listed.</p>';
+
+    document.getElementById('modalBody').innerHTML = `
+      <div class="detail-section">
+        <h3>Submission Details</h3>
+        <div class="detail-row"><span class="label">Committee</span><span>${s.committee || ''}</span></div>
+        <div class="detail-row"><span class="label">Contact</span><span>${s.submitterName || ''} — ${s.submitterEmail || ''}</span></div>
+        <div class="detail-row"><span class="label">Date on Form</span><span>${s.submissionDate || ''}</span></div>
+        <div class="detail-row"><span class="label">Received</span><span>${fmtDate(s.receivedAt)}</span></div>
+      </div>
+
+      <div class="detail-section">
+        <h3>Session Content</h3>
+        ${sectionsHtml}
+      </div>
+
+      <div class="detail-section">
+        <h3>Learning / Session Objectives</h3>
+        ${objectivesHtml}
+      </div>
+
+      <div class="detail-section">
+        <h3>Possible Resources, Speakers &amp; Presenters</h3>
+        <div class="detail-row"><span class="label">Speakers</span></div>
+        <div class="detail-block">${s.speakers || '<span style="color:#aaa;">None listed.</span>'}</div>
+        <div class="detail-row" style="margin-top:10px;"><span class="label">Resources</span></div>
+        <div class="detail-block">${s.resources || '<span style="color:#aaa;">None listed.</span>'}</div>
+      </div>
+
+      <div class="detail-section">
+        <h3>Additional Context</h3>
+        <div class="detail-row"><span class="label">Delivery Method(s)</span><span>${(s.delivery || []).join(', ') || 'None selected'}</span></div>
+        <div class="detail-row"><span class="label">Priority</span><span>${s.priority || 'Not specified'}</span></div>
+        <div class="detail-row"><span class="label">Why Now</span></div>
+        <div class="detail-block">${s.whyNow || '<span style="color:#aaa;">None listed.</span>'}</div>
+        <div class="detail-row" style="margin-top:10px;"><span class="label">Additional Notes</span></div>
+        <div class="detail-block">${s.notes || '<span style="color:#aaa;">None.</span>'}</div>
+      </div>
+    `;
+
+    document.getElementById('modalBackdrop').classList.add('show');
+  }
+
+  function closeModal() {
+    document.getElementById('modalBackdrop').classList.remove('show');
+    activeSubmission = null;
+  }
+  document.getElementById('closeModalBtn').addEventListener('click', closeModal);
+  document.getElementById('closeModalBtn2').addEventListener('click', closeModal);
+  document.getElementById('modalBackdrop').addEventListener('click', (e) => {
+    if (e.target.id === 'modalBackdrop') closeModal();
+  });
+
+  document.getElementById('printOneBtn').addEventListener('click', () => window.print());
+
+  document.getElementById('deleteBtn').addEventListener('click', async () => {
+    if (!activeSubmission) return;
+    if (!confirm(`Delete the submission "${activeSubmission.mainTopic}"? This cannot be undone.`)) return;
+    try {
+      const res = await fetch(`${WORKER_URL}/submission/${activeSubmission.id}`, {
+        method: 'DELETE',
+        headers: { 'X-Auth-Token': AUTH_TOKEN }
+      });
+      if (!res.ok) throw new Error('Delete failed');
+      closeModal();
+      await loadSubmissions();
+    } catch (err) {
+      alert('Could not delete this submission. Please try again.');
+    }
+  });
+
+  // ---------- Exports ----------
+  function exportRows() {
+    return filteredSubmissions.map(s => ({
+      'Received At': fmtDate(s.receivedAt),
+      'Committee': s.committee || '',
+      'Contact Name': s.submitterName || '',
+      'Contact Email': s.submitterEmail || '',
+      'Date on Form': s.submissionDate || '',
+      'Main Session Topic': s.mainTopic || '',
+      'Sections': (s.sections || []).map((sec, i) => `Section ${i + 1}: ${sec.title}${sec.description ? ' — ' + sec.description : ''}`).join(' | '),
+      'Objectives': (s.objectives || []).map((o, i) => `${i + 1}. ${o}`).join(' | '),
+      'Possible Speakers': s.speakers || '',
+      'Possible Resources': s.resources || '',
+      'Delivery Methods': (s.delivery || []).join(', '),
+      'Why Now': s.whyNow || '',
+      'Priority': s.priority || '',
+      'Notes': s.notes || ''
+    }));
+  }
+
+  document.getElementById('exportCsvBtn').addEventListener('click', () => {
+    if (!filteredSubmissions.length) { alert('No submissions to export.'); return; }
+    const rows = exportRows();
+    const headers = Object.keys(rows[0]);
+    const csvEscape = v => /[",\n]/.test(v) ? `"${String(v).replace(/"/g, '""')}"` : v;
+    const lines = [headers.join(',')].concat(rows.map(r => headers.map(h => csvEscape(r[h])).join(',')));
+    const blob = new Blob([lines.join('\r\n')], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `clear-content-ideas-${new Date().toISOString().slice(0,10)}.csv`;
+    link.click();
+  });
+
+  document.getElementById('exportXlsxBtn').addEventListener('click', () => {
+    if (!filteredSubmissions.length) { alert('No submissions to export.'); return; }
+    const rows = exportRows();
+    const ws = XLSX.utils.json_to_sheet(rows);
+    ws['!cols'] = Object.keys(rows[0]).map(() => ({ wch: 28 }));
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Content Ideas');
+    XLSX.writeFile(wb, `clear-content-ideas-${new Date().toISOString().slice(0,10)}.xlsx`);
+  });
+
+  // Init
+  if (WORKER_URL && AUTH_TOKEN) {
+    loadSubmissions();
+  } else {
+    showSetup();
+  }
+</script>
+
+</body>
+</html>
