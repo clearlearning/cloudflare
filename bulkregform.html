@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CLEAR Learning &mdash; Subscriber Registration</title>
+<link rel="icon" type="image/png" href="https://assets-002.noviams.com/novi-file-uploads/clear/structure/clearlogo.png">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&family=Trebuchet+MS&display=swap');
+  :root{--burgundy:#64092c;--burgundy-light:#8a1e4a;--gold:#dda838;--gold-light:#f0c96a;--blue:#084d78;--blue-light:#0a6ba8;--gray:#484848;--gray-light:#f4f4f5;--gray-mid:#e0e0e0;--white:#ffffff;--green:#2e7d32;--green-bg:#e8f5e9;--red:#c62828;--red-bg:#ffebee;--amber:#b85c00;--amber-bg:#fff8e1;--radius:6px;--shadow:0 2px 8px rgba(0,0,0,0.08);--shadow-lg:0 4px 16px rgba(0,0,0,0.12);}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'Open Sans',sans-serif;color:var(--gray);background:var(--gray-light);min-height:100vh;}
+  h1,h2,h3,h4{font-family:'Trebuchet MS','Open Sans',sans-serif;}
+  .header{background:linear-gradient(135deg,var(--burgundy) 0%,var(--burgundy-light) 100%);color:var(--white);padding:28px 32px;display:flex;align-items:center;gap:16px;box-shadow:var(--shadow-lg);}
+  .header img{width:44px;height:44px;border-radius:8px;background:#fff;padding:4px;flex-shrink:0;}
+  .header h1{font-size:21px;font-weight:700;}
+  .header p{font-size:13px;opacity:0.9;margin-top:2px;}
+  .main{max-width:1100px;margin:0 auto;padding:28px 24px 64px;}
+  .intro{background:var(--white);border-left:4px solid var(--gold);border-radius:var(--radius);padding:18px 22px;margin-bottom:24px;box-shadow:var(--shadow);font-size:14px;line-height:1.6;}
+  .panel{background:var(--white);border-radius:var(--radius);padding:26px 28px;box-shadow:var(--shadow);margin-bottom:22px;}
+  .panel h2{font-size:16px;color:var(--burgundy);margin-bottom:18px;display:flex;align-items:center;gap:8px;}
+  .step-num{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;background:var(--burgundy);color:#fff;border-radius:50%;font-size:12px;font-weight:700;flex-shrink:0;}
+  .form-row{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:14px;}
+  .form-group{display:flex;flex-direction:column;gap:5px;flex:1;min-width:220px;}
+  .form-group label{font-size:11px;font-weight:600;color:var(--gray);text-transform:uppercase;letter-spacing:0.5px;}
+  .form-group .req{color:var(--burgundy);}
+  .form-group input,.form-group select{padding:10px 14px;border:1.5px solid var(--gray-mid);border-radius:var(--radius);font-size:14px;font-family:'Open Sans',sans-serif;transition:border-color 0.2s;}
+  .form-group input:focus,.form-group select:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(8,77,120,0.1);}
+  .form-group .hint{font-size:12px;color:#888;line-height:1.4;}
+  .form-group .field-error{font-size:12px;color:var(--red);display:none;}
+  .form-group.invalid input,.form-group.invalid select{border-color:var(--red);background:var(--red-bg);}
+  .form-group.invalid .field-error{display:block;}
+  .btn{padding:11px 26px;border:none;border-radius:var(--radius);font-size:14px;font-weight:600;font-family:'Open Sans',sans-serif;cursor:pointer;transition:all 0.2s;display:inline-flex;align-items:center;gap:8px;}
+  .btn-primary{background:var(--blue);color:var(--white);}.btn-primary:hover{background:var(--blue-light);}.btn-primary:disabled{background:#aaa;cursor:not-allowed;}
+  .btn-secondary{background:var(--white);color:var(--blue);border:1.5px solid var(--blue);}.btn-secondary:hover{background:rgba(8,77,120,0.05);}
+  .btn-gold{background:var(--gold);color:var(--burgundy);}.btn-gold:hover{background:var(--gold-light);}
+  .btn-burgundy{background:var(--burgundy);color:var(--white);font-size:15px;padding:13px 32px;}.btn-burgundy:hover{background:var(--burgundy-light);}.btn-burgundy:disabled{background:#aaa;cursor:not-allowed;}
+  .btn-sm{padding:7px 14px;font-size:12px;}
+  .btn-outline-danger{background:transparent;color:var(--red);border:1px solid transparent;}
+  .upload-row{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-bottom:18px;padding:16px;background:var(--gray-light);border-radius:var(--radius);border:1px dashed var(--gray-mid);}
+  .upload-row .divider{color:#aaa;font-size:12px;}
+  .license-counter{display:flex;align-items:center;gap:10px;font-size:13px;margin-bottom:14px;padding:10px 16px;border-radius:var(--radius);background:var(--gray-light);}
+  .license-counter.over{background:var(--amber-bg);color:var(--amber);font-weight:600;}
+  .table-wrap{overflow-x:auto;border:1px solid var(--gray-mid);border-radius:var(--radius);}
+  table{width:100%;border-collapse:collapse;font-size:13px;}
+  thead th{background:var(--blue);color:var(--white);padding:10px 10px;text-align:left;font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:0.3px;}
+  tbody td{padding:6px 8px;border-bottom:1px solid var(--gray-mid);vertical-align:top;}
+  tbody tr:nth-child(even){background:#fafafa;}
+  tbody td input{width:100%;padding:7px 9px;border:1.5px solid transparent;border-radius:4px;font-size:13px;font-family:'Open Sans',sans-serif;background:transparent;}
+  tbody td input:focus{outline:none;border-color:var(--blue);background:#fff;box-shadow:0 0 0 2px rgba(8,77,120,0.1);}
+  tbody td input.cell-error{border-color:var(--red);background:var(--red-bg);}
+  .row-num{color:#999;font-size:12px;text-align:center;width:28px;}
+  .row-remove{cursor:pointer;color:var(--red);font-weight:700;font-size:15px;text-align:center;width:28px;user-select:none;}
+  .row-remove:hover{color:var(--burgundy);}
+  .status-bar{padding:12px 16px;border-radius:var(--radius);font-size:13px;margin-top:14px;display:none;line-height:1.5;}
+  .status-bar.info{background:#e3f2fd;color:#1565c0;border:1px solid #90caf9;display:block;}
+  .status-bar.success{background:var(--green-bg);color:var(--green);border:1px solid #a5d6a7;display:block;}
+  .status-bar.error{background:var(--red-bg);color:var(--red);border:1px solid #ef9a9a;display:block;}
+  .submit-bar{display:flex;align-items:center;gap:16px;justify-content:flex-end;flex-wrap:wrap;margin-top:20px;}
+  .submit-note{font-size:12px;color:#888;flex:1;min-width:200px;}
+  .confirmation{text-align:center;padding:48px 24px;}
+  .confirmation .icon{font-size:52px;margin-bottom:14px;}
+  .confirmation h2{color:var(--green);font-size:22px;margin-bottom:10px;}
+  .confirmation p{font-size:14px;color:var(--gray);margin-bottom:6px;line-height:1.6;}
+  .confirmation .ref{display:inline-block;margin-top:14px;padding:10px 20px;background:var(--gray-light);border-radius:var(--radius);font-family:monospace;font-size:14px;font-weight:700;color:var(--burgundy);}
+  .hidden{display:none!important;}
+  .spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,0.35);border-top-color:#fff;border-radius:50%;animation:spin 0.6s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .honeypot{position:absolute;left:-9999px;opacity:0;height:0;overflow:hidden;}
+  @media(max-width:768px){.header{padding:18px;}.main{padding:16px;}.panel{padding:18px;}}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <img src="https://assets-002.noviams.com/novi-file-uploads/clear/structure/clearlogo.png" alt="CLEAR">
+  <div>
+    <h1>Subscriber Registration</h1>
+    <p>CLEAR Learning &mdash; register the people who will use your license</p>
+  </div>
+</div>
+
+<div class="main">
+
+  <div class="intro" id="introBlock">
+    Purchased a multi-user license from CLEAR Learning? Use this form to tell us who should get access.
+    Enter your order details below, then add each subscriber &mdash; either directly in the table or by uploading
+    our Excel template. We'll review your submission and set up accounts within 1&ndash;2 business days.
+  </div>
+
+  <form id="regForm" onsubmit="return false;">
+
+  <!-- honeypot -->
+  <input type="text" name="website" id="hp" class="honeypot" tabindex="-1" autocomplete="off">
+
+  <div class="panel" id="orderPanel">
+    <h2><span class="step-num">1</span> Order Information</h2>
+    <div class="form-row">
+      <div class="form-group" id="fg_orderNumber">
+        <label>Order Number <span class="req">*</span></label>
+        <input type="text" id="orderNumber" placeholder="e.g. 100482">
+        <span class="hint">Found on your order confirmation email.</span>
+        <span class="field-error">Enter your order number.</span>
+      </div>
+      <div class="form-group" id="fg_product">
+        <label>Product Purchased <span class="req">*</span></label>
+        <select id="productSelect"><option value="">Select the product you purchased...</option></select>
+        <span class="field-error">Select the product you purchased.</span>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group" id="fg_purchaserName">
+        <label>Your Name (Purchaser) <span class="req">*</span></label>
+        <input type="text" id="purchaserName" placeholder="First and last name">
+        <span class="hint">Confirms you're the person who placed the order.</span>
+        <span class="field-error">Enter your name.</span>
+      </div>
+      <div class="form-group" id="fg_agencyName">
+        <label>Your Agency / Organization <span class="req">*</span></label>
+        <input type="text" id="agencyName" placeholder="e.g. Colorado Department of Regulatory Agencies">
+        <span class="hint">This fills in automatically for each subscriber below &mdash; you can still edit it per row.</span>
+        <span class="field-error">Enter your agency name.</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel" id="subscriberPanel" style="display:none;">
+    <h2><span class="step-num">2</span> Subscribers</h2>
+
+    <div class="upload-row">
+      <button type="button" class="btn btn-secondary btn-sm" id="downloadTemplateBtn">&#128229; Download Excel Template</button>
+      <span class="divider">or</span>
+      <button type="button" class="btn btn-secondary btn-sm" id="uploadTemplateBtn">&#128228; Upload Completed Template</button>
+      <input type="file" id="uploadFileInput" accept=".xlsx,.xls" style="display:none">
+      <span class="hint" style="flex:1;min-width:200px;">Uploading replaces the table below with the file's contents so you can review and fix anything before submitting.</span>
+    </div>
+    <div id="uploadStatus" class="status-bar"></div>
+
+    <div class="license-counter" id="licenseCounter"></div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th class="row-num">#</th>
+            <th style="width:16%;">First Name <span class="req">*</span></th>
+            <th style="width:16%;">Last Name <span class="req">*</span></th>
+            <th style="width:22%;">Email Address <span class="req">*</span></th>
+            <th style="width:16%;">Job Title</th>
+            <th style="width:20%;">Agency</th>
+            <th class="row-num">&nbsp;</th>
+          </tr>
+        </thead>
+        <tbody id="subscriberBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="panel hidden" id="reviewPanel">
+    <h2><span class="step-num">3</span> Review &amp; Submit</h2>
+    <div id="reviewSummary" style="font-size:13px;line-height:1.7;"></div>
+    <div class="submit-bar">
+      <span class="submit-note" id="submitNote"></span>
+      <button type="button" class="btn btn-burgundy" id="submitBtn" disabled>Submit Registration</button>
+    </div>
+    <div id="submitStatus" class="status-bar"></div>
+  </div>
+
+  </form>
+
+  <div class="panel hidden" id="confirmationPanel">
+    <div class="confirmation">
+      <div class="icon">&#9989;</div>
+      <h2>Registration submitted</h2>
+      <p>Thanks &mdash; we've received your subscriber list for order <strong id="confOrder"></strong>.</p>
+      <p>Our team will verify your order and set up accounts within 1&ndash;2 business days. You'll receive a separate email once your subscribers can log in.</p>
+      <div class="ref" id="confRef"></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ============================================================
+// CONFIG — edit here to add/remove products or change the
+// submission endpoint once the Worker route is live.
+// ============================================================
+const PRODUCTS = [
+  "Introduction to Regulatory Governance - 1 License",
+  "Introduction to Regulatory Governance - 10 Licenses",
+  "Introduction to Regulatory Governance - Unlimited Licenses"
+  // Add more "Product Name - N Licenses" / "- Unlimited Licenses" entries here.
+];
+const SUBMIT_ENDPOINT = 'https://clear-lms-proxy.avance.workers.dev/subreg/submit';
+// ============================================================
+
+function parseLicenseCount(name){
+  if(/unlimited/i.test(name))return null; // null = unlimited
+  const m=name.match(/(\d+)\s*licenses?/i);
+  return m?parseInt(m[1],10):1;
+}
+
+const STATE={product:'',licenseCap:null,rows:[],rowSeq:0};
+
+// Populate product dropdown
+(function(){
+  const sel=document.getElementById('productSelect');
+  PRODUCTS.forEach(p=>{const o=document.createElement('option');o.value=p;o.textContent=p;sel.appendChild(o);});
+  sel.addEventListener('change',onProductChange);
+})();
+
+function newRow(agencyDefault){
+  STATE.rowSeq++;
+  return{id:STATE.rowSeq,firstName:'',lastName:'',email:'',jobTitle:'',agency:agencyDefault||document.getElementById('agencyName').value.trim(),errors:{}};
+}
+
+function onProductChange(){
+  const name=document.getElementById('productSelect').value;
+  STATE.product=name;
+  clearFieldError('fg_product');
+  if(!name){
+    document.getElementById('subscriberPanel').style.display='none';
+    document.getElementById('reviewPanel').classList.add('hidden');
+    return;
+  }
+  STATE.licenseCap=parseLicenseCount(name);
+  const startCount=STATE.licenseCap===null?5:Math.min(STATE.licenseCap,30);
+  const agencyDefault=document.getElementById('agencyName').value.trim();
+  STATE.rows=[];
+  for(let i=0;i<Math.max(startCount,1);i++)STATE.rows.push(newRow(agencyDefault));
+  document.getElementById('subscriberPanel').style.display='block';
+  renderRows();
+  updateReview();
+}
+
+document.getElementById('agencyName').addEventListener('input',()=>{
+  clearFieldError('fg_agencyName');
+});
+document.getElementById('orderNumber').addEventListener('input',()=>clearFieldError('fg_orderNumber'));
+document.getElementById('purchaserName').addEventListener('input',()=>clearFieldError('fg_purchaserName'));
+
+function esc(s){if(s==null)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function isValidEmail(e){return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);}
+
+function rowIsBlank(r){return!r.firstName.trim()&&!r.lastName.trim()&&!r.email.trim();}
+function rowIsFilled(r){return!!(r.firstName.trim()&&r.lastName.trim()&&r.email.trim());}
+
+function validateRow(r){
+  r.errors={};
+  if(rowIsBlank(r))return; // untouched trailing row — not an error yet
+  if(!r.firstName.trim())r.errors.firstName=true;
+  if(!r.lastName.trim())r.errors.lastName=true;
+  if(!r.email.trim())r.errors.email=true;
+  else if(!isValidEmail(r.email.trim()))r.errors.email=true;
+}
+
+function checkDuplicateEmails(){
+  const seen={};
+  STATE.rows.forEach(r=>{
+    const e=r.email.trim().toLowerCase();
+    if(!e)return;
+    seen[e]=(seen[e]||0)+1;
+  });
+  STATE.rows.forEach(r=>{
+    const e=r.email.trim().toLowerCase();
+    if(e&&seen[e]>1)r.errors.email=true;
+  });
+}
+
+function maybeAutoAddRow(){
+  const last=STATE.rows[STATE.rows.length-1];
+  if(last&&rowIsFilled(last)){
+    STATE.rows.push(newRow());
+  }
+}
+
+function renderRows(){
+  const tbody=document.getElementById('subscriberBody');
+  STATE.rows.forEach(validateRow);
+  checkDuplicateEmails();
+  let h='';
+  STATE.rows.forEach((r,i)=>{
+    h+='<tr>'
+      +'<td class="row-num">'+(i+1)+'</td>'
+      +'<td><input type="text" data-id="'+r.id+'" data-f="firstName" class="'+(r.errors.firstName?'cell-error':'')+'" value="'+esc(r.firstName)+'"></td>'
+      +'<td><input type="text" data-id="'+r.id+'" data-f="lastName" class="'+(r.errors.lastName?'cell-error':'')+'" value="'+esc(r.lastName)+'"></td>'
+      +'<td><input type="text" data-id="'+r.id+'" data-f="email" class="'+(r.errors.email?'cell-error':'')+'" value="'+esc(r.email)+'"></td>'
+      +'<td><input type="text" data-id="'+r.id+'" data-f="jobTitle" value="'+esc(r.jobTitle)+'"></td>'
+      +'<td><input type="text" data-id="'+r.id+'" data-f="agency" value="'+esc(r.agency)+'"></td>'
+      +'<td class="row-remove" data-remove="'+r.id+'" title="Remove row">&times;</td>'
+      +'</tr>';
+  });
+  tbody.innerHTML=h;
+  tbody.querySelectorAll('input').forEach(inp=>{
+    inp.addEventListener('input',onCellInput);
+  });
+  tbody.querySelectorAll('.row-remove').forEach(el=>{
+    el.addEventListener('click',()=>{
+      if(STATE.rows.length<=1)return;
+      STATE.rows=STATE.rows.filter(r=>r.id!==parseInt(el.dataset.remove));
+      renderRows();
+      updateReview();
+    });
+  });
+  renderLicenseCounter();
+}
+
+function onCellInput(e){
+  const id=parseInt(e.target.dataset.id);
+  const field=e.target.dataset.f;
+  const row=STATE.rows.find(r=>r.id===id);
+  if(!row)return;
+  row[field]=e.target.value;
+  const wasLast=STATE.rows[STATE.rows.length-1].id===id;
+  if(wasLast&&rowIsFilled(row)){
+    maybeAutoAddRow();
+    renderRows();
+    // restore focus roughly to same field of same row after re-render
+    const again=document.querySelector('input[data-id="'+id+'"][data-f="'+field+'"]');
+    if(again){again.focus();const v=again.value;again.setSelectionRange(v.length,v.length);}
+  }else{
+    validateRow(row);
+    checkDuplicateEmails();
+    e.target.classList.toggle('cell-error',!!row.errors[field]);
+  }
+  updateReview();
+}
+
+function renderLicenseCounter(){
+  const el=document.getElementById('licenseCounter');
+  const filledCount=STATE.rows.filter(rowIsFilled).length;
+  if(STATE.licenseCap===null){
+    el.className='license-counter';
+    el.innerHTML='<strong>'+filledCount+'</strong> subscriber'+(filledCount===1?'':'s')+' entered &mdash; unlimited license.';
+  }else{
+    const over=filledCount>STATE.licenseCap;
+    el.className='license-counter'+(over?' over':'');
+    el.innerHTML='<strong>'+filledCount+'</strong> of <strong>'+STATE.licenseCap+'</strong> purchased license'+(STATE.licenseCap===1?'':'s')+' entered'
+      +(over?' &mdash; this is more than your order covers. We\'ll follow up if we can\'t confirm the extra seats.':'.');
+  }
+}
+
+// ============================================================
+// Template download
+// ============================================================
+document.getElementById('downloadTemplateBtn').addEventListener('click',()=>{
+  const headers=['First Name','Last Name','Email Address','Job Title','Agency'];
+  const example=['Jane','Smith','jane.smith@example.gov','Compliance Analyst','Example State Board'];
+  const ws=XLSX.utils.aoa_to_sheet([headers,example]);
+  ws['!cols']=headers.map(h=>({wch:Math.max(h.length+4,20)}));
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,'Subscribers');
+  XLSX.writeFile(wb,'CLEAR_Subscriber_Registration_Template.xlsx');
+});
+
+// ============================================================
+// Template upload
+// ============================================================
+document.getElementById('uploadTemplateBtn').addEventListener('click',()=>{
+  document.getElementById('uploadFileInput').click();
+});
+document.getElementById('uploadFileInput').addEventListener('change',function(e){
+  const file=e.target.files[0];
+  if(!file)return;
+  if(STATE.rows.some(r=>!rowIsBlank(r))){
+    if(!confirm('This will replace your current entries with the file\'s contents. Continue?')){this.value='';return;}
+  }
+  const statusEl=document.getElementById('uploadStatus');
+  statusEl.className='status-bar info';statusEl.innerHTML='Reading file...';
+  const reader=new FileReader();
+  reader.onload=function(evt){
+    try{
+      const wb=XLSX.read(evt.target.result,{type:'array'});
+      const ws=wb.Sheets[wb.SheetNames[0]];
+      const data=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
+      if(data.length<1){statusEl.className='status-bar error';statusEl.innerHTML='The file appears to be empty.';return;}
+      const hdr=data[0].map(h=>String(h).trim().toLowerCase());
+      const col=names=>hdr.findIndex(h=>names.includes(h));
+      const iF=col(['first name','firstname']);
+      const iL=col(['last name','lastname']);
+      const iE=col(['email address','email']);
+      const iJ=col(['job title','title']);
+      const iA=col(['agency','agency / organization','organization']);
+      if(iF<0||iL<0||iE<0){
+        statusEl.className='status-bar error';
+        statusEl.innerHTML='The file is missing required columns. It must include <strong>First Name</strong>, <strong>Last Name</strong>, and <strong>Email Address</strong> &mdash; download the template above if you\'re not sure of the format.';
+        return;
+      }
+      const agencyDefault=document.getElementById('agencyName').value.trim();
+      const rows=data.slice(1).filter(r=>r.some(c=>String(c).trim())).map(r=>{
+        return newRowFromValues(
+          String(r[iF]||'').trim(),
+          String(r[iL]||'').trim(),
+          String(r[iE]||'').trim(),
+          iJ>=0?String(r[iJ]||'').trim():'',
+          iA>=0&&String(r[iA]||'').trim()?String(r[iA]).trim():agencyDefault
+        );
+      });
+      if(!rows.length){
+        statusEl.className='status-bar error';statusEl.innerHTML='No subscriber rows were found in the file.';return;
+      }
+      rows.push(newRow(agencyDefault)); // trailing blank row for further manual entry
+      STATE.rows=rows;
+      renderRows();
+      updateReview();
+      const problemCount=STATE.rows.filter(r=>Object.keys(r.errors).length>0).length;
+      if(problemCount>0){
+        statusEl.className='status-bar error';
+        statusEl.innerHTML='Loaded '+(rows.length-1)+' row(s). <strong>'+problemCount+' row(s) need attention</strong> &mdash; fixed cells are outlined in red in the table below.';
+      }else{
+        statusEl.className='status-bar success';
+        statusEl.innerHTML='Loaded '+(rows.length-1)+' subscriber(s) successfully. Review the table below, then submit.';
+      }
+    }catch(err){
+      statusEl.className='status-bar error';statusEl.innerHTML='Could not read that file: '+esc(err.message);
+    }
+  };
+  reader.readAsArrayBuffer(file);
+  this.value='';
+});
+
+function newRowFromValues(firstName,lastName,email,jobTitle,agency){
+  STATE.rowSeq++;
+  return{id:STATE.rowSeq,firstName,lastName,email,jobTitle,agency,errors:{}};
+}
+
+// ============================================================
+// Review + submit
+// ============================================================
+function clearFieldError(id){document.getElementById(id).classList.remove('invalid');}
+function setFieldError(id){document.getElementById(id).classList.add('invalid');}
+
+function updateReview(){
+  const hasProduct=!!STATE.product;
+  document.getElementById('reviewPanel').classList.toggle('hidden',!hasProduct);
+  if(!hasProduct)return;
+  const filled=STATE.rows.filter(rowIsFilled);
+  const hasErrors=STATE.rows.some(r=>Object.keys(r.errors).length>0);
+  const topFieldsOk=document.getElementById('orderNumber').value.trim()
+    &&document.getElementById('purchaserName').value.trim()
+    &&document.getElementById('agencyName').value.trim();
+  const ready=topFieldsOk&&filled.length>0&&!hasErrors;
+  document.getElementById('submitBtn').disabled=!ready;
+  const note=document.getElementById('submitNote');
+  if(!topFieldsOk)note.textContent='Complete order number, your name, and agency above to continue.';
+  else if(filled.length===0)note.textContent='Add at least one subscriber before submitting.';
+  else if(hasErrors)note.textContent='Fix the highlighted subscriber rows before submitting.';
+  else note.textContent='';
+  document.getElementById('reviewSummary').innerHTML=
+    '<strong>Order:</strong> '+esc(document.getElementById('orderNumber').value.trim()||'—')+'<br>'
+    +'<strong>Product:</strong> '+esc(STATE.product)+'<br>'
+    +'<strong>Purchaser:</strong> '+esc(document.getElementById('purchaserName').value.trim()||'—')+'<br>'
+    +'<strong>Agency:</strong> '+esc(document.getElementById('agencyName').value.trim()||'—')+'<br>'
+    +'<strong>Subscribers ready to submit:</strong> '+filled.length;
+}
+['orderNumber','purchaserName','agencyName'].forEach(id=>{
+  document.getElementById(id).addEventListener('input',updateReview);
+});
+
+document.getElementById('submitBtn').addEventListener('click',async()=>{
+  if(document.getElementById('hp').value){return;} // honeypot tripped — silently drop
+  const orderNumber=document.getElementById('orderNumber').value.trim();
+  const purchaserName=document.getElementById('purchaserName').value.trim();
+  const agencyName=document.getElementById('agencyName').value.trim();
+  let missing=false;
+  if(!orderNumber){setFieldError('fg_orderNumber');missing=true;}
+  if(!STATE.product){setFieldError('fg_product');missing=true;}
+  if(!purchaserName){setFieldError('fg_purchaserName');missing=true;}
+  if(!agencyName){setFieldError('fg_agencyName');missing=true;}
+  if(missing)return;
+
+  const subscribers=STATE.rows.filter(rowIsFilled).map(r=>({
+    firstName:r.firstName.trim(),lastName:r.lastName.trim(),email:r.email.trim().toLowerCase(),
+    jobTitle:r.jobTitle.trim(),agency:r.agency.trim()||agencyName
+  }));
+
+  const btn=document.getElementById('submitBtn');
+  btn.disabled=true;btn.innerHTML='<span class="spinner"></span> Submitting...';
+  const statusEl=document.getElementById('submitStatus');
+  statusEl.className='status-bar info';statusEl.innerHTML='Sending your registration...';
+
+  const payload={
+    orderNumber,productName:STATE.product,purchaserName,agencyName,
+    subscribers,licenseCap:STATE.licenseCap,submittedAt:new Date().toISOString()
+  };
+
+  try{
+    const res=await fetch(SUBMIT_ENDPOINT,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(payload)
+    });
+    if(!res.ok)throw new Error('Server responded with '+res.status);
+    let data={};
+    try{data=await res.json();}catch(e){}
+    showConfirmation(orderNumber,data.confirmationId);
+  }catch(err){
+    statusEl.className='status-bar error';
+    statusEl.innerHTML='We couldn\'t submit your registration right now (' +esc(err.message)+'). Please try again in a few minutes, or contact CLEAR Learning directly if this keeps happening.';
+    btn.disabled=false;btn.innerHTML='Submit Registration';
+  }
+});
+
+function showConfirmation(orderNumber,confirmationId){
+  document.getElementById('regForm').classList.add('hidden');
+  document.getElementById('introBlock').classList.add('hidden');
+  document.getElementById('confOrder').textContent=orderNumber;
+  document.getElementById('confRef').textContent='Confirmation: '+(confirmationId||('ORD-'+orderNumber+'-'+Date.now().toString().slice(-6)));
+  document.getElementById('confirmationPanel').classList.remove('hidden');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+</script>
+</body>
+</html>
