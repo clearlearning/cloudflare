@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Meeting availability</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --burgundy:#64092C; --burgundy-2:#8A1E47; --wash:#F5EDF0;
+  --gold:#DDA838; --gold-wash:#FCF4E2;
+  --charcoal:#484848; --ink:#262626; --muted:#6B6B72;
+  --line:#DCDCE1; --page:#F6F6F7; --white:#fff; --blue:#084D78;
+  --ok:#1D6B3A; --err:#A1121F;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{font-family:"Open Sans",system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--ink);background:var(--page);line-height:1.5;font-size:16px}
+h1,h2,h3{font-family:"Trebuchet MS","Open Sans",sans-serif}
+.wrap{max-width:1120px;margin:0 auto;padding:0 1.25rem}
+.masthead{background:var(--burgundy);color:#fff;border-bottom:4px solid var(--gold)}
+.masthead .wrap{padding-top:2.25rem;padding-bottom:2rem}
+.masthead h1{font-size:clamp(1.9rem,4vw,2.7rem);line-height:1.1;margin:0 0 .6rem;letter-spacing:-.01em}
+.masthead p{max-width:64ch;margin:0;color:#F3E3E9}
+main .wrap{padding-top:1.75rem;padding-bottom:8rem}
+.panel{background:#fff;border:1px solid var(--line);border-radius:10px;padding:1.25rem 1.25rem 1.35rem}
+.panel + .panel{margin-top:1.25rem}
+.panel h2{font-size:1.25rem;margin:0 0 .25rem;color:var(--burgundy)}
+.panel > .sub{margin:0 0 1rem;color:var(--muted);font-size:.92rem;max-width:72ch}
+.fields{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.fields .full{grid-column:1/-1}
+label{display:block;font-weight:600;font-size:.9rem;margin-bottom:.3rem}
+.hint{font-weight:400;color:var(--muted);font-size:.82rem}
+input[type=text],input[type=email],input[type=password],input[type=number],textarea{width:100%;font:inherit;padding:.6rem .7rem;border:1px solid #BEBEC6;border-radius:6px;background:#fff;color:var(--ink)}
+textarea{min-height:4.5rem;resize:vertical}
+input:focus-visible,textarea:focus-visible,button:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.btn{font:inherit;font-weight:600;border-radius:6px;padding:.62rem 1.15rem;border:1px solid var(--burgundy);background:var(--burgundy);color:#fff;cursor:pointer;white-space:nowrap}
+.btn:hover{background:var(--burgundy-2)}
+.btn.secondary{background:#fff;color:var(--burgundy)}
+.btn.secondary:hover{background:var(--wash)}
+.btn.small{padding:.35rem .75rem;font-size:.85rem}
+.btn:disabled{opacity:.6;cursor:wait}
+.linkbtn{background:none;border:0;padding:0;font:inherit;color:var(--blue);text-decoration:underline;cursor:pointer}
+.msg{margin:0;font-size:.92rem}
+.msg.ok{color:var(--ok)} .msg.err{color:var(--err)}
+
+/* toolbar + legend */
+.toolbar{display:flex;flex-wrap:wrap;gap:.75rem 1.5rem;align-items:center;justify-content:space-between;margin-bottom:.25rem}
+.seg{display:inline-flex;border:1px solid var(--burgundy);border-radius:6px;overflow:hidden}
+.seg button{font:inherit;font-size:.85rem;border:0;background:#fff;color:var(--burgundy);padding:.35rem .75rem;cursor:pointer}
+.seg button[aria-pressed=true]{background:var(--burgundy);color:#fff}
+.legend{display:flex;flex-wrap:wrap;gap:.5rem 1.1rem;font-size:.82rem;color:var(--charcoal);margin:.25rem 0 0;padding:0;list-style:none}
+.legend li{display:flex;align-items:center;gap:.4rem}
+.sw{width:1.1rem;height:.85rem;border-radius:3px;border:1px solid var(--line);display:inline-block}
+.sw.on{background:var(--burgundy);border-color:var(--burgundy)}
+.sw.lonely{background:repeating-linear-gradient(135deg,var(--burgundy) 0 4px,var(--burgundy-2) 4px 8px);outline:2px dashed var(--gold);outline-offset:-2px}
+.sw.off{background:#ECECEF;border-color:transparent}
+
+/* grid */
+.week{margin-top:1.6rem}
+.week h3{font-size:1.05rem;margin:0 0 .5rem;color:var(--charcoal);font-weight:700}
+.grid-scroll{overflow-x:auto;padding:2px 2px .35rem}
+.grid{display:grid;gap:3px;min-width:min-content}
+.corner{font-size:.72rem;color:var(--muted);align-self:end;text-align:right;padding:0 .5rem .35rem 0}
+.dayhead,.rowhead{font:inherit;background:none;border:0;color:var(--charcoal);border-radius:6px}
+.dayhead{display:flex;flex-direction:column;align-items:center;padding:.3rem .2rem;font-size:.78rem;line-height:1.25}
+.dayhead strong{font-size:.95rem;color:var(--ink)}
+.rowhead{text-align:right;padding:0 .55rem;font-size:.78rem;white-space:nowrap;display:flex;align-items:center;justify-content:flex-end}
+button.dayhead,button.rowhead{cursor:pointer}
+button.dayhead:hover,button.rowhead:hover{background:var(--wash)}
+.cell{height:2.15rem;min-width:4.25rem;border:1px solid var(--line);background:#fff;border-radius:4px;font:inherit;font-size:.72rem;color:#9A9AA2;cursor:pointer;user-select:none;-webkit-user-select:none;touch-action:manipulation;padding:0 .2rem}
+.cell:hover{border-color:var(--burgundy-2)}
+.cell.on{background:var(--burgundy);border-color:var(--burgundy);color:#fff}
+.cell.on.lonely{background:repeating-linear-gradient(135deg,var(--burgundy) 0 6px,var(--burgundy-2) 6px 12px);outline:2px dashed var(--gold);outline-offset:-3px}
+.cell:disabled{background:#ECECEF;border-color:transparent;cursor:not-allowed;color:transparent}
+.cell.heat{cursor:pointer;font-size:.85rem;font-weight:700;color:var(--charcoal)}
+.cell.heat.dark{color:#fff}
+.cell.heat.sel{outline:3px solid var(--gold);outline-offset:-1px}
+
+/* save bar */
+.savebar{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--line);box-shadow:0 -6px 18px rgba(60,10,30,.08);padding-bottom:env(safe-area-inset-bottom,0px);z-index:5}
+.savebar .wrap{display:flex;gap:1rem;align-items:center;justify-content:space-between;padding-top:.8rem;padding-bottom:.8rem}
+.savebar .count{font-weight:600}
+.savebar .warn{display:block;font-weight:400;font-size:.85rem;color:#8A5A00}
+.savebar .msg{flex:1;text-align:right}
+
+/* organizer */
+.statrow{display:flex;flex-wrap:wrap;gap:.75rem;align-items:center}
+.statrow .big{font-family:"Trebuchet MS",sans-serif;font-size:1.6rem;font-weight:700;color:var(--burgundy);margin-right:.25rem}
+.statrow .spacer{flex:1}
+.settings{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1rem;align-items:end;margin-bottom:1rem}
+.check{display:flex;gap:.5rem;align-items:center;font-weight:600;font-size:.9rem;padding-bottom:.6rem}
+.check input{width:1.1rem;height:1.1rem;accent-color:var(--burgundy)}
+.pins{display:flex;flex-wrap:wrap;gap:.4rem;align-items:center;margin:0 0 1rem;font-size:.88rem}
+.pin{display:inline-flex;gap:.35rem;align-items:center;background:var(--gold-wash);border:1px solid var(--gold);border-radius:999px;padding:.15rem .3rem .15rem .65rem}
+.pin button{border:0;background:none;cursor:pointer;font-size:1rem;line-height:1;color:var(--charcoal);padding:0 .25rem}
+.option{border-top:1px solid var(--line);padding-top:1.1rem;margin-top:1.1rem}
+.option-head{display:flex;flex-wrap:wrap;gap:.25rem 1rem;align-items:baseline}
+.option-head h3{margin:0;font-size:1.1rem;color:var(--burgundy)}
+.option-head p{margin:0;color:var(--muted);font-size:.9rem;flex:1}
+.meetings{list-style:none;margin:.8rem 0 0;padding:0;display:grid;gap:.6rem}
+.meetings li{display:grid;grid-template-columns:minmax(190px,240px) 1fr;gap:1rem;padding:.75rem .9rem;border-left:4px solid var(--gold);background:#FBFBFC;border-radius:0 8px 8px 0}
+.when strong{display:block}
+.when span{color:var(--muted);font-size:.9rem}
+.chips{display:flex;flex-wrap:wrap;gap:.35rem}
+.chip{background:var(--wash);color:var(--burgundy);border-radius:999px;padding:.12rem .6rem;font-size:.85rem;font-weight:600}
+.alts,.short,.unplaced{margin:.45rem 0 0;font-size:.85rem;color:var(--muted)}
+.short{color:var(--err);font-weight:600}
+.unplaced{margin-top:.8rem}
+.cellinfo{margin-top:1rem;padding:.9rem 1rem;background:var(--gold-wash);border-radius:8px;font-size:.92rem}
+.cellinfo h4{margin:0 0 .35rem;font-size:.95rem}
+.cellinfo p{margin:.2rem 0}
+table{border-collapse:collapse;width:100%;font-size:.88rem}
+th,td{text-align:left;padding:.5rem .6rem;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-weight:700;color:var(--charcoal);background:#FAFAFB}
+td.num{font-weight:700;color:var(--burgundy);text-align:center}
+.table-scroll{overflow-x:auto}
+.empty{color:var(--muted);margin:0}
+.progress{color:var(--muted);font-size:.9rem;margin:.5rem 0 0}
+[hidden]{display:none !important}
+
+@media (max-width:680px){
+  .fields{grid-template-columns:1fr}
+  .savebar .wrap{flex-wrap:wrap}
+  .savebar .msg{text-align:left;flex-basis:100%;order:3}
+  .meetings li{grid-template-columns:1fr;gap:.4rem}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none !important}}
+</style>
+</head>
+<body>
+
+<header class="masthead">
+  <div class="wrap">
+    <h1 id="pageTitle">Meeting availability</h1>
+    <p id="pageIntro"></p>
+  </div>
+</header>
+
+<!-- ============ RESPONDENT VIEW ============ -->
+<main id="respondView" hidden>
+  <div class="wrap">
+    <section class="panel" aria-labelledby="youHead">
+      <h2 id="youHead">Your details</h2>
+      <p class="sub">Already responded? Enter the same email to load your saved answers and update them.</p>
+      <div class="fields">
+        <div><label for="name">Name</label><input id="name" type="text" autocomplete="name" maxlength="100"></div>
+        <div><label for="email">Email</label><input id="email" type="email" autocomplete="email" maxlength="200"></div>
+      </div>
+    </section>
+
+    <section class="panel" aria-labelledby="availHead">
+      <h2 id="availHead">When are you available?</h2>
+      <p class="sub" id="availSub">Mark every hour you could join. Click or drag across cells, or select a date or time label to fill that whole column or row. Meetings are 2 hours, so mark at least two hours in a row.</p>
+      <div class="toolbar">
+        <ul class="legend" aria-label="Legend">
+          <li><span class="sw on"></span>Available</li>
+          <li><span class="sw lonely"></span>Single hour, too short for a meeting</li>
+          <li><span class="sw off"></span>Not an option</li>
+        </ul>
+        <div style="display:flex;gap:.75rem;align-items:center;flex-wrap:wrap">
+          <div class="seg" id="tzSeg" hidden role="group" aria-label="Time zone for cell labels">
+            <button type="button" data-tz="mt" aria-pressed="true">Mountain Time</button>
+            <button type="button" data-tz="local" aria-pressed="false" id="tzLocalBtn">My time</button>
+          </div>
+          <button type="button" class="linkbtn" id="clearAll">Clear all</button>
+        </div>
+      </div>
+      <div id="grid"></div>
+    </section>
+
+    <section class="panel" aria-labelledby="notesHead">
+      <h2 id="notesHead">Anything else?</h2>
+      <p class="sub">Optional. For example, a preference between dates or a conflict that might change.</p>
+      <label for="notes" class="hint" style="font-weight:400">Notes for the organizer</label>
+      <textarea id="notes" maxlength="1000"></textarea>
+    </section>
+  </div>
+
+  <div class="savebar">
+    <div class="wrap">
+      <div><span class="count" id="countText">No hours marked yet</span><span class="warn" id="warnText" hidden></span></div>
+      <p class="msg" id="saveMsg" role="status" aria-live="polite"></p>
+      <button type="button" class="btn" id="saveBtn">Save availability</button>
+    </div>
+  </div>
+</main>
+
+<!-- ============ ORGANIZER VIEW ============ -->
+<main id="orgView" hidden>
+  <div class="wrap">
+    <section class="panel" id="tokenPanel" hidden>
+      <h2>Organizer sign-in</h2>
+      <p class="sub">Enter the organizer key set on the Worker (the ADMIN_TOKEN secret).</p>
+      <div class="fields">
+        <div><label for="tokenInput">Organizer key</label><input id="tokenInput" type="password" autocomplete="off"></div>
+        <div style="align-self:end"><button type="button" class="btn" id="tokenBtn">Load responses</button></div>
+      </div>
+      <p class="msg err" id="tokenMsg" role="alert" style="margin-top:.75rem"></p>
+    </section>
+
+    <div id="orgBody" hidden>
+      <section class="panel">
+        <div class="statrow">
+          <span class="big" id="respCount">0</span><span id="respLabel">responses</span>
+          <span class="spacer"></span>
+          <button type="button" class="btn secondary small" id="refreshBtn">Refresh</button>
+          <button type="button" class="btn secondary small" id="csvBtn">Export CSV</button>
+          <button type="button" class="linkbtn" id="signOutBtn">Sign out</button>
+        </div>
+        <p class="msg" id="orgMsg" role="status" aria-live="polite" style="margin-top:.5rem"></p>
+      </section>
+
+      <section class="panel" aria-labelledby="schedHead">
+        <h2 id="schedHead">Build the schedule</h2>
+        <p class="sub">Finds the set of 2-hour times that fills every meeting to the minimum first, then places as many different people as possible, then fills toward the maximum. Pin a time from the list below to force it into every option.</p>
+        <div class="settings">
+          <div><label for="setMeetings">Meetings</label><input id="setMeetings" type="number" min="1" max="12"></div>
+          <div><label for="setMin">Minimum people</label><input id="setMin" type="number" min="1" max="50"></div>
+          <div><label for="setMax">Maximum people</label><input id="setMax" type="number" min="1" max="50"></div>
+          <div><label for="setPer">Meetings per person</label><input id="setPer" type="number" min="1" max="12"></div>
+          <label class="check"><input id="setOnePerDay" type="checkbox" checked> One meeting per day</label>
+          <div><button type="button" class="btn" id="runBtn">Find best schedule</button></div>
+        </div>
+        <div class="pins" id="pins"></div>
+        <div id="results"><p class="empty">Select Find best schedule to see options.</p></div>
+        <p class="progress" id="progress" hidden></p>
+      </section>
+
+      <section class="panel" aria-labelledby="heatHead">
+        <h2 id="heatHead">Availability by hour</h2>
+        <p class="sub">Each number is how many people are free that hour (Mountain Time). Select a cell to see who.</p>
+        <div id="heatGrid"></div>
+        <div class="cellinfo" id="cellInfo" hidden></div>
+      </section>
+
+      <section class="panel" aria-labelledby="winHead">
+        <h2 id="winHead">Best 2-hour windows</h2>
+        <p class="sub">Every possible meeting time, ranked by how many people can attend the full 2 hours.</p>
+        <div class="table-scroll"><table>
+          <thead><tr><th>Date</th><th>Time (MT)</th><th>Available</th><th>Who</th><th></th></tr></thead>
+          <tbody id="winBody"></tbody>
+        </table></div>
+        <p style="margin:.75rem 0 0"><button type="button" class="linkbtn" id="moreWins">Show all windows</button></p>
+      </section>
+
+      <section class="panel" aria-labelledby="respHead">
+        <h2 id="respHead">Responses</h2>
+        <div class="table-scroll"><table>
+          <thead><tr><th>Name</th><th>Email</th><th>Hours</th><th>2-hr windows</th><th>Notes</th><th>Updated</th><th></th></tr></thead>
+          <tbody id="respBody"></tbody>
+        </table></div>
+      </section>
+    </div>
+  </div>
+</main>
+
+<script>
+/* =====================================================================
+   CONFIG — edit this block for each poll
+   ===================================================================== */
+const CONFIG = {
+  workerUrl: 'https://clear-meeting-poll.avance.workers.dev',
+  pollId: 'oct-nov-2026-meetings',          // lowercase letters, numbers, hyphens
+  title: 'Meeting availability',
+  intro: 'We are scheduling four 2-hour virtual meetings between October 15 and November 20, with 5 to 6 people in each. Mark every hour you are available. All times are Mountain Time.',
+  timeZone: 'America/Denver',
+  startHour: 8,        // 8 AM MT
+  endHour: 16,         // 4 PM MT (last meeting must end by this hour)
+  meetingHours: 2,
+  defaults: { meetings: 4, min: 5, max: 6 },
+  dates: [
+    { date: '2026-10-15' }, { date: '2026-10-16' },
+    { date: '2026-10-19' }, { date: '2026-10-20' }, { date: '2026-10-21' }, { date: '2026-10-22' }, { date: '2026-10-23' },
+    { date: '2026-10-26' }, { date: '2026-10-27' }, { date: '2026-10-28' },
+    { date: '2026-11-02' }, { date: '2026-11-03' }, { date: '2026-11-04', startHour: 10 }, { date: '2026-11-05' }, { date: '2026-11-06' },
+    { date: '2026-11-09' }, { date: '2026-11-10' }, { date: '2026-11-11' }, { date: '2026-11-12' }, { date: '2026-11-13' },
+    { date: '2026-11-16' }, { date: '2026-11-17' }, { date: '2026-11-18' }, { date: '2026-11-19' }, { date: '2026-11-20' }
+  ]
+};
+/* ===================================================================== */
+
+const API = CONFIG.workerUrl.replace(/\/$/, '') + '/poll/' + encodeURIComponent(CONFIG.pollId);
+const L = CONFIG.meetingHours;
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+/* ---------- dates & hours ---------- */
+const key = (ds, h) => ds + 'T' + String(h).padStart(2, '0');
+const parseKey = k => ({ date: k.slice(0, 10), hour: +k.slice(11, 13) });
+function ymd(ds) { const [y, m, d] = ds.split('-').map(Number); return { y, m, d }; }
+function dateObj(ds) { const { y, m, d } = ymd(ds); return new Date(Date.UTC(y, m - 1, d, 12)); }
+const fmtWd = new Intl.DateTimeFormat('en-US', { weekday: 'short', timeZone: 'UTC' });
+const fmtMd = new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' });
+const fmtLongF = new Intl.DateTimeFormat('en-US', { weekday: 'long', month: 'long', day: 'numeric', timeZone: 'UTC' });
+const fmtWdMd = ds => fmtWd.format(dateObj(ds)) + ', ' + fmtMd.format(dateObj(ds));
+const fmtLong = ds => fmtLongF.format(dateObj(ds));
+const h12 = h => (h % 12) || 12;
+const ap = h => (h % 24) < 12 ? 'AM' : 'PM';
+function rangeLabel(s, e) { return ap(s) === ap(e) ? `${h12(s)}–${h12(e)} ${ap(e)}` : `${h12(s)} ${ap(s)}–${h12(e)} ${ap(e)}`; }
+const hourLabel = h => `${h12(h)} ${ap(h)}`;
+function mondayOf(ds) { const d = dateObj(ds); d.setUTCDate(d.getUTCDate() - ((d.getUTCDay() + 6) % 7)); return d.toISOString().slice(0, 10); }
+function fmtStamp(iso) { try { return new Date(iso).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }); } catch { return iso; } }
+
+const HOURS = []; for (let h = CONFIG.startHour; h < CONFIG.endHour; h++) HOURS.push(h);
+const DATES = CONFIG.dates.map(d => ({ date: d.date, start: d.startHour ?? CONFIG.startHour, end: d.endHour ?? CONFIG.endHour }))
+  .sort((a, b) => a.date.localeCompare(b.date));
+const DATE_MAP = new Map(DATES.map(d => [d.date, d]));
+const isValid = (ds, h) => { const d = DATE_MAP.get(ds); return !!d && h >= d.start && h < d.end; };
+const VALID_KEYS = new Set();
+DATES.forEach(d => { for (let h = d.start; h < d.end; h++) VALID_KEYS.add(key(d.date, h)); });
+const WEEKS = (() => { const m = new Map(); DATES.forEach(d => { const w = mondayOf(d.date); if (!m.has(w)) m.set(w, []); m.get(w).push(d.date); }); return [...m.entries()]; })();
+const WINDOWS = [];
+DATES.forEach(d => { for (let s = d.start; s + L <= d.end; s++) WINDOWS.push({ id: key(d.date, s), date: d.date, start: s, keys: Array.from({ length: L }, (_, i) => key(d.date, s + i)) }); });
+
+/* ---------- time zones ---------- */
+const tzParts = new Intl.DateTimeFormat('en-US', { timeZone: CONFIG.timeZone, year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });
+function zonedToUtc(ds, h) {
+  const { y, m, d } = ymd(ds); const target = Date.UTC(y, m - 1, d, h); let guess = target;
+  for (let i = 0; i < 2; i++) {
+    const p = Object.fromEntries(tzParts.formatToParts(new Date(guess)).map(x => [x.type, x.value]));
+    guess += target - Date.UTC(+p.year, +p.month - 1, +p.day, (+p.hour) % 24, +p.minute);
+  }
+  return new Date(guess);
+}
+const VIEWER_TZ = Intl.DateTimeFormat().resolvedOptions().timeZone || CONFIG.timeZone;
+const fmtLocalT = new Intl.DateTimeFormat('en-US', { hour: 'numeric', minute: '2-digit', timeZone: VIEWER_TZ });
+const fmtMtT = new Intl.DateTimeFormat('en-US', { hour: 'numeric', minute: '2-digit', timeZone: CONFIG.timeZone });
+const fmtLocalYmd = new Intl.DateTimeFormat('en-CA', { year: 'numeric', month: '2-digit', day: '2-digit', timeZone: VIEWER_TZ });
+const fmtLocalWd = new Intl.DateTimeFormat('en-US', { weekday: 'short', timeZone: VIEWER_TZ });
+const LOCAL_DIFFERS = [...VALID_KEYS].some(k => { const { date, hour } = parseKey(k); const u = zonedToUtc(date, hour); return fmtLocalT.format(u) !== fmtMtT.format(u); });
+const LOCAL_ABBR = (() => { try { return new Intl.DateTimeFormat('en-US', { timeZoneName: 'short', timeZone: VIEWER_TZ }).formatToParts(new Date()).find(p => p.type === 'timeZoneName').value; } catch { return 'local'; } })();
+function localLabel(ds, h) {
+  const u = zonedToUtc(ds, h); let t = fmtLocalT.format(u).replace(':00', '');
+  if (fmtLocalYmd.format(u) !== ds) t = fmtLocalWd.format(u) + ' ' + t;
+  return t;
+}
+
+/* ---------- shared grid builder ---------- */
+function buildGrid(root, mode) {
+  const interactive = mode === 'respond';
+  const cells = new Map(); let html = '';
+  for (const [wk, days] of WEEKS) {
+    html += `<section class="week"><h3>Week of ${fmtMd.format(dateObj(wk))}</h3><div class="grid-scroll"><div class="grid" style="grid-template-columns:5.6rem repeat(${days.length},minmax(4.25rem,1fr))">`;
+    html += `<div class="corner">MT</div>`;
+    for (const ds of days) {
+      const inner = `<span>${fmtWd.format(dateObj(ds))}</span><strong>${fmtMd.format(dateObj(ds))}</strong>`;
+      html += interactive
+        ? `<button type="button" class="dayhead" data-day="${ds}" aria-label="Toggle all hours on ${fmtLong(ds)}">${inner}</button>`
+        : `<div class="dayhead">${inner}</div>`;
+    }
+    for (const h of HOURS) {
+      html += interactive
+        ? `<button type="button" class="rowhead" data-row="${h}" data-week="${wk}" aria-label="Toggle ${rangeLabel(h, h + 1)} for the week of ${fmtMd.format(dateObj(wk))}">${rangeLabel(h, h + 1)}</button>`
+        : `<div class="rowhead">${rangeLabel(h, h + 1)}</div>`;
+      for (const ds of days) {
+        const k = key(ds, h), valid = isValid(ds, h);
+        html += `<button type="button" class="cell${mode === 'heat' ? ' heat' : ''}" data-key="${k}" ${valid ? '' : 'disabled'} aria-label="${esc(fmtLong(ds))}, ${rangeLabel(h, h + 1)} Mountain Time${valid ? '' : ', not an option'}"></button>`;
+      }
+    }
+    html += `</div></div></section>`;
+  }
+  root.innerHTML = html;
+  root.querySelectorAll('.cell').forEach(c => cells.set(c.dataset.key, c));
+  return cells;
+}
+
+/* =====================================================================
+   RESPONDENT VIEW
+   ===================================================================== */
+const selected = new Set();
+let rCells = null, showLocal = false, loadedFor = '', respondInit = false;
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+const STORE_EMAIL = 'poll_' + CONFIG.pollId + '_email';
+
+function coveredKeys(set) { const c = new Set(); WINDOWS.forEach(w => { if (w.keys.every(k => set.has(k))) w.keys.forEach(k => c.add(k)); }); return c; }
+
+function setCellLabels() {
+  for (const [k, c] of rCells) { if (c.disabled) continue; const { date, hour } = parseKey(k); c.textContent = showLocal ? localLabel(date, hour) : hourLabel(hour); }
+}
+function refreshCells() {
+  const covered = coveredKeys(selected);
+  for (const [k, c] of rCells) {
+    if (c.disabled) continue;
+    const on = selected.has(k);
+    c.classList.toggle('on', on); c.classList.toggle('lonely', on && !covered.has(k)); c.setAttribute('aria-pressed', on);
+  }
+  const days = new Set([...selected].map(k => k.slice(0, 10)));
+  const lonely = [...selected].filter(k => !covered.has(k)).length;
+  $('#countText').textContent = selected.size ? `${selected.size} hour${selected.size === 1 ? '' : 's'} marked across ${days.size} day${days.size === 1 ? '' : 's'}` : 'No hours marked yet';
+  const warn = $('#warnText');
+  warn.hidden = !lonely;
+  warn.textContent = lonely ? `${lonely} single hour${lonely === 1 ? '' : 's'} can't fit a 2-hour meeting on ${lonely === 1 ? 'its' : 'their'} own.` : '';
+}
+function setKey(k, on) { if (!VALID_KEYS.has(k)) return; on ? selected.add(k) : selected.delete(k); }
+function toggleGroup(keys) { keys = keys.filter(k => VALID_KEYS.has(k)); const allOn = keys.every(k => selected.has(k)); keys.forEach(k => setKey(k, !allOn)); refreshCells(); }
+function setMsg(el, type, text) { el.className = 'msg' + (type ? ' ' + type : ''); el.textContent = text; }
+
+function initRespond() {
+  if (respondInit) return; respondInit = true;
+  const root = $('#grid');
+  rCells = buildGrid(root, 'respond'); setCellLabels(); refreshCells();
+
+  if (LOCAL_DIFFERS) {
+    $('#tzSeg').hidden = false; $('#tzLocalBtn').textContent = `My time (${LOCAL_ABBR})`;
+    $('#tzSeg').addEventListener('click', e => {
+      const b = e.target.closest('button'); if (!b) return;
+      showLocal = b.dataset.tz === 'local';
+      $('#tzSeg').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', x === b));
+      setCellLabels();
+    });
+  }
+
+  let painting = null, suppressClick = false;
+  root.addEventListener('pointerdown', e => {
+    const c = e.target.closest('.cell'); if (!c || c.disabled || e.pointerType === 'touch' || e.button !== 0) return;
+    e.preventDefault(); suppressClick = true;
+    painting = { add: !selected.has(c.dataset.key) };
+    setKey(c.dataset.key, painting.add); refreshCells();
+  });
+  root.addEventListener('pointerover', e => {
+    if (!painting) return; const c = e.target.closest('.cell'); if (!c || c.disabled) return;
+    if (selected.has(c.dataset.key) !== painting.add) { setKey(c.dataset.key, painting.add); refreshCells(); }
+  });
+  window.addEventListener('pointerup', () => { painting = null; });
+  root.addEventListener('click', e => {
+    const c = e.target.closest('.cell');
+    if (c) { if (suppressClick) { suppressClick = false; return; } if (!c.disabled) { setKey(c.dataset.key, !selected.has(c.dataset.key)); refreshCells(); } return; }
+    const d = e.target.closest('.dayhead[data-day]');
+    if (d) { const ds = d.dataset.day; toggleGroup(HOURS.map(h => key(ds, h))); return; }
+    const r = e.target.closest('.rowhead[data-row]');
+    if (r) { const days = WEEKS.find(w => w[0] === r.dataset.week)[1]; toggleGroup(days.map(ds => key(ds, +r.dataset.row))); }
+  });
+
+  $('#clearAll').addEventListener('click', () => { if (!selected.size || confirm('Clear all marked hours?')) { selected.clear(); refreshCells(); } });
+  $('#email').addEventListener('change', () => loadExisting($('#email').value.trim().toLowerCase()));
+  $('#saveBtn').addEventListener('click', save);
+
+  const remembered = localStorage.getItem(STORE_EMAIL);
+  if (remembered) { $('#email').value = remembered; loadExisting(remembered); }
+}
+
+async function loadExisting(email) {
+  if (!EMAIL_RE.test(email) || email === loadedFor) return;
+  loadedFor = email;
+  const msg = $('#saveMsg');
+  try {
+    const r = await fetch(API + '/response?email=' + encodeURIComponent(email));
+    if (r.status === 404) return;
+    if (!r.ok) throw new Error();
+    const d = await r.json();
+    if (selected.size) { setMsg(msg, '', `You already saved answers on ${fmtStamp(d.updatedAt)}. Saving now will replace them.`); return; }
+    (d.slots || []).forEach(k => setKey(k, true));
+    if (!$('#name').value.trim()) $('#name').value = d.name || '';
+    if (!$('#notes').value.trim()) $('#notes').value = d.notes || '';
+    refreshCells();
+    setMsg(msg, 'ok', `Loaded the answers you saved on ${fmtStamp(d.updatedAt)}.`);
+  } catch { /* lookup is a convenience; ignore failures */ }
+}
+
+async function save() {
+  const msg = $('#saveMsg'), btn = $('#saveBtn');
+  const name = $('#name').value.trim(), email = $('#email').value.trim().toLowerCase(), notes = $('#notes').value.trim();
+  if (!name) { setMsg(msg, 'err', 'Add your name at the top of the page.'); $('#name').focus(); return; }
+  if (!EMAIL_RE.test(email)) { setMsg(msg, 'err', 'Add a valid email at the top of the page.'); $('#email').focus(); return; }
+  if (!selected.size && !notes) { setMsg(msg, 'err', 'Mark at least one 2-hour block, or add a note if none of these times work.'); return; }
+  btn.disabled = true; btn.textContent = 'Saving…'; setMsg(msg, '', '');
+  try {
+    const r = await fetch(API + '/response', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, email, notes, slots: [...selected].sort() }) });
+    const d = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(d.error || `Save failed (${r.status}).`);
+    try { localStorage.setItem(STORE_EMAIL, email); } catch {}
+    loadedFor = email;
+    setMsg(msg, 'ok', 'Saved. Come back to this page anytime and use the same email to update your availability.');
+  } catch (err) {
+    setMsg(msg, 'err', (err.message || 'Save failed.') + ' Check your connection and try again.');
+  } finally { btn.disabled = false; btn.textContent = 'Save availability'; }
+}
+
+/* =====================================================================
+   ORGANIZER VIEW
+   ===================================================================== */
+const TOKEN_KEY = 'poll_admin_token';
+const ORG = { people: [], windows: [], keyPeople: new Map(), pins: new Set(), results: [], showAllWins: false, init: false, selCell: null };
+
+function getToken() { try { return localStorage.getItem(TOKEN_KEY) || ''; } catch { return ''; } }
+function showTokenForm(err) { $('#tokenPanel').hidden = false; $('#orgBody').hidden = true; $('#tokenMsg').textContent = err || ''; $('#tokenInput').focus(); }
+
+function initOrg() {
+  document.title = 'Organizer: ' + CONFIG.title;
+  $('#pageTitle').textContent = CONFIG.title + ': organizer view';
+  $('#pageIntro').textContent = 'Review responses and build the meeting schedule. Respondents never see this page.';
+  if (!ORG.init) {
+    ORG.init = true;
+    $('#tokenBtn').addEventListener('click', () => { const t = $('#tokenInput').value.trim(); if (!t) return; try { localStorage.setItem(TOKEN_KEY, t); } catch {} orgLoad(); });
+    $('#tokenInput').addEventListener('keydown', e => { if (e.key === 'Enter') $('#tokenBtn').click(); });
+    $('#refreshBtn').addEventListener('click', orgLoad);
+    $('#signOutBtn').addEventListener('click', () => { try { localStorage.removeItem(TOKEN_KEY); } catch {} showTokenForm(); });
+    $('#csvBtn').addEventListener('click', exportCsv);
+    $('#runBtn').addEventListener('click', runOptimizer);
+    $('#moreWins').addEventListener('click', () => { ORG.showAllWins = !ORG.showAllWins; renderWindows(); });
+    $('#winBody').addEventListener('click', e => { const b = e.target.closest('[data-pin]'); if (b) togglePin(b.dataset.pin); });
+    $('#pins').addEventListener('click', e => { const b = e.target.closest('[data-unpin]'); if (b) togglePin(b.dataset.unpin); });
+    $('#results').addEventListener('click', e => { const b = e.target.closest('[data-copy]'); if (b) copySchedule(+b.dataset.copy, b); });
+    $('#respBody').addEventListener('click', e => { const b = e.target.closest('[data-del]'); if (b) deleteResponse(b.dataset.del); });
+    $('#heatGrid').addEventListener('click', e => { const c = e.target.closest('.cell'); if (c && !c.disabled) showCellInfo(c.dataset.key); });
+    $('#setMeetings').value = CONFIG.defaults.meetings; $('#setMin').value = CONFIG.defaults.min; $('#setMax').value = CONFIG.defaults.max;
+  }
+  getToken() ? orgLoad() : showTokenForm();
+}
+
+async function orgLoad() {
+  const token = getToken(); if (!token) return showTokenForm();
+  setMsg($('#orgMsg'), '', 'Loading responses…');
+  try {
+    const r = await fetch(API + '/responses', { headers: { 'X-Admin-Token': token } });
+    if (r.status === 401) { try { localStorage.removeItem(TOKEN_KEY); } catch {} return showTokenForm('That organizer key was not accepted.'); }
+    if (!r.ok) throw new Error(`The Worker returned ${r.status}.`);
+    const d = await r.json();
+    $('#tokenPanel').hidden = true; $('#orgBody').hidden = false;
+    ORG.people = (d.responses || []).map(x => ({ ...x, slots: new Set((x.slots || []).filter(k => VALID_KEYS.has(k))) }))
+      .sort((a, b) => a.name.localeCompare(b.name));
+    computeOrg();
+    const n = ORG.people.length, per = $('#setPer');
+    if (!per.value) per.value = n >= CONFIG.defaults.meetings * CONFIG.defaults.min ? 1 : 2;
+    renderOrg();
+    setMsg($('#orgMsg'), '', `Loaded ${fmtStamp(new Date().toISOString())}. New responses can take up to a minute to appear.`);
+  } catch (err) {
+    if ($('#orgBody').hidden) showTokenForm(err.message || 'Could not reach the Worker.');
+    else setMsg($('#orgMsg'), 'err', (err.message || 'Could not reach the Worker.') + ' Try Refresh.');
+  }
+}
+
+function computeOrg() {
+  ORG.keyPeople = new Map([...VALID_KEYS].map(k => [k, []]));
+  ORG.people.forEach((p, i) => p.slots.forEach(k => ORG.keyPeople.get(k).push(i)));
+  ORG.windows = WINDOWS.map(w => {
+    const avail = new Set(ORG.people.map((_, i) => i).filter(i => w.keys.every(k => ORG.people[i].slots.has(k))));
+    return { ...w, avail };
+  });
+  ORG.people.forEach((p, i) => { p.windowCount = ORG.windows.filter(w => w.avail.has(i)).length; });
+}
+
+const nameOf = i => ORG.people[i]?.name || '?';
+const namesList = idxs => [...idxs].map(nameOf).sort((a, b) => a.localeCompare(b));
+
+function renderOrg() {
+  $('#respCount').textContent = ORG.people.length;
+  $('#respLabel').textContent = ORG.people.length === 1 ? 'response' : 'responses';
+  renderHeat(); renderWindows(); renderResponses(); renderPins();
+  $('#results').innerHTML = '<p class="empty">Select Find best schedule to see options.</p>';
+}
+
+function renderHeat() {
+  const cells = buildGrid($('#heatGrid'), 'heat');
+  const max = Math.max(1, ...[...ORG.keyPeople.values()].map(a => a.length));
+  for (const [k, c] of cells) {
+    if (c.disabled) continue;
+    const n = ORG.keyPeople.get(k).length, a = n ? 0.1 + 0.85 * (n / max) : 0;
+    c.textContent = n || '';
+    c.style.background = n ? `rgba(100,9,44,${a.toFixed(3)})` : '#fff';
+    c.classList.toggle('dark', a > 0.5);
+    c.classList.toggle('sel', k === ORG.selCell);
+    c.setAttribute('aria-label', c.getAttribute('aria-label').replace(/:.*$/, '') + `: ${n} available`);
+  }
+  if (ORG.selCell) showCellInfo(ORG.selCell);
+}
+
+function showCellInfo(k) {
+  ORG.selCell = k;
+  document.querySelectorAll('#heatGrid .cell.sel').forEach(c => c.classList.remove('sel'));
+  document.querySelector(`#heatGrid .cell[data-key="${k}"]`)?.classList.add('sel');
+  const { date, hour } = parseKey(k), yes = ORG.keyPeople.get(k) || [];
+  const no = ORG.people.map((_, i) => i).filter(i => !yes.includes(i));
+  const box = $('#cellInfo'); box.hidden = false;
+  box.innerHTML = `<h4>${esc(fmtLong(date))}, ${rangeLabel(hour, hour + 1)} MT</h4>
+    <p><strong>Available (${yes.length}):</strong> ${yes.length ? esc(namesList(yes).join(', ')) : 'Nobody'}</p>
+    <p><strong>Not available (${no.length}):</strong> ${no.length ? esc(namesList(no).join(', ')) : 'Nobody'}</p>`;
+}
+
+function renderWindows() {
+  const sorted = ORG.windows.filter(w => w.avail.size).sort((a, b) => b.avail.size - a.avail.size || a.id.localeCompare(b.id));
+  const shown = ORG.showAllWins ? sorted : sorted.slice(0, 25);
+  $('#winBody').innerHTML = shown.length ? shown.map(w => `<tr>
+      <td>${esc(fmtWdMd(w.date))}</td><td>${rangeLabel(w.start, w.start + L)}</td><td class="num">${w.avail.size}</td>
+      <td>${esc(namesList(w.avail).join(', '))}</td>
+      <td><button type="button" class="btn ${ORG.pins.has(w.id) ? '' : 'secondary '}small" data-pin="${w.id}" aria-pressed="${ORG.pins.has(w.id)}">${ORG.pins.has(w.id) ? 'Pinned' : 'Pin'}</button></td></tr>`).join('')
+    : '<tr><td colspan="5" class="empty">No full 2-hour windows yet. Share the poll link to collect responses.</td></tr>';
+  $('#moreWins').hidden = sorted.length <= 25;
+  $('#moreWins').textContent = ORG.showAllWins ? 'Show top 25 only' : `Show all ${sorted.length} windows`;
+}
+
+function togglePin(id) { ORG.pins.has(id) ? ORG.pins.delete(id) : ORG.pins.add(id); renderPins(); renderWindows(); }
+function renderPins() {
+  const box = $('#pins');
+  if (!ORG.pins.size) { box.innerHTML = ''; return; }
+  box.innerHTML = '<span>Pinned:</span>' + [...ORG.pins].sort().map(id => { const { date, hour } = parseKey(id);
+    return `<span class="pin">${esc(fmtWdMd(date))}, ${rangeLabel(hour, hour + L)}<button type="button" data-unpin="${id}" aria-label="Unpin">×</button></span>`; }).join('');
+}
+
+function renderResponses() {
+  $('#respBody').innerHTML = ORG.people.length ? ORG.people.map(p => `<tr>
+      <td>${esc(p.name)}</td><td>${esc(p.email)}</td><td class="num">${p.slots.size}</td><td class="num">${p.windowCount}</td>
+      <td>${esc(p.notes || '')}</td><td style="white-space:nowrap">${esc(fmtStamp(p.updatedAt))}</td>
+      <td><button type="button" class="linkbtn" data-del="${esc(p.email)}">Delete</button></td></tr>`).join('')
+    : '<tr><td colspan="7" class="empty">No responses yet.</td></tr>';
+}
+
+async function deleteResponse(email) {
+  const p = ORG.people.find(x => x.email === email);
+  if (!confirm(`Delete the response from ${p ? p.name : email}? This can't be undone.`)) return;
+  try {
+    const r = await fetch(API + '/response?email=' + encodeURIComponent(email), { method: 'DELETE', headers: { 'X-Admin-Token': getToken() } });
+    if (!r.ok) throw new Error(`Delete failed (${r.status}).`);
+    ORG.people = ORG.people.filter(x => x.email !== email); computeOrg(); renderOrg();
+    setMsg($('#orgMsg'), 'ok', `Deleted the response from ${p ? p.name : email}.`);
+  } catch (err) { setMsg($('#orgMsg'), 'err', err.message); }
+}
+
+function exportCsv() {
+  const q = v => '"' + String(v ?? '').replace(/"/g, '""') + '"';
+  const rows = [['Name', 'Email', 'Updated', 'Hours marked', '2-hour windows', 'Notes', 'Available hours (MT)']];
+  ORG.people.forEach(p => rows.push([p.name, p.email, p.updatedAt, p.slots.size, p.windowCount, p.notes || '',
+    [...p.slots].sort().map(k => { const { date, hour } = parseKey(k); return `${fmtWdMd(date)} ${rangeLabel(hour, hour + 1)}`; }).join('; ')]));
+  const blob = new Blob([rows.map(r => r.map(q).join(',')).join('\r\n')], { type: 'text/csv' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = CONFIG.pollId + '-responses.csv'; a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+
+/* ---------- optimizer ---------- */
+function evaluate(sel, s) {
+  const n = ORG.people.length, k = sel.length, S = n + k, T = n + k + 1, N = n + k + 2;
+  const cap = Array.from({ length: N }, () => new Int16Array(N)), adj = Array.from({ length: N }, () => []);
+  const edge = (u, v) => { adj[u].push(v); adj[v].push(u); };
+  for (let p = 0; p < n; p++) edge(S, p);
+  sel.forEach((w, m) => { edge(n + m, T); w.avail.forEach(p => { edge(p, n + m); cap[p][n + m] = 1; }); });
+  const augment = () => {
+    for (;;) {
+      const par = new Int32Array(N).fill(-1); par[S] = S; const q = [S];
+      for (let i = 0; i < q.length && par[T] < 0; i++) { const u = q[i]; for (const v of adj[u]) if (par[v] < 0 && cap[u][v] > 0) { par[v] = u; q.push(v); } }
+      if (par[T] < 0) return;
+      let b = Infinity; for (let v = T; v !== S; v = par[v]) b = Math.min(b, cap[par[v]][v]);
+      for (let v = T; v !== S; v = par[v]) { cap[par[v]][v] -= b; cap[v][par[v]] += b; }
+    }
+  };
+  // Phase 1: one meeting each, fill to minimum. Phase 2: allow repeats up to the cap. Phase 3: fill to maximum.
+  for (let p = 0; p < n; p++) cap[S][p] = 1;
+  for (let m = 0; m < k; m++) cap[n + m][T] = s.min;
+  augment();
+  if (s.per > 1) { for (let p = 0; p < n; p++) cap[S][p] += s.per - 1; augment(); }
+  if (s.max > s.min) { for (let m = 0; m < k; m++) cap[n + m][T] += s.max - s.min; augment(); }
+
+  const meetings = sel.map((w, m) => {
+    const assigned = [...w.avail].filter(p => cap[n + m][p] > 0);
+    return { w, assigned, alternates: [...w.avail].filter(p => !assigned.includes(p)) };
+  }).sort((a, b) => a.w.id.localeCompare(b.w.id));
+  const placed = new Set(meetings.flatMap(m => m.assigned));
+  const metMin = meetings.filter(m => m.assigned.length >= s.min).length;
+  const total = meetings.reduce((t, m) => t + m.assigned.length, 0);
+  const backup = meetings.reduce((t, m) => t + Math.min(m.alternates.length, 3), 0);
+  return { key: sel.map(w => w.id).sort().join('|'), meetings, placed, metMin, total, backup,
+    score: metMin * 1e9 + placed.size * 1e6 + total * 1e3 + backup };
+}
+
+async function runOptimizer() {
+  const s = { meetings: +$('#setMeetings').value || 4, min: +$('#setMin').value || 1, max: +$('#setMax').value || 1, per: +$('#setPer').value || 1, onePerDay: $('#setOnePerDay').checked };
+  const box = $('#results'), prog = $('#progress'), btn = $('#runBtn');
+  if (s.max < s.min) { box.innerHTML = '<p class="msg err">Maximum people must be at least the minimum.</p>'; return; }
+  if (!ORG.people.length) { box.innerHTML = '<p class="empty">No responses yet.</p>'; return; }
+  const compat = (a, b) => a.date !== b.date || (!s.onePerDay && Math.abs(a.start - b.start) >= L);
+  const pinned = ORG.windows.filter(w => ORG.pins.has(w.id));
+  if (pinned.length > s.meetings) { box.innerHTML = `<p class="msg err">You pinned ${pinned.length} times but asked for ${s.meetings} meetings. Unpin some or raise the meeting count.</p>`; return; }
+  for (let i = 0; i < pinned.length; i++) for (let j = i + 1; j < pinned.length; j++)
+    if (!compat(pinned[i], pinned[j])) { box.innerHTML = '<p class="msg err">Two pinned times conflict (same day or overlapping). Unpin one, or turn off One meeting per day.</p>'; return; }
+
+  const cands = ORG.windows.filter(w => w.avail.size && !ORG.pins.has(w.id));
+  const cache = new Map(), found = new Map();
+  const ev = sel => { const k = sel.map(w => w.id).sort().join('|'); if (!cache.has(k)) cache.set(k, evaluate(sel, s)); return cache.get(k); };
+  const RESTARTS = 24;
+  btn.disabled = true; prog.hidden = false;
+
+  for (let r = 0; r < RESTARTS; r++) {
+    let pool = r === 0 ? [...cands].sort((a, b) => b.avail.size - a.avail.size) : [...cands].sort(() => Math.random() - 0.5);
+    let sel = [...pinned];
+    for (const c of pool) { if (sel.length >= s.meetings) break; if (sel.every(x => compat(x, c))) sel.push(c); }
+    let best = ev(sel), improved = true;
+    while (improved) {
+      improved = false;
+      for (let i = pinned.length; i < sel.length; i++) {
+        for (const c of cands) {
+          if (sel.includes(c)) continue;
+          const others = sel.filter((_, j) => j !== i);
+          if (!others.every(x => compat(x, c))) continue;
+          const trial = [...others.slice(0, i), c, ...others.slice(i)], res = ev(trial);
+          if (res.score > best.score) { sel = trial; best = res; improved = true; }
+        }
+      }
+    }
+    found.set(best.key, best);
+    prog.textContent = `Comparing schedules… ${Math.round((r + 1) / RESTARTS * 100)}%`;
+    await new Promise(res => setTimeout(res, 0));
+  }
+  btn.disabled = false; prog.hidden = true;
+  ORG.results = [...found.values()].sort((a, b) => b.score - a.score).slice(0, 3);
+  ORG.lastSettings = s;
+  renderResults();
+}
+
+function renderResults() {
+  const s = ORG.lastSettings, box = $('#results'), n = ORG.people.length;
+  if (!ORG.results.length || !ORG.results[0].meetings.length) { box.innerHTML = '<p class="empty">No schedule fits these settings. Try fewer meetings, a lower minimum, or turn off One meeting per day.</p>'; return; }
+  box.innerHTML = ORG.results.map((r, i) => {
+    const unplaced = ORG.people.map((_, idx) => idx).filter(idx => !r.placed.has(idx));
+    const short = r.meetings.length < s.meetings ? ` Only ${r.meetings.length} non-conflicting times are available.` : '';
+    return `<article class="option">
+      <div class="option-head"><h3>Option ${i + 1}</h3>
+        <p>${r.metMin} of ${s.meetings} meetings reach ${s.min} or more people. ${r.placed.size} of ${n} respondents placed.${short}</p>
+        <button type="button" class="btn secondary small" data-copy="${i}">Copy schedule</button></div>
+      <ol class="meetings">${r.meetings.map(m => `<li>
+        <div class="when"><strong>${esc(fmtLong(m.w.date))}</strong><span>${rangeLabel(m.w.start, m.w.start + L)} MT</span></div>
+        <div class="who">
+          <div class="chips">${namesList(m.assigned).map(nm => `<span class="chip">${esc(nm)}</span>`).join('') || '<span class="empty">Nobody assigned</span>'}</div>
+          ${m.assigned.length < s.min ? `<p class="short">Needs ${s.min - m.assigned.length} more</p>` : ''}
+          ${m.alternates.length ? `<p class="alts">Also available: ${esc(namesList(m.alternates).join(', '))}</p>` : ''}
+        </div></li>`).join('')}</ol>
+      <p class="unplaced">${unplaced.length ? `Not placed: ${esc(namesList(unplaced).join(', '))}` : 'Everyone who responded is placed in a meeting.'}</p>
+    </article>`;
+  }).join('');
+}
+
+async function copySchedule(i, btn) {
+  const r = ORG.results[i];
+  const text = r.meetings.map(m => `${fmtLong(m.w.date)}, ${rangeLabel(m.w.start, m.w.start + L)} MT\n  ${namesList(m.assigned).join(', ')}`).join('\n\n');
+  try { await navigator.clipboard.writeText(text); btn.textContent = 'Copied'; setTimeout(() => btn.textContent = 'Copy schedule', 1500); }
+  catch { prompt('Copy the schedule:', text); }
+}
+
+/* =====================================================================
+   ROUTING
+   ===================================================================== */
+function route() {
+  const org = location.hash === '#organizer';
+  $('#respondView').hidden = org; $('#orgView').hidden = !org;
+  if (org) initOrg();
+  else {
+    document.title = CONFIG.title;
+    $('#pageTitle').textContent = CONFIG.title; $('#pageIntro').textContent = CONFIG.intro;
+    initRespond();
+  }
+}
+window.addEventListener('hashchange', route);
+route();
+</script>
+</body>
+</html>
