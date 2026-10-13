@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Committee Leadership Guide | CLEAR</title>
+<meta name="description" content="Resources for CLEAR committee chairs and vice-chairs: the committee year, staff liaisons, meetings, decisions, and reporting to the Board.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --burgundy:#64092C; --gold:#DDA838; --charcoal:#484848; --blue:#084D78;
+  --bg:#FFFFFF; --surface:#F7F1F3; --line:#E6DBDF; --text:#3A3638; --muted:#5F585B;
+  --heading:var(--burgundy); --link:var(--blue); --hero-bg:var(--burgundy);
+  --chip-chair:#F6E7C4; --chip-chair-ink:#5C4100; --chip-staff:#DCE9F3; --chip-staff-ink:#084D78;
+  --good:#1F6B3A; --good-bg:#E5F2E9; --warn:#7A1E35; --warn-bg:#F7E4EA;
+  --font:'Open Sans','Trebuchet MS',Arial,sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --bg:#1E1A1C; --surface:#292326; --line:#3F3539; --text:#ECE6E8; --muted:#BDB3B7;
+    --heading:#EBB0C4; --link:#8EC5EA; --hero-bg:#3E0619;
+    --chip-chair:#4A3A12; --chip-chair-ink:#F3D892; --chip-staff:#16324A; --chip-staff-ink:#A9D2F0;
+    --good:#8FD3A6; --good-bg:#1D3426; --warn:#F2A8BD; --warn-bg:#3E1E28;
+    color-scheme:dark;
+  }
+}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:1.5rem}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important}}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--font);font-size:1.0625rem;line-height:1.6}
+a{color:var(--link);text-underline-offset:.18em}
+:focus-visible{outline:3px solid var(--gold);outline-offset:2px;border-radius:3px}
+h1,h2,h3{line-height:1.2;margin:0}
+h2{color:var(--heading);font-size:1.75rem;font-weight:800;letter-spacing:-.01em}
+h3{color:var(--heading);font-size:1.125rem;font-weight:700}
+p{margin:0 0 1rem}
+.skip{position:absolute;left:-999px;top:0;background:var(--gold);color:var(--burgundy);padding:.5rem 1rem;font-weight:700;z-index:10}
+.skip:focus{left:1rem;top:1rem}
+
+/* ---------- Hero: the committee year ---------- */
+.hero{background:var(--hero-bg);color:#fff;padding:2rem 1.25rem 2.5rem}
+.hero-inner{max-width:1120px;margin:0 auto}
+.wordmark{display:inline-flex;align-items:center;gap:.6rem;font-weight:800;font-size:1.05rem;letter-spacing:.02em;color:#fff;text-decoration:none}
+.wordmark span{display:block;width:28px;height:4px;background:var(--gold)}
+.hero h1{font-size:clamp(2.1rem,5vw,3.25rem);font-weight:800;letter-spacing:-.02em;margin:2rem 0 .75rem;max-width:18ch}
+.hero .lede{font-size:1.15rem;max-width:62ch;color:rgba(255,255,255,.88);margin-bottom:2.25rem}
+.now-line{font-size:1.25rem;font-weight:700;margin:0 0 1rem}
+.now-line strong{color:var(--gold)}
+
+.year{display:flex;gap:6px;margin:0;padding:0}
+.phase{flex:var(--span) 1 0;min-width:0;display:flex;flex-direction:column;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.22);border-radius:6px;color:#fff;font:inherit;padding:0;cursor:pointer;text-align:left;overflow:hidden;transition:background .15s}
+.phase:hover{background:rgba(255,255,255,.14)}
+.phase[aria-selected="true"]{background:#fff;color:var(--burgundy);border-color:#fff}
+.months{display:flex}
+.month{flex:1;text-align:center;padding:.65rem 0;font-size:.82rem;font-weight:600;border-right:1px solid rgba(255,255,255,.14)}
+.phase[aria-selected="true"] .month{border-color:rgba(100,9,44,.15)}
+.month:last-child{border-right:0}
+.month.now{background:var(--gold);color:var(--burgundy);font-weight:800}
+.m-short{display:none}
+.phase-name{font-size:.8rem;font-weight:600;padding:.45rem .55rem .6rem;border-top:1px solid rgba(255,255,255,.18);line-height:1.25}
+.phase[aria-selected="true"] .phase-name{border-color:rgba(100,9,44,.15)}
+.year-note{font-size:.85rem;color:rgba(255,255,255,.75);margin:.6rem 0 1.25rem}
+.year-note i{display:inline-block;width:.8em;height:.8em;background:var(--gold);border-radius:2px;vertical-align:-.05em;margin-right:.35em}
+
+.phase-panel{background:rgba(0,0,0,.2);border-left:4px solid var(--gold);border-radius:0 6px 6px 0;padding:1.4rem 1.5rem}
+.phase-panel h2{color:#fff;font-size:1.35rem;margin-bottom:1rem}
+.panel-cols{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem}
+.panel-cols h3{color:var(--gold);font-size:.95rem;margin-bottom:.4rem}
+.panel-cols ul{margin:0;padding-left:1.1rem}
+.panel-cols li{margin-bottom:.35rem;color:rgba(255,255,255,.92)}
+
+@media (max-width:760px){
+  .phase-name{display:none}
+  .m-long{display:none}.m-short{display:inline}
+  .year{gap:3px}
+  .panel-cols{grid-template-columns:1fr}
+}
+
+/* ---------- Layout ---------- */
+.layout{max-width:1120px;margin:0 auto;padding:0 1.25rem;display:grid;grid-template-columns:220px minmax(0,1fr);gap:3.5rem}
+.toc{position:sticky;top:1.5rem;align-self:start;padding-top:3rem;font-size:.92rem}
+.toc p{font-weight:700;color:var(--muted);margin-bottom:.5rem}
+.toc ol{list-style:none;margin:0;padding:0;border-left:2px solid var(--line)}
+.toc a{display:block;padding:.35rem 0 .35rem .9rem;margin-left:-2px;border-left:2px solid transparent;color:var(--text);text-decoration:none}
+.toc a:hover{color:var(--heading)}
+.toc a.active{border-left-color:var(--gold);color:var(--heading);font-weight:700}
+main{max-width:760px;padding-bottom:4rem}
+section{padding-top:3rem;margin-bottom:1rem}
+section > .intro{font-size:1.1rem;color:var(--muted);margin:.6rem 0 1.5rem;max-width:62ch}
+
+@media (max-width:960px){
+  .layout{grid-template-columns:1fr;gap:0}
+  .toc{position:static;padding-top:1.5rem}
+  .toc ol{display:flex;flex-wrap:wrap;gap:.4rem;border:0}
+  .toc a{border:1px solid var(--line);border-radius:999px;padding:.3rem .8rem;margin:0}
+  .toc a.active{border-color:var(--gold)}
+}
+
+/* ---------- Start here ---------- */
+.expect{display:grid;grid-template-columns:1fr 1fr;gap:0;border-top:1px solid var(--line);margin:0 0 2rem}
+.expect div{padding:1rem 1.25rem 1rem 0;border-bottom:1px solid var(--line)}
+.expect dt{font-weight:700;color:var(--heading)}
+.expect dd{margin:.2rem 0 0;color:var(--muted);font-size:.97rem}
+@media (max-width:600px){.expect{grid-template-columns:1fr}}
+
+.checklist{background:var(--surface);border-radius:10px;padding:1.5rem}
+.check-head{display:flex;justify-content:space-between;align-items:baseline;gap:1rem;flex-wrap:wrap;margin-bottom:.75rem}
+.progress{font-weight:700;color:var(--heading)}
+.bar{height:8px;background:var(--line);border-radius:999px;overflow:hidden;margin-bottom:1rem}
+.bar span{display:block;height:100%;width:0;background:var(--gold);transition:width .3s}
+.checklist ul{list-style:none;margin:0;padding:0}
+.checklist li{border-top:1px solid var(--line)}
+.checklist label{display:grid;grid-template-columns:1.6rem 1fr;gap:.75rem;padding:.9rem 0;cursor:pointer}
+.checklist input{width:1.25rem;height:1.25rem;margin:.2rem 0 0;accent-color:var(--burgundy)}
+.checklist .task{font-weight:700}
+.checklist .hint{display:block;color:var(--muted);font-size:.93rem;font-weight:400}
+.checklist input:checked + span .task{text-decoration:line-through;text-decoration-color:var(--gold);text-decoration-thickness:2px}
+.link-btn{background:none;border:0;color:var(--link);font:inherit;font-size:.9rem;text-decoration:underline;cursor:pointer;padding:0}
+
+/* ---------- Liaisons / structure ---------- */
+.finder{display:flex;flex-wrap:wrap;gap:.75rem;align-items:center;margin-bottom:1rem}
+.finder label{font-weight:700}
+select{font:inherit;padding:.55rem .75rem;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--text);max-width:100%}
+.finder-result{min-height:1.6em;font-size:1.1rem;margin-bottom:1.5rem}
+.finder-result strong{color:var(--heading)}
+.org-board{background:var(--burgundy);color:#fff;border-radius:8px;padding:1rem 1.25rem;text-align:center}
+.org-board strong{display:block;font-size:1.1rem}
+.org-board span{font-size:.92rem;opacity:.85}
+.org-stem{width:2px;height:22px;background:var(--line);margin:0 auto}
+.org-groups{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;border-top:2px solid var(--line);padding-top:1.25rem}
+.org-group h3{margin-bottom:.5rem}
+.org-group ul{list-style:none;margin:0;padding:0}
+.org-group li{display:flex;justify-content:space-between;gap:1rem;padding:.6rem .5rem;border-bottom:1px solid var(--line);font-size:.95rem;border-radius:4px}
+.org-group li span:last-child{color:var(--muted);text-align:right;flex-shrink:0;max-width:45%}
+.org-group li.match{background:var(--chip-chair);color:var(--chip-chair-ink)}
+.org-group li.match span:last-child{color:var(--chip-chair-ink);font-weight:700}
+.general{margin-top:1.25rem;font-size:.97rem;color:var(--muted)}
+@media (max-width:640px){.org-groups{grid-template-columns:1fr}}
+
+/* ---------- Roles ---------- */
+.roles{display:grid;gap:0;border-left:4px solid var(--gold)}
+.role{display:grid;grid-template-columns:11rem 1fr;gap:1rem;padding:.9rem 0 .9rem 1.25rem;border-bottom:1px solid var(--line)}
+.role:last-child{border-bottom:0}
+.role dt{font-weight:800;color:var(--heading)}
+.role dd{margin:0}
+@media (max-width:600px){.role{grid-template-columns:1fr;gap:.2rem}}
+
+/* ---------- Sequences ---------- */
+.steps{list-style:none;counter-reset:s;margin:0 0 1.5rem;padding:0}
+.steps li{counter-increment:s;position:relative;padding:0 0 1.25rem 3rem}
+.steps li::before{content:counter(s);position:absolute;left:0;top:0;width:2rem;height:2rem;border-radius:50%;background:var(--burgundy);color:#fff;font-weight:800;display:grid;place-items:center;font-size:.95rem}
+.steps li::after{content:"";position:absolute;left:calc(1rem - 1px);top:2.1rem;bottom:.2rem;width:2px;background:var(--line)}
+.steps li:last-child::after{display:none}
+.steps strong{display:block;color:var(--heading)}
+
+.callout{background:var(--surface);border-left:4px solid var(--blue);border-radius:0 8px 8px 0;padding:1rem 1.25rem;margin:1.25rem 0}
+.callout p:last-child{margin:0}
+
+/* ---------- Meetings ---------- */
+.filter{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;margin-bottom:1.5rem}
+.filter > span{font-weight:700;margin-right:.25rem}
+.filter button{font:inherit;font-size:.93rem;padding:.4rem .9rem;border-radius:999px;border:1px solid var(--line);background:var(--bg);color:var(--text);cursor:pointer}
+.filter button[aria-pressed="true"]{background:var(--burgundy);border-color:var(--burgundy);color:#fff}
+.stage{margin-bottom:2rem}
+.stage h3{font-size:1.25rem;margin-bottom:.15rem}
+.stage > p{color:var(--muted);font-size:.95rem;margin-bottom:.6rem}
+.duties{list-style:none;margin:0;padding:0}
+.duties li{display:grid;grid-template-columns:6.5rem 1fr;gap:.75rem;align-items:start;padding:.65rem 0;border-top:1px solid var(--line);transition:opacity .2s}
+.tag{font-size:.78rem;font-weight:700;padding:.15rem .5rem;border-radius:4px;text-align:center;justify-self:start}
+.tag.chair{background:var(--chip-chair);color:var(--chip-chair-ink)}
+.tag.staff{background:var(--chip-staff);color:var(--chip-staff-ink)}
+.duties li.dim{opacity:.3}
+
+/* ---------- Decision flow ---------- */
+.flow{display:grid;grid-template-columns:1fr 1fr;gap:0 1.25rem;margin:1rem 0 1.5rem}
+.node{border:2px solid var(--line);border-radius:8px;padding:.85rem 1rem;background:var(--bg)}
+.node strong{display:block;color:var(--heading)}
+.node.start{grid-column:1/-1;border-color:var(--burgundy)}
+.node.end{grid-column:1/-1;background:var(--surface);border-color:var(--surface)}
+.node.yes{border-color:var(--good)}
+.node.tie{border-color:var(--gold)}
+.link{height:26px;position:relative;font-size:.82rem;color:var(--muted);font-weight:600}
+.link::before{content:"";position:absolute;left:50%;top:0;bottom:0;width:2px;background:var(--line)}
+.link span{position:absolute;left:calc(50% + .6rem);top:50%;transform:translateY(-50%);white-space:nowrap;background:var(--bg);padding:0 .2rem}
+.link.full{grid-column:1/-1}
+.flow .spacer{min-height:1px}
+@media (max-width:560px){
+  .flow{grid-template-columns:1fr}
+  .flow .spacer{display:none}
+  .o2{order:2}.o3{order:3}.o4{order:4}.o5{order:5}.o6{order:6}.o7{order:7}.o8{order:8}.o9{order:9}
+}
+
+/* ---------- Board practice ---------- */
+.practice{list-style:none;margin:0 0 1rem;padding:0;counter-reset:q}
+.practice li{border-top:1px solid var(--line);padding:1.1rem 0}
+.practice p.q{font-weight:600;margin-bottom:.7rem}
+.answers{display:flex;flex-wrap:wrap;gap:.5rem}
+.answers button{font:inherit;font-size:.93rem;font-weight:600;padding:.5rem 1rem;border-radius:6px;border:2px solid var(--burgundy);background:var(--bg);color:var(--heading);cursor:pointer}
+.answers button:hover:not(:disabled){background:var(--surface)}
+.answers button:disabled{cursor:default;opacity:.55}
+.answers button.picked{opacity:1;background:var(--burgundy);color:#fff}
+.feedback{margin-top:.75rem;padding:.75rem 1rem;border-radius:6px;font-size:.96rem}
+.feedback:empty{display:none}
+.feedback.right{background:var(--good-bg);color:var(--good)}
+.feedback.wrong{background:var(--warn-bg);color:var(--warn)}
+.feedback b{display:block}
+.score-row{display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap;background:var(--surface);border-radius:8px;padding:.85rem 1.1rem}
+.score-row p{margin:0;font-weight:700}
+
+/* ---------- Reporting ---------- */
+.items{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;margin:1.25rem 0}
+.items div{border-top:4px solid var(--blue);padding-top:.75rem}
+.items div + div{border-top-color:var(--gold)}
+.items p{margin:.35rem 0 0;color:var(--muted)}
+@media (max-width:600px){.items{grid-template-columns:1fr}}
+
+/* ---------- Tools ---------- */
+.tools{margin:0;padding:0}
+.tool{display:grid;grid-template-columns:11rem 1fr;gap:1rem;padding:1rem 0;border-top:1px solid var(--line)}
+.tool dt{font-weight:800;color:var(--heading)}
+.tool dd{margin:0}
+.tool dd small{display:block;color:var(--muted);font-size:.92rem;margin-top:.2rem}
+@media (max-width:600px){.tool{grid-template-columns:1fr;gap:.2rem}}
+
+footer{border-top:1px solid var(--line);margin-top:2rem;padding:2rem 1.25rem;text-align:center;color:var(--muted);font-size:.93rem}
+footer p{margin:.25rem 0}
+
+@media print{
+  .hero{background:#fff!important;color:#000}
+  .hero *{color:#000!important}
+  .toc,.filter,.finder,.answers,.score-row,.link-btn,.year,.year-note{display:none!important}
+  .layout{display:block}
+  main{max-width:none}
+  section{page-break-inside:avoid}
+  .duties li.dim{opacity:1}
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="hero">
+  <div class="hero-inner">
+    <a class="wordmark" href="https://www.clearhq.org"><span aria-hidden="true"></span>CLEAR</a>
+    <h1>Committee leadership guide</h1>
+    <p class="lede">Thank you for leading a CLEAR committee. Use this guide to see what's coming up, who to ask, and how meetings, decisions, and Board reporting work. CLEAR staff is always available to help.</p>
+
+    <p class="now-line" id="nowLine">Your committee year at a glance</p>
+    <div class="year" role="tablist" aria-label="Committee year, September to August" id="year"></div>
+    <p class="year-note"><i aria-hidden="true"></i>The current month is highlighted. Select any part of the year to see what happens then.</p>
+    <div class="phase-panel" role="tabpanel" id="phasePanel" aria-live="polite"></div>
+  </div>
+</header>
+
+<div class="layout">
+  <nav class="toc" aria-label="On this page">
+    <p>On this page</p>
+    <ol>
+      <li><a href="#start">Start here</a></li>
+      <li><a href="#liaisons">Your staff liaison</a></li>
+      <li><a href="#roles">Who does what</a></li>
+      <li><a href="#priorities">Your priorities</a></li>
+      <li><a href="#meetings">Running meetings</a></li>
+      <li><a href="#decisions">Making decisions</a></li>
+      <li><a href="#board">When to involve the Board</a></li>
+      <li><a href="#reporting">Reporting to the Board</a></li>
+      <li><a href="#tools">Tools</a></li>
+    </ol>
+  </nav>
+
+  <main id="main">
+
+    <!-- START HERE -->
+    <section id="start" aria-labelledby="start-h">
+      <h2 id="start-h">Start here</h2>
+      <p class="intro">Here's what the role asks of you over the year, and four things to do before your first meeting.</p>
+
+      <dl class="expect">
+        <div><dt>Two required meetings</dt><dd>Midyear Business Meetings in January and the Annual Educational Conference in September.</dd></div>
+        <div><dt>Videoconferences in between</dt><dd>Usually quarterly, about an hour each, and more often when a project calls for it.</dd></div>
+        <div><dt>Prep before each meeting</dt><dd>Time to review and give feedback on the draft agenda and materials.</dd></div>
+        <div><dt>Two Board reports</dt><dd>After the January and September meetings, given by you or someone you designate.</dd></div>
+        <div><dt>Optional October Q&amp;A</dt><dd>A virtual meeting for committee leaders across CLEAR.</dd></div>
+        <div><dt>Conference planning only</dt><dd>Review 15–20 session proposals in November and December.</dd></div>
+      </dl>
+
+      <div class="checklist">
+        <div class="check-head">
+          <h3>Before your first committee meeting</h3>
+          <span class="progress" id="checkProgress" aria-live="polite">0 of 4 done</span>
+        </div>
+        <div class="bar" aria-hidden="true"><span id="checkBar"></span></div>
+        <ul id="checklist">
+          <li><label><input type="checkbox" data-key="charter"><span><span class="task">Review the committee charter</span><span class="hint">It defines what your committee is responsible for. Look in your committee's resource folder in OnBoard, or ask your staff liaison.</span></span></label></li>
+          <li><label><input type="checkbox" data-key="sod"><span><span class="task">Review the statements of direction</span><span class="hint">These are the Board's priorities for your committee this year. <a href="#priorities">How statements of direction work</a></span></span></label></li>
+          <li><label><input type="checkbox" data-key="minutes"><span><span class="task">Review recent minutes and ongoing projects</span><span class="hint">Current and past minutes are in OnBoard.</span></span></label></li>
+          <li><label><input type="checkbox" data-key="meet"><span><span class="task">Meet with your staff liaison and vice-chair</span><span class="hint">Talk through priorities and the upcoming agenda. <a href="#liaisons">Find your staff liaison</a></span></span></label></li>
+        </ul>
+        <button class="link-btn" type="button" id="checkReset">Clear checklist</button>
+      </div>
+    </section>
+
+    <!-- LIAISONS -->
+    <section id="liaisons" aria-labelledby="liaisons-h">
+      <h2 id="liaisons-h">Your staff liaison</h2>
+      <p class="intro">Your staff liaison is your main connection to CLEAR staff. Start with them for any question about your committee's work.</p>
+
+      <div class="finder">
+        <label for="committeeSelect">My committee is</label>
+        <select id="committeeSelect"><option value="">Choose a committee or working group</option></select>
+      </div>
+      <p class="finder-result" id="finderResult" aria-live="polite"></p>
+
+      <div class="org">
+        <div class="org-board"><strong>Board of Directors</strong><span>Sets priorities and gives direction and approval</span></div>
+        <div class="org-stem" aria-hidden="true"></div>
+        <div class="org-groups">
+          <div class="org-group"><h3>Committees</h3><ul id="listCommittees"></ul></div>
+          <div class="org-group"><h3>Working groups</h3><ul id="listWorking"></ul></div>
+        </div>
+      </div>
+      <p class="general">For general committee questions and OnBoard access, contact <strong>Stephanie Thompson</strong>.</p>
+    </section>
+
+    <!-- ROLES -->
+    <section id="roles" aria-labelledby="roles-h">
+      <h2 id="roles-h">Who does what</h2>
+      <p class="intro">You lead the conversation. Staff handles the logistics. The Board sets direction.</p>
+      <dl class="roles">
+        <div class="role"><dt>Board of Directors</dt><dd>Establishes priorities and provides direction and approval where required.</dd></div>
+        <div class="role"><dt>Committee chair</dt><dd>Leads the committee, facilitates discussion, helps advance its priorities, monitors progress on tasks, and represents the committee to the Board.</dd></div>
+        <div class="role"><dt>Vice-chair</dt><dd>Supports the chair and runs meetings when the chair is unavailable.</dd></div>
+        <div class="role"><dt>Staff liaison</dt><dd>Coordinates logistics, prepares meeting materials and minutes, and connects the committee to CLEAR staff.</dd></div>
+      </dl>
+      <div class="callout"><p><strong>Changing over in September.</strong> New chairs take over at the close of the Annual Educational Conference. Staff will still check in with outgoing chairs about minutes and immediate follow-up from the September meeting.</p></div>
+    </section>
+
+    <!-- PRIORITIES -->
+    <section id="priorities" aria-labelledby="priorities-h">
+      <h2 id="priorities-h">Your priorities: statements of direction</h2>
+      <p class="intro">Each year the Board gives your committee two or three new priorities, on top of routine work like environmental scans and programming topic development. Here's how they move through the year.</p>
+      <ol class="steps">
+        <li><strong>The Board writes them</strong>Statements of direction draw on the strategic plan and on ongoing and new tasks.</li>
+        <li><strong>You receive them at the start of the year</strong>Staff shares them with your committee in the fall.</li>
+        <li><strong>Your committee reviews them</strong>Raise concerns or ask for clarification before the Midyear Business Meeting.</li>
+        <li><strong>They shape your agendas</strong>The tasks become at least part of the agenda at your meetings from then on.</li>
+        <li><strong>You report your plans and progress</strong>Describe your plan for each task and how it's going in your Midyear and Annual Conference reports to the Board.</li>
+      </ol>
+      <div class="callout"><p><strong>Need a smaller team?</strong> You can set up a temporary working group for a specific project, like reviewing curriculum, writing a publication, or building a resource. The chair or another volunteer can lead it. Working groups meet by videoconference as needed and report back to the full committee on a schedule the committee sets.</p></div>
+    </section>
+
+    <!-- MEETINGS -->
+    <section id="meetings" aria-labelledby="meetings-h">
+      <h2 id="meetings-h">Running meetings</h2>
+      <p class="intro">Every meeting is shared work between you and your staff liaison. Filter to see your part.</p>
+
+      <div class="filter" role="group" aria-label="Show responsibilities for">
+        <span>Show</span>
+        <button type="button" data-role="all" aria-pressed="true">Everyone</button>
+        <button type="button" data-role="chair" aria-pressed="false">Chair and vice-chair</button>
+        <button type="button" data-role="staff" aria-pressed="false">Staff liaison</button>
+      </div>
+
+      <div class="stage">
+        <h3>Before the meeting</h3>
+        <p>Every agenda includes a review of minutes and a quick look at the charter and statements of direction, to keep discussion focused.</p>
+        <ul class="duties">
+          <li data-role="chair"><span class="tag chair">Chair</span><span>Share your availability and how often you'd like to meet.</span></li>
+          <li data-role="staff"><span class="tag staff">Staff</span><span>Poll members to find a date that works for most, then send the invitations.</span></li>
+          <li data-role="staff"><span class="tag staff">Staff</span><span>Draft the agenda 1–2 weeks before the meeting.</span></li>
+          <li data-role="chair"><span class="tag chair">Chair</span><span>Review the draft agenda with the vice-chair, add items for ongoing projects, and approve it.</span></li>
+        </ul>
+      </div>
+
+      <div class="stage">
+        <h3>During the meeting</h3>
+        <p>If the chair can't attend, the vice-chair leads.</p>
+        <ul class="duties">
+          <li data-role="chair"><span class="tag chair">Chair</span><span>Open the meeting and set an inclusive tone.</span></li>
+          <li data-role="chair"><span class="tag chair">Chair</span><span>Guide the conversation so every agenda item is covered, and invite input from all members.</span></li>
+          <li data-role="chair"><span class="tag chair">Chair</span><span>Summarize decisions and next steps, and confirm who owns each follow-up and when it's due.</span></li>
+          <li data-role="staff"><span class="tag staff">Staff</span><span>Host the Zoom meeting, share the agenda on screen, and take minutes.</span></li>
+          <li data-role="staff"><span class="tag staff">Staff</span><span>Answer questions from the chair and members.</span></li>
+        </ul>
+      </div>
+
+      <div class="stage">
+        <h3>After the meeting</h3>
+        <ul class="duties">
+          <li data-role="staff"><span class="tag staff">Staff</span><span>Compile the minutes and send them to the chair.</span></li>
+          <li data-role="chair"><span class="tag chair">Chair</span><span>Review and approve the minutes.</span></li>
+          <li data-role="staff"><span class="tag staff">Staff</span><span>Send the minutes to the committee with reminders about assignments.</span></li>
+          <li data-role="chair"><span class="tag chair">Chair</span><span>Track project progress, follow up with members who have assignments, and update staff. Your liaison can help.</span></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- DECISIONS -->
+    <section id="decisions" aria-labelledby="decisions-h">
+      <h2 id="decisions-h">Making decisions</h2>
+      <p class="intro">Committees decide together. Aim for consensus first, and vote only when you need to. You don't need a formal motion or a second.</p>
+
+      <div class="flow" role="img" aria-label="Decision flow: the chair checks for support. If there is general agreement, the decision is made by consensus. If not, members vote and a simple majority decides. If the vote is tied, the chair casts the deciding vote. The minutes record the decision and whether a vote took place.">
+        <div class="node start"><strong>The chair checks for support</strong>Ask whether the group supports the decision.</div>
+        <div class="link o2"><span>General agreement</span></div>
+        <div class="link o4"><span>No agreement</span></div>
+        <div class="node yes o3"><strong>Decided by consensus</strong>Move on to the next item.</div>
+        <div class="node o5"><strong>Members vote</strong>A simple majority decides, unless the bylaws say otherwise.</div>
+        <div class="spacer" aria-hidden="true"></div>
+        <div class="link o6"><span>Tied vote</span></div>
+        <div class="spacer" aria-hidden="true"></div>
+        <div class="node tie o7"><strong>The chair breaks the tie</strong>This is the only time the chair votes.</div>
+        <div class="link full o8"></div>
+        <div class="node end o9"><strong>The minutes record it</strong>Staff notes the decision, and notes when a vote took place.</div>
+      </div>
+    </section>
+
+    <!-- BOARD APPROVAL -->
+    <section id="board" aria-labelledby="board-h">
+      <h2 id="board-h">When to involve the Board</h2>
+      <p class="intro">Your committee can act on anything that fits its charter and approved priorities. Bring a recommendation to the Board first when it has significant financial impact or would be a major change to a CLEAR program, service, or publication.</p>
+      <p>Try a few situations. Decide whether your committee can go ahead or should bring it to the Board.</p>
+
+      <ul class="practice" id="practice"></ul>
+
+      <div class="score-row">
+        <p id="score" aria-live="polite">0 of 7 answered</p>
+        <button class="link-btn" type="button" id="practiceReset">Start over</button>
+      </div>
+      <div class="callout"><p><strong>Not sure?</strong> Ask your staff liaison before moving forward. They can tell you whether an action needs Board approval.</p></div>
+    </section>
+
+    <!-- REPORTING -->
+    <section id="reporting" aria-labelledby="reporting-h">
+      <h2 id="reporting-h">Reporting to the Board</h2>
+      <p class="intro">Twice a year you'll tell the Board what your committee decided and where it stands on its priorities. It's a short bullet list, not meeting minutes.</p>
+
+      <div class="items">
+        <div><h3>Information items</h3><p>Updates on progress toward your statement of direction goals.</p></div>
+        <div><h3>Action items</h3><p>Proposed actions that need Board review and approval before you proceed.</p></div>
+      </div>
+
+      <ol class="steps">
+        <li><strong>Your committee meets in January or September</strong>Board reports are part of these two meetings.</li>
+        <li><strong>You and staff build the report</strong>Your liaison works with you on the bullet list after the meeting.</li>
+        <li><strong>You present it to the Board</strong>You, or someone you designate, give the report at the Board meeting. In person is preferred, and a virtual option may be available.</li>
+        <li><strong>Staff brings back the Board's response</strong>You'll hear the Board's feedback or decision at your next committee meeting.</li>
+      </ol>
+
+      <div class="callout"><p><strong>Don't wait if something comes up.</strong> Your staff liaison can send a recommendation to CLEAR's executive director at any time for the next available Board meeting agenda.</p></div>
+    </section>
+
+    <!-- TOOLS -->
+    <section id="tools" aria-labelledby="tools-h">
+      <h2 id="tools-h">Tools</h2>
+      <p class="intro">Staff sets these up for you. Here's what each one is for.</p>
+      <dl class="tools">
+        <div class="tool"><dt>OnBoard</dt><dd>Current and past agendas and minutes, plus your committee's resource folder under the Resources menu.<small>Your login is in your committee welcome email. For access help, contact Stephanie Thompson.</small></dd></div>
+        <div class="tool"><dt>Zoom</dt><dd>All virtual committee meetings.<small>Staff sets up and hosts each meeting and sends members the link.</small></dd></div>
+        <div class="tool"><dt>Google Docs</dt><dd>Writing and commenting on shared work together.<small>Ask your staff liaison to create and share a doc.</small></dd></div>
+        <div class="tool"><dt>Surveys</dt><dd>Gathering feedback from your committee, from all CLEAR committee members, or, with approval, from the wider CLEAR membership.<small>Staff builds and sends surveys for you.</small></dd></div>
+        <div class="tool"><dt>CLEAR Regulatory Network</dt><dd>Posting committee updates or discussion questions for the community.<small>Staff can show you how to post.</small></dd></div>
+      </dl>
+    </section>
+
+  </main>
+</div>
+
+<footer>
+  <p>Questions? Contact your staff liaison, or Stephanie Thompson for general committee questions.</p>
+  <p>Council on Licensure, Enforcement and Regulation</p>
+</footer>
+
+<script>
+(function(){
+  /* ---------- Committee year ---------- */
+  var MONTHS=['Sep','Oct','Nov','Dec','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug'];
+  var FULL=['September','October','November','December','January','February','March','April','May','June','July','August'];
+  var PHASES=[
+    {id:'sep',name:'Transition',start:0,span:1,title:'September: Annual Educational Conference',
+      happens:['Committees meet in person at the conference. This meeting is required.','Committees report the year\'s progress to the Board.','New chairs take over at the close of the conference.','Invitations to join committees stay open through September.'],
+      you:['Outgoing chairs: give the Board report and stay available to staff for minutes and follow-up.','Incoming chairs: get ready to lead from the conference onward.']},
+    {id:'oct',name:'Orientation',start:1,span:1,title:'October: Leadership orientation',
+      happens:['Rosters are finalized at the start of the month.','Staff sends welcome emails with details about the year ahead.','Committees hold a virtual welcome meeting in October or November.'],
+      you:['Review the orientation materials on this page.','Attend the optional virtual leadership Q&A.','Work through the before-your-first-meeting checklist.']},
+    {id:'novdec',name:'Planning',start:2,span:2,title:'November–December: Planning the year',
+      happens:['Committees review their statements of direction and plan their work.','Any remaining welcome meetings take place in November.','The conference program committee and subcommittees review session proposals.'],
+      you:['Raise concerns or questions about your statements of direction before the Midyear meeting.','Conference planning subcommittees: review and comment on 15–20 proposals.']},
+    {id:'jan',name:'Midyear',start:4,span:1,title:'January: Midyear Business Meetings',
+      happens:['Every committee meets at the Midyear Business Meetings. This meeting is required.','Committees report their progress to the Board.'],
+      you:['Build the Board report with your staff liaison after your meeting.','Present it at the Board meeting yourself or through a designee.']},
+    {id:'febaug',name:'Committee work',start:5,span:7,title:'February–August: Committee work',
+      happens:['Committees meet by videoconference, usually quarterly, for about an hour.','Working groups meet as needed on specific projects.'],
+      you:['Keep statement of direction tasks moving and follow up on assignments.','Send recommendations to the Board through your liaison whenever they come up.']}
+  ];
+  var nowIdx=(new Date().getMonth()-8+12)%12;
+  var yearEl=document.getElementById('year'), panel=document.getElementById('phasePanel');
+  var nowPhase=PHASES.filter(function(p){return nowIdx>=p.start&&nowIdx<p.start+p.span;})[0];
+  document.getElementById('nowLine').innerHTML='It\u2019s <strong>'+FULL[nowIdx]+'</strong>. Here\u2019s what\u2019s happening now.';
+
+  PHASES.forEach(function(p){
+    var b=document.createElement('button');
+    b.type='button';b.className='phase';b.setAttribute('role','tab');b.id='tab-'+p.id;
+    b.setAttribute('aria-controls','phasePanel');b.style.setProperty('--span',p.span);
+    var m='<span class="months">';
+    for(var i=p.start;i<p.start+p.span;i++){
+      m+='<span class="month'+(i===nowIdx?' now':'')+'"><span class="m-long">'+MONTHS[i]+'</span><span class="m-short" aria-hidden="true">'+MONTHS[i][0]+'</span></span>';
+    }
+    m+='</span><span class="phase-name">'+p.name+'</span>';
+    b.innerHTML=m;
+    b.setAttribute('aria-label',p.title);
+    b.addEventListener('click',function(){select(p);});
+    b.addEventListener('keydown',function(e){
+      var i=PHASES.indexOf(p),n=null;
+      if(e.key==='ArrowRight')n=PHASES[(i+1)%PHASES.length];
+      if(e.key==='ArrowLeft')n=PHASES[(i-1+PHASES.length)%PHASES.length];
+      if(n){e.preventDefault();select(n);document.getElementById('tab-'+n.id).focus();}
+    });
+    yearEl.appendChild(b);
+  });
+  function li(a){return a.map(function(x){return '<li>'+x+'</li>';}).join('');}
+  function select(p){
+    PHASES.forEach(function(q){
+      var t=document.getElementById('tab-'+q.id);
+      t.setAttribute('aria-selected',q===p?'true':'false');
+      t.tabIndex=q===p?0:-1;
+    });
+    panel.setAttribute('aria-labelledby','tab-'+p.id);
+    panel.innerHTML='<h2>'+p.title+(p===nowPhase?' (now)':'')+'</h2><div class="panel-cols"><div><h3>What happens</h3><ul>'+li(p.happens)+'</ul></div><div><h3>What you do</h3><ul>'+li(p.you)+'</ul></div></div>';
+  }
+  select(nowPhase);
+
+  /* ---------- Checklist ---------- */
+  var KEY='clear-committee-checklist';
+  var boxes=[].slice.call(document.querySelectorAll('#checklist input'));
+  var saved={};
+  try{saved=JSON.parse(localStorage.getItem(KEY))||{};}catch(e){saved={};}
+  boxes.forEach(function(b){b.checked=!!saved[b.dataset.key];b.addEventListener('change',updateCheck);});
+  function updateCheck(){
+    var done=0,state={};
+    boxes.forEach(function(b){state[b.dataset.key]=b.checked;if(b.checked)done++;});
+    document.getElementById('checkProgress').textContent=done===boxes.length?'All done. You\u2019re ready.':done+' of '+boxes.length+' done';
+    document.getElementById('checkBar').style.width=(done/boxes.length*100)+'%';
+    try{localStorage.setItem(KEY,JSON.stringify(state));}catch(e){}
+  }
+  document.getElementById('checkReset').addEventListener('click',function(){boxes.forEach(function(b){b.checked=false;});updateCheck();});
+  updateCheck();
+
+  /* ---------- Liaisons ---------- */
+  var COMMITTEES=[
+    ['Education and Training Committee','Amanda Vance'],
+    ['International Relations Committee','Virginia Smith'],
+    ['Examination Resources & Advisory Committee (ERAC)','Matt Grayson'],
+    ['Regulatory Agency Administration Committee','Jodie Markey'],
+    ['Diversity, Equity, and Inclusion Committee','Adam Parfitt'],
+    ['Annual Educational Conference Program Committee and all its subcommittees','Virginia Smith']
+  ];
+  var WORKING=[
+    ['Membership Experience Working Group','Adam Parfitt'],
+    ['AI Working Group','Tora Stubberud-Dobbs'],
+    ['Investigator/Inspector Credential Development Working Group','Jodie Markey and Amanda Vance'],
+    ['Course Reviewer Working Group','Amanda Vance'],
+    ['Central Agency Working Group','Adam Parfitt']
+  ];
+  var sel=document.getElementById('committeeSelect'), rows=[];
+  function build(list,ulId,label){
+    var ul=document.getElementById(ulId), og=document.createElement('optgroup');
+    og.label=label;
+    list.forEach(function(c){
+      var r=document.createElement('li');
+      r.innerHTML='<span>'+c[0]+'</span><span>'+c[1]+'</span>';
+      ul.appendChild(r);rows.push(r);
+      var o=document.createElement('option');o.value=rows.length-1;o.textContent=c[0];og.appendChild(o);
+    });
+    sel.appendChild(og);
+  }
+  build(COMMITTEES,'listCommittees','Committees');
+  build(WORKING,'listWorking','Working groups');
+  var ALL=COMMITTEES.concat(WORKING);
+  sel.addEventListener('change',function(){
+    rows.forEach(function(r){r.classList.remove('match');});
+    var out=document.getElementById('finderResult');
+    if(sel.value===''){out.textContent='';return;}
+    var c=ALL[+sel.value];
+    rows[+sel.value].classList.add('match');
+    var multi=c[1].indexOf(' and ')>-1;
+    out.innerHTML='Your staff liaison'+(multi?'s are ':' is ')+'<strong>'+c[1]+'</strong>.';
+  });
+
+  /* ---------- Board practice ---------- */
+  var SCEN=[
+    {q:'Your committee wants to recommend raising the registration fee for a training program.',a:'board',why:'Changing registration fees has financial implications, so it goes to the Board first.'},
+    {q:'You want to form a small working group to draft a resource for one of your statements of direction.',a:'committee',why:'Committees can set up temporary working groups for statement of direction tasks. The group reports back to the full committee.'},
+    {q:'Members propose moving an in-person program to a fully virtual format.',a:'board',why:'Significantly changing how a program is delivered is a major change that needs Board approval.'},
+    {q:'The committee brainstorms programming topics for the coming year.',a:'committee',why:'Programming topic development is routine committee work.'},
+    {q:'The committee would like to give a major publication a new name.',a:'board',why:'Renaming a training program or major publication needs Board approval.'},
+    {q:'Your committee runs an environmental scan of emerging regulatory issues.',a:'committee',why:'Environmental scans are routine committee work.'},
+    {q:'You want to recommend a new technology platform for delivering a program.',a:'board',why:'Recommending new technology for program delivery is a change the Board reviews.'}
+  ];
+  var practice=document.getElementById('practice'), answered=0, correct=0;
+  function renderPractice(){
+    practice.innerHTML='';answered=0;correct=0;updateScore();
+    SCEN.forEach(function(s,i){
+      var item=document.createElement('li');
+      item.innerHTML='<p class="q" id="q'+i+'">'+s.q+'</p><div class="answers" role="group" aria-labelledby="q'+i+'"><button type="button" data-v="committee">Committee can go ahead</button><button type="button" data-v="board">Bring it to the Board</button></div><div class="feedback" aria-live="polite"></div>';
+      var btns=item.querySelectorAll('button'), fb=item.querySelector('.feedback');
+      [].forEach.call(btns,function(b){
+        b.addEventListener('click',function(){
+          var ok=b.dataset.v===s.a;
+          [].forEach.call(btns,function(x){x.disabled=true;});
+          b.classList.add('picked');
+          fb.className='feedback '+(ok?'right':'wrong');
+          fb.innerHTML='<b>'+(ok?'Right.':(s.a==='board'?'This one goes to the Board.':'Your committee can handle this one.'))+'</b>'+s.why;
+          answered++;if(ok)correct++;updateScore();
+        });
+      });
+      practice.appendChild(item);
+    });
+  }
+  function updateScore(){
+    document.getElementById('score').textContent=answered<SCEN.length?answered+' of '+SCEN.length+' answered':'You got '+correct+' of '+SCEN.length+' right.';
+  }
+  document.getElementById('practiceReset').addEventListener('click',renderPractice);
+  renderPractice();
+
+  /* ---------- Meeting role filter ---------- */
+  var fbtns=[].slice.call(document.querySelectorAll('.filter button'));
+  var duties=[].slice.call(document.querySelectorAll('.duties li'));
+  fbtns.forEach(function(b){
+    b.addEventListener('click',function(){
+      fbtns.forEach(function(x){x.setAttribute('aria-pressed',x===b?'true':'false');});
+      var r=b.dataset.role;
+      duties.forEach(function(d){d.classList.toggle('dim',r!=='all'&&d.dataset.role!==r);});
+    });
+  });
+
+  /* ---------- Active section in nav ---------- */
+  var links=[].slice.call(document.querySelectorAll('.toc a'));
+  if('IntersectionObserver' in window){
+    var io=new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        if(e.isIntersecting){
+          links.forEach(function(l){l.classList.toggle('active',l.getAttribute('href')==='#'+e.target.id);});
+        }
+      });
+    },{rootMargin:'-20% 0px -70% 0px'});
+    document.querySelectorAll('main section').forEach(function(s){io.observe(s);});
+  }
+})();
+</script>
+</body>
+</html>
