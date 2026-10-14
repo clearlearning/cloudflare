@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Committee Leadership Guide | CLEAR</title>
 <meta name="description" content="Resources for CLEAR committee chairs and vice-chairs: the committee year, staff liaisons, meetings, decisions, and reporting to the Board.">
+<link rel="icon" type="image/png" href="https://assets-002.noviams.com/novi-file-uploads/clear/structure/clearlogo.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -43,8 +44,8 @@ p{margin:0 0 1rem}
 /* ---------- Hero: the committee year ---------- */
 .hero{background:var(--hero-bg);color:#fff;padding:2rem 1.25rem 2.5rem}
 .hero-inner{max-width:1120px;margin:0 auto}
-.wordmark{display:inline-flex;align-items:center;gap:.6rem;font-weight:800;font-size:1.05rem;letter-spacing:.02em;color:#fff;text-decoration:none}
-.wordmark span{display:block;width:28px;height:4px;background:var(--gold)}
+.logo{display:inline-block;background:#fff;border-radius:8px;padding:.6rem .9rem;line-height:0}
+.logo img{height:52px;width:auto;display:block}
 .hero h1{font-size:clamp(2.1rem,5vw,3.25rem);font-weight:800;letter-spacing:-.02em;margin:2rem 0 .75rem;max-width:18ch}
 .hero .lede{font-size:1.15rem;max-width:62ch;color:rgba(255,255,255,.88);margin-bottom:2.25rem}
 .now-line{font-size:1.25rem;font-weight:700;margin:0 0 1rem}
@@ -134,10 +135,18 @@ select{font:inherit;padding:.55rem .75rem;border:1px solid var(--line);border-ra
 .org-group h3{margin-bottom:.5rem}
 .org-group ul{list-style:none;margin:0;padding:0}
 .org-group li{display:flex;justify-content:space-between;gap:1rem;padding:.6rem .5rem;border-bottom:1px solid var(--line);font-size:.95rem;border-radius:4px}
-.org-group li span:last-child{color:var(--muted);text-align:right;flex-shrink:0;max-width:45%}
+.org-group li > span:last-child{color:var(--muted);text-align:right;flex-shrink:0;max-width:45%}
 .org-group li.match{background:var(--chip-chair);color:var(--chip-chair-ink)}
-.org-group li.match span:last-child{color:var(--chip-chair-ink);font-weight:700}
+.org-group li.match > span:last-child,.org-group li.match a{color:var(--chip-chair-ink);font-weight:700}
 .general{margin-top:1.25rem;font-size:.97rem;color:var(--muted)}
+.subs{margin-top:1.25rem;background:var(--surface);border-radius:8px;padding:1rem 1.25rem;font-size:.95rem}
+.subs p{margin:0 0 .5rem}
+.subs ul{margin:0;padding-left:1.2rem;columns:2;column-gap:1.5rem}
+.subs li{margin-bottom:.3rem;break-inside:avoid;border-radius:4px;padding:0 .3rem}
+.subs li.match{background:var(--chip-chair);color:var(--chip-chair-ink);font-weight:700}
+.org-group li sup{color:var(--heading);font-weight:700}
+.staff-link{font-weight:700}
+@media (max-width:640px){.subs ul{columns:1}}
 @media (max-width:640px){.org-groups{grid-template-columns:1fr}}
 
 /* ---------- Roles ---------- */
@@ -244,12 +253,12 @@ footer p{margin:.25rem 0}
 
 <header class="hero">
   <div class="hero-inner">
-    <a class="wordmark" href="https://www.clearhq.org"><span aria-hidden="true"></span>CLEAR</a>
-    <h1>Committee leadership guide</h1>
+    <a class="logo" href="https://www.clearhq.org"><img src="https://assets-002.noviams.com/novi-file-uploads/clear/structure/clearlogo.png" alt="CLEAR: Council on Licensure, Enforcement and Regulation"></a>
+    <h1>Committee Leadership Guide</h1>
     <p class="lede">Thank you for leading a CLEAR committee. Use this guide to see what's coming up, who to ask, and how meetings, decisions, and Board reporting work. CLEAR staff is always available to help.</p>
 
-    <p class="now-line" id="nowLine">Your committee year at a glance</p>
-    <div class="year" role="tablist" aria-label="Committee year, September to August" id="year"></div>
+    <p class="now-line" id="nowLine">Your Committee Year at a Glance</p>
+    <div class="year" role="tablist" aria-label="Committee year, September to September" id="year"></div>
     <p class="year-note"><i aria-hidden="true"></i>The current month is highlighted. Select any part of the year to see what happens then.</p>
     <div class="phase-panel" role="tabpanel" id="phasePanel" aria-live="polite"></div>
   </div>
@@ -257,15 +266,15 @@ footer p{margin:.25rem 0}
 
 <div class="layout">
   <nav class="toc" aria-label="On this page">
-    <p>On this page</p>
+    <p>On This Page</p>
     <ol>
-      <li><a href="#start">Start here</a></li>
-      <li><a href="#liaisons">Your staff liaison</a></li>
-      <li><a href="#roles">Who does what</a></li>
-      <li><a href="#priorities">Your priorities</a></li>
-      <li><a href="#meetings">Running meetings</a></li>
-      <li><a href="#decisions">Making decisions</a></li>
-      <li><a href="#board">When to involve the Board</a></li>
+      <li><a href="#start">Start Here</a></li>
+      <li><a href="#liaisons">Your Staff Liaison</a></li>
+      <li><a href="#roles">Who Does What</a></li>
+      <li><a href="#priorities">Your Priorities</a></li>
+      <li><a href="#meetings">Running Meetings</a></li>
+      <li><a href="#decisions">Making Decisions</a></li>
+      <li><a href="#board">When to Involve the Board</a></li>
       <li><a href="#reporting">Reporting to the Board</a></li>
       <li><a href="#tools">Tools</a></li>
     </ol>
@@ -275,21 +284,21 @@ footer p{margin:.25rem 0}
 
     <!-- START HERE -->
     <section id="start" aria-labelledby="start-h">
-      <h2 id="start-h">Start here</h2>
+      <h2 id="start-h">Start Here</h2>
       <p class="intro">Here's what the role asks of you over the year, and four things to do before your first meeting.</p>
 
       <dl class="expect">
-        <div><dt>Two required meetings</dt><dd>Midyear Business Meetings in January and the Annual Educational Conference in September.</dd></div>
-        <div><dt>Videoconferences in between</dt><dd>Usually quarterly, about an hour each, and more often when a project calls for it.</dd></div>
-        <div><dt>Prep before each meeting</dt><dd>Time to review and give feedback on the draft agenda and materials.</dd></div>
-        <div><dt>Two Board reports</dt><dd>After the January and September meetings, given by you or someone you designate.</dd></div>
+        <div><dt>Two Required Meetings</dt><dd>Midyear Business Meetings in January and the Annual Educational Conference in September.</dd></div>
+        <div><dt>Videoconferences in Between</dt><dd>Usually quarterly, about an hour each, and more often when a project calls for it.</dd></div>
+        <div><dt>Preparation Before Each Meeting</dt><dd>Time to review and give feedback on the draft agenda and materials.</dd></div>
+        <div><dt>Two Board Reports</dt><dd>After the January and September meetings, given by you or someone you designate.</dd></div>
         <div><dt>Optional October Q&amp;A</dt><dd>A virtual meeting for committee leaders across CLEAR.</dd></div>
-        <div><dt>Conference planning only</dt><dd>Review 15–20 session proposals in November and December.</dd></div>
+        <div><dt>Conference Subcommittees Only</dt><dd>Review 15–20 session proposals in November and December.</dd></div>
       </dl>
 
       <div class="checklist">
         <div class="check-head">
-          <h3>Before your first committee meeting</h3>
+          <h3>Before Your First Committee Meeting</h3>
           <span class="progress" id="checkProgress" aria-live="polite">0 of 4 done</span>
         </div>
         <div class="bar" aria-hidden="true"><span id="checkBar"></span></div>
@@ -305,7 +314,7 @@ footer p{margin:.25rem 0}
 
     <!-- LIAISONS -->
     <section id="liaisons" aria-labelledby="liaisons-h">
-      <h2 id="liaisons-h">Your staff liaison</h2>
+      <h2 id="liaisons-h">Your Staff Liaison</h2>
       <p class="intro">Your staff liaison is your main connection to CLEAR staff. Start with them for any question about your committee's work.</p>
 
       <div class="finder">
@@ -322,39 +331,40 @@ footer p{margin:.25rem 0}
           <div class="org-group"><h3>Working groups</h3><ul id="listWorking"></ul></div>
         </div>
       </div>
-      <p class="general">For general committee questions and OnBoard access, contact <strong>Stephanie Thompson</strong>.</p>
+      <div class="subs"><p><span aria-hidden="true">*</span> <strong>Annual Educational Conference Program Committee subcommittees</strong> (staff liaison: <span data-staff="Virginia Smith"></span>)</p><ul id="listSubs"></ul></div>
+      <p class="general">For general committee questions and OnBoard access, contact <span data-staff="Stephanie Thompson"></span>.</p>
     </section>
 
     <!-- ROLES -->
     <section id="roles" aria-labelledby="roles-h">
-      <h2 id="roles-h">Who does what</h2>
+      <h2 id="roles-h">Who Does What</h2>
       <p class="intro">You lead the conversation. Staff handles the logistics. The Board sets direction.</p>
       <dl class="roles">
         <div class="role"><dt>Board of Directors</dt><dd>Establishes priorities and provides direction and approval where required.</dd></div>
-        <div class="role"><dt>Committee chair</dt><dd>Leads the committee, facilitates discussion, helps advance its priorities, monitors progress on tasks, and represents the committee to the Board.</dd></div>
-        <div class="role"><dt>Vice-chair</dt><dd>Supports the chair and runs meetings when the chair is unavailable.</dd></div>
-        <div class="role"><dt>Staff liaison</dt><dd>Coordinates logistics, prepares meeting materials and minutes, and connects the committee to CLEAR staff.</dd></div>
+        <div class="role"><dt>Committee Chair</dt><dd>Leads the committee, helps advance its priorities, facilitates discussion, monitors progress on tasks, and represents the committee to the Board.</dd></div>
+        <div class="role"><dt>Vice-Chair</dt><dd>Supports the chair and runs meetings when the chair is unavailable.</dd></div>
+        <div class="role"><dt>Staff Liaison</dt><dd>Coordinates logistics, prepares meeting materials and minutes, and connects the committee to CLEAR staff.</dd></div>
       </dl>
       <div class="callout"><p><strong>Changing over in September.</strong> New chairs take over at the close of the Annual Educational Conference. Staff will still check in with outgoing chairs about minutes and immediate follow-up from the September meeting.</p></div>
     </section>
 
     <!-- PRIORITIES -->
     <section id="priorities" aria-labelledby="priorities-h">
-      <h2 id="priorities-h">Your priorities: statements of direction</h2>
+      <h2 id="priorities-h">Your Priorities: Statements of Direction</h2>
       <p class="intro">Each year the Board gives your committee two or three new priorities, on top of routine work like environmental scans and programming topic development. Here's how they move through the year.</p>
       <ol class="steps">
-        <li><strong>The Board writes them</strong>Statements of direction draw on the strategic plan and on ongoing and new tasks.</li>
-        <li><strong>You receive them at the start of the year</strong>Staff shares them with your committee in the fall.</li>
-        <li><strong>Your committee reviews them</strong>Raise concerns or ask for clarification before the Midyear Business Meeting.</li>
-        <li><strong>They shape your agendas</strong>The tasks become at least part of the agenda at your meetings from then on.</li>
-        <li><strong>You report your plans and progress</strong>Describe your plan for each task and how it's going in your Midyear and Annual Conference reports to the Board.</li>
+        <li><strong>The Board Writes Them</strong>Statements of direction draw on the strategic plan and on ongoing and new tasks.</li>
+        <li><strong>You Receive Them at the Start of the Committee Year</strong>Staff shares them with your committee in the fall.</li>
+        <li><strong>Your Committee Reviews Them</strong>Raise concerns or ask for clarification before the Midyear Business Meeting.</li>
+        <li><strong>They Shape Your Agendas</strong>The tasks become at least part of the agenda at your meetings from then on.</li>
+        <li><strong>You Report Your Plans and Progress</strong>Describe your plan for each task and how it's going in your Midyear and Annual Conference reports to the Board.</li>
       </ol>
       <div class="callout"><p><strong>Need a smaller team?</strong> You can set up a temporary working group for a specific project, like reviewing curriculum, writing a publication, or building a resource. The chair or another volunteer can lead it. Working groups meet by videoconference as needed and report back to the full committee on a schedule the committee sets.</p></div>
     </section>
 
     <!-- MEETINGS -->
     <section id="meetings" aria-labelledby="meetings-h">
-      <h2 id="meetings-h">Running meetings</h2>
+      <h2 id="meetings-h">Running Meetings</h2>
       <p class="intro">Every meeting is shared work between you and your staff liaison. Filter to see your part.</p>
 
       <div class="filter" role="group" aria-label="Show responsibilities for">
@@ -365,7 +375,7 @@ footer p{margin:.25rem 0}
       </div>
 
       <div class="stage">
-        <h3>Before the meeting</h3>
+        <h3>Before the Meeting</h3>
         <p>Every agenda includes a review of minutes and a quick look at the charter and statements of direction, to keep discussion focused.</p>
         <ul class="duties">
           <li data-role="chair"><span class="tag chair">Chair</span><span>Share your availability and how often you'd like to meet.</span></li>
@@ -376,7 +386,7 @@ footer p{margin:.25rem 0}
       </div>
 
       <div class="stage">
-        <h3>During the meeting</h3>
+        <h3>During the Meeting</h3>
         <p>If the chair can't attend, the vice-chair leads.</p>
         <ul class="duties">
           <li data-role="chair"><span class="tag chair">Chair</span><span>Open the meeting and set an inclusive tone.</span></li>
@@ -388,7 +398,7 @@ footer p{margin:.25rem 0}
       </div>
 
       <div class="stage">
-        <h3>After the meeting</h3>
+        <h3>After the Meeting</h3>
         <ul class="duties">
           <li data-role="staff"><span class="tag staff">Staff</span><span>Compile the minutes and send them to the chair.</span></li>
           <li data-role="chair"><span class="tag chair">Chair</span><span>Review and approve the minutes.</span></li>
@@ -400,27 +410,27 @@ footer p{margin:.25rem 0}
 
     <!-- DECISIONS -->
     <section id="decisions" aria-labelledby="decisions-h">
-      <h2 id="decisions-h">Making decisions</h2>
+      <h2 id="decisions-h">Making Decisions</h2>
       <p class="intro">Committees decide together. Aim for consensus first, and vote only when you need to. You don't need a formal motion or a second.</p>
 
       <div class="flow" role="img" aria-label="Decision flow: the chair checks for support. If there is general agreement, the decision is made by consensus. If not, members vote and a simple majority decides. If the vote is tied, the chair casts the deciding vote. The minutes record the decision and whether a vote took place.">
-        <div class="node start"><strong>The chair checks for support</strong>Ask whether the group supports the decision.</div>
+        <div class="node start"><strong>The Chair Checks for Support</strong>Ask whether the group supports the decision.</div>
         <div class="link o2"><span>General agreement</span></div>
         <div class="link o4"><span>No agreement</span></div>
-        <div class="node yes o3"><strong>Decided by consensus</strong>Move on to the next item.</div>
-        <div class="node o5"><strong>Members vote</strong>A simple majority decides, unless the bylaws say otherwise.</div>
+        <div class="node yes o3"><strong>Decided by Consensus</strong>Move on to the next item.</div>
+        <div class="node o5"><strong>Members Vote</strong>A simple majority decides, unless the bylaws say otherwise.</div>
         <div class="spacer" aria-hidden="true"></div>
         <div class="link o6"><span>Tied vote</span></div>
         <div class="spacer" aria-hidden="true"></div>
-        <div class="node tie o7"><strong>The chair breaks the tie</strong>This is the only time the chair votes.</div>
+        <div class="node tie o7"><strong>The Chair Breaks the Tie</strong>This is the only time the chair votes.</div>
         <div class="link full o8"></div>
-        <div class="node end o9"><strong>The minutes record it</strong>Staff notes the decision, and notes when a vote took place.</div>
+        <div class="node end o9"><strong>The Minutes Record It</strong>Staff notes the decision, and notes when a vote took place.</div>
       </div>
     </section>
 
     <!-- BOARD APPROVAL -->
     <section id="board" aria-labelledby="board-h">
-      <h2 id="board-h">When to involve the Board</h2>
+      <h2 id="board-h">When to Involve the Board</h2>
       <p class="intro">Your committee can act on anything that fits its charter and approved priorities. Bring a recommendation to the Board first when it has significant financial impact or would be a major change to a CLEAR program, service, or publication.</p>
       <p>Try a few situations. Decide whether your committee can go ahead or should bring it to the Board.</p>
 
@@ -439,15 +449,15 @@ footer p{margin:.25rem 0}
       <p class="intro">Twice a year you'll tell the Board what your committee decided and where it stands on its priorities. It's a short bullet list, not meeting minutes.</p>
 
       <div class="items">
-        <div><h3>Information items</h3><p>Updates on progress toward your statement of direction goals.</p></div>
-        <div><h3>Action items</h3><p>Proposed actions that need Board review and approval before you proceed.</p></div>
+        <div><h3>Information Items</h3><p>Updates on progress toward your statement of direction goals.</p></div>
+        <div><h3>Action Items</h3><p>Proposed actions that need Board review and approval before you proceed.</p></div>
       </div>
 
       <ol class="steps">
-        <li><strong>Your committee meets in January or September</strong>Board reports are part of these two meetings.</li>
-        <li><strong>You and staff build the report</strong>Your liaison works with you on the bullet list after the meeting.</li>
-        <li><strong>You present it to the Board</strong>You, or someone you designate, give the report at the Board meeting. In person is preferred, and a virtual option may be available.</li>
-        <li><strong>Staff brings back the Board's response</strong>You'll hear the Board's feedback or decision at your next committee meeting.</li>
+        <li><strong>Your Committee Meets in January or September</strong>Board reports are part of these two meetings.</li>
+        <li><strong>You and Staff Build the Report</strong>Your liaison works with you on the bullet list after the meeting.</li>
+        <li><strong>You Present It to the Board</strong>You, or someone you designate, give the report at the Board meeting. In person is preferred, and a virtual option may be available.</li>
+        <li><strong>You Share the Board's Response</strong>You and your staff liaison share the Board's feedback or decision at the committee's next meeting.</li>
       </ol>
 
       <div class="callout"><p><strong>Don't wait if something comes up.</strong> Your staff liaison can send a recommendation to CLEAR's executive director at any time for the next available Board meeting agenda.</p></div>
@@ -458,7 +468,7 @@ footer p{margin:.25rem 0}
       <h2 id="tools-h">Tools</h2>
       <p class="intro">Staff sets these up for you. Here's what each one is for.</p>
       <dl class="tools">
-        <div class="tool"><dt>OnBoard</dt><dd>Current and past agendas and minutes, plus your committee's resource folder under the Resources menu.<small>Your login is in your committee welcome email. For access help, contact Stephanie Thompson.</small></dd></div>
+        <div class="tool"><dt>OnBoard</dt><dd>Current and past agendas and minutes, plus your committee's resource folder under the Resources menu.<small>Your login is in your committee welcome email. For access help, contact <span data-staff="Stephanie Thompson"></span>.</small></dd></div>
         <div class="tool"><dt>Zoom</dt><dd>All virtual committee meetings.<small>Staff sets up and hosts each meeting and sends members the link.</small></dd></div>
         <div class="tool"><dt>Google Docs</dt><dd>Writing and commenting on shared work together.<small>Ask your staff liaison to create and share a doc.</small></dd></div>
         <div class="tool"><dt>Surveys</dt><dd>Gathering feedback from your committee, from all CLEAR committee members, or, with approval, from the wider CLEAR membership.<small>Staff builds and sends surveys for you.</small></dd></div>
@@ -470,45 +480,48 @@ footer p{margin:.25rem 0}
 </div>
 
 <footer>
-  <p>Questions? Contact your staff liaison, or Stephanie Thompson for general committee questions.</p>
+  <p>Questions? Contact your staff liaison, or <span data-staff="Stephanie Thompson"></span> for general committee questions.</p>
   <p>Council on Licensure, Enforcement and Regulation</p>
 </footer>
 
 <script>
 (function(){
   /* ---------- Committee year ---------- */
-  var MONTHS=['Sep','Oct','Nov','Dec','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug'];
-  var FULL=['September','October','November','December','January','February','March','April','May','June','July','August'];
+  var ABBR=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  var FULL=['January','February','March','April','May','June','July','August','September','October','November','December'];
   var PHASES=[
-    {id:'sep',name:'Transition',start:0,span:1,title:'September: Annual Educational Conference',
-      happens:['Committees meet in person at the conference. This meeting is required.','Committees report the year\'s progress to the Board.','New chairs take over at the close of the conference.','Invitations to join committees stay open through September.'],
-      you:['Outgoing chairs: give the Board report and stay available to staff for minutes and follow-up.','Incoming chairs: get ready to lead from the conference onward.']},
-    {id:'oct',name:'Orientation',start:1,span:1,title:'October: Leadership orientation',
+    {id:'sepstart',name:'Transition',months:[8],title:'September: Transition to the New Committee Year',
+      happens:['New chairs take over at the close of the Annual Educational Conference.','Invitations to join committees remain open through September.'],
+      you:['Incoming chairs: prepare to lead from the conference onward.']},
+    {id:'oct',name:'Orientation',months:[9],title:'October: Leadership Orientation',
       happens:['Rosters are finalized at the start of the month.','Staff sends welcome emails with details about the year ahead.','Committees hold a virtual welcome meeting in October or November.'],
-      you:['Review the orientation materials on this page.','Attend the optional virtual leadership Q&A.','Work through the before-your-first-meeting checklist.']},
-    {id:'novdec',name:'Planning',start:2,span:2,title:'November–December: Planning the year',
-      happens:['Committees review their statements of direction and plan their work.','Any remaining welcome meetings take place in November.','The conference program committee and subcommittees review session proposals.'],
-      you:['Raise concerns or questions about your statements of direction before the Midyear meeting.','Conference planning subcommittees: review and comment on 15–20 proposals.']},
-    {id:'jan',name:'Midyear',start:4,span:1,title:'January: Midyear Business Meetings',
+      you:['Review the orientation materials on this page.','Attend the optional virtual leadership Q&amp;A.','Complete the before-your-first-meeting checklist.']},
+    {id:'novdec',name:'Planning',months:[10,11],title:'November\u2013December: Planning the Year',
+      happens:['Committees review their statements of direction and plan their work.','Any remaining welcome meetings take place in November.','The conference program committee and its subcommittees review session proposals.'],
+      you:['Raise concerns or questions about your statements of direction before the Midyear meeting.','Conference subcommittees: review and provide feedback on 15\u201320 proposals.']},
+    {id:'jan',name:'Midyear',months:[0],title:'January: Midyear Business Meetings',
       happens:['Every committee meets at the Midyear Business Meetings. This meeting is required.','Committees report their progress to the Board.'],
-      you:['Build the Board report with your staff liaison after your meeting.','Present it at the Board meeting yourself or through a designee.']},
-    {id:'febaug',name:'Committee work',start:5,span:7,title:'February–August: Committee work',
+      you:['Build the Board report with your staff liaison after your meeting.','Present the report at the Board meeting yourself or through a designee.']},
+    {id:'febaug',name:'Committee Work',months:[1,2,3,4,5,6,7],title:'February\u2013August: Committee Work',
       happens:['Committees meet by videoconference, usually quarterly, for about an hour.','Working groups meet as needed on specific projects.'],
-      you:['Keep statement of direction tasks moving and follow up on assignments.','Send recommendations to the Board through your liaison whenever they come up.']}
+      you:['Keep statement of direction tasks moving and follow up on assignments.','Send recommendations to the Board through your staff liaison whenever they arise.']},
+    {id:'sepend',name:'Reporting',months:[8],title:'September: Annual Educational Conference and Reporting',
+      happens:['Committees meet in person at the conference. This meeting is required.','Committees report the year\u2019s progress to the Board.'],
+      you:['Outgoing chairs: give the Board report and remain available to staff for minutes and follow-up.']}
   ];
-  var nowIdx=(new Date().getMonth()-8+12)%12;
+  var nowMonth=new Date().getMonth();
   var yearEl=document.getElementById('year'), panel=document.getElementById('phasePanel');
-  var nowPhase=PHASES.filter(function(p){return nowIdx>=p.start&&nowIdx<p.start+p.span;})[0];
-  document.getElementById('nowLine').innerHTML='It\u2019s <strong>'+FULL[nowIdx]+'</strong>. Here\u2019s what\u2019s happening now.';
+  var nowPhase=PHASES.filter(function(p){return p.months.indexOf(nowMonth)>-1;})[0];
+  document.getElementById('nowLine').innerHTML='It\u2019s <strong>'+FULL[nowMonth]+'</strong>. Here\u2019s what\u2019s happening now.';
 
   PHASES.forEach(function(p){
     var b=document.createElement('button');
     b.type='button';b.className='phase';b.setAttribute('role','tab');b.id='tab-'+p.id;
-    b.setAttribute('aria-controls','phasePanel');b.style.setProperty('--span',p.span);
+    b.setAttribute('aria-controls','phasePanel');b.style.setProperty('--span',p.months.length);
     var m='<span class="months">';
-    for(var i=p.start;i<p.start+p.span;i++){
-      m+='<span class="month'+(i===nowIdx?' now':'')+'"><span class="m-long">'+MONTHS[i]+'</span><span class="m-short" aria-hidden="true">'+MONTHS[i][0]+'</span></span>';
-    }
+    p.months.forEach(function(mo){
+      m+='<span class="month'+(mo===nowMonth?' now':'')+'"><span class="m-long">'+ABBR[mo]+'</span><span class="m-short" aria-hidden="true">'+ABBR[mo][0]+'</span></span>';
+    });
     m+='</span><span class="phase-name">'+p.name+'</span>';
     b.innerHTML=m;
     b.setAttribute('aria-label',p.title);
@@ -529,7 +542,8 @@ footer p{margin:.25rem 0}
       t.tabIndex=q===p?0:-1;
     });
     panel.setAttribute('aria-labelledby','tab-'+p.id);
-    panel.innerHTML='<h2>'+p.title+(p===nowPhase?' (now)':'')+'</h2><div class="panel-cols"><div><h3>What happens</h3><ul>'+li(p.happens)+'</ul></div><div><h3>What you do</h3><ul>'+li(p.you)+'</ul></div></div>';
+    var isNow=p.months.indexOf(nowMonth)>-1;
+    panel.innerHTML='<h2>'+p.title+(isNow?' (Now)':'')+'</h2><div class="panel-cols"><div><h3>What Happens</h3><ul>'+li(p.happens)+'</ul></div><div><h3>What You Do</h3><ul>'+li(p.you)+'</ul></div></div>';
   }
   select(nowPhase);
 
@@ -549,45 +563,80 @@ footer p{margin:.25rem 0}
   document.getElementById('checkReset').addEventListener('click',function(){boxes.forEach(function(b){b.checked=false;});updateCheck();});
   updateCheck();
 
+  /* ---------- Staff email addresses ----------
+     Enter each address between the quotes. Any name with an address becomes an email link everywhere on the page. */
+  var STAFF={
+    'Amanda Vance':'',
+    'Virginia Smith':'',
+    'Matt Grayson':'',
+    'Jodie Markey':'',
+    'Adam Parfitt':'',
+    'Tora Stubberud-Dobbs':'',
+    'Stephanie Thompson':''
+  };
+  function person(n){
+    var e=STAFF[n];
+    return e?'<a class="staff-link" href="mailto:'+e+'">'+n+'</a>':'<strong>'+n+'</strong>';
+  }
+  function people(list){return list.map(person).join(' and ');}
+  [].forEach.call(document.querySelectorAll('[data-staff]'),function(el){el.innerHTML=person(el.dataset.staff);});
+
   /* ---------- Liaisons ---------- */
   var COMMITTEES=[
-    ['Education and Training Committee','Amanda Vance'],
-    ['International Relations Committee','Virginia Smith'],
-    ['Examination Resources & Advisory Committee (ERAC)','Matt Grayson'],
-    ['Regulatory Agency Administration Committee','Jodie Markey'],
-    ['Diversity, Equity, and Inclusion Committee','Adam Parfitt'],
-    ['Annual Educational Conference Program Committee and all its subcommittees','Virginia Smith']
+    ['Education and Training Committee',['Amanda Vance']],
+    ['International Relations Committee',['Virginia Smith']],
+    ['Examination Resources & Advisory Committee (ERAC)',['Matt Grayson']],
+    ['Regulatory Agency Administration Committee',['Jodie Markey']],
+    ['Diversity, Equity, and Inclusion Committee',['Adam Parfitt']],
+    ['Annual Educational Conference Program Committee and all its subcommittees',['Virginia Smith'],true]
+  ];
+  var SUBS=[
+    'Regulatory Administration and Governance Subcommittee',
+    'Compliance, Discipline, and Enforcement Subcommittee',
+    'Entry to Practice Standards and Continuing Competence Subcommittee',
+    'Testing and Examinations Subcommittee'
   ];
   var WORKING=[
-    ['Membership Experience Working Group','Adam Parfitt'],
-    ['AI Working Group','Tora Stubberud-Dobbs'],
-    ['Investigator/Inspector Credential Development Working Group','Jodie Markey and Amanda Vance'],
-    ['Course Reviewer Working Group','Amanda Vance'],
-    ['Central Agency Working Group','Adam Parfitt']
+    ['Membership Experience Working Group',['Adam Parfitt']],
+    ['AI Working Group',['Tora Stubberud-Dobbs']],
+    ['Investigator/Inspector Credential Development Working Group',['Jodie Markey','Amanda Vance']],
+    ['Course Reviewer Working Group',['Amanda Vance']],
+    ['Central Agency Working Group',['Adam Parfitt']]
   ];
-  var sel=document.getElementById('committeeSelect'), rows=[];
+  var sel=document.getElementById('committeeSelect'), entries=[], programRow=null;
+  function addOption(og,label,liaisons,row,sub){
+    entries.push({liaisons:liaisons,row:row,sub:sub});
+    var o=document.createElement('option');o.value=entries.length-1;o.textContent=label;og.appendChild(o);
+  }
   function build(list,ulId,label){
     var ul=document.getElementById(ulId), og=document.createElement('optgroup');
     og.label=label;
     list.forEach(function(c){
       var r=document.createElement('li');
-      r.innerHTML='<span>'+c[0]+'</span><span>'+c[1]+'</span>';
-      ul.appendChild(r);rows.push(r);
-      var o=document.createElement('option');o.value=rows.length-1;o.textContent=c[0];og.appendChild(o);
+      r.innerHTML='<span>'+c[0]+(c[2]?'<sup aria-hidden="true">*</sup>':'')+'</span><span>'+people(c[1])+'</span>';
+      ul.appendChild(r);
+      addOption(og,c[0],c[1],r,null);
+      if(c[2])programRow=r;
     });
     sel.appendChild(og);
   }
   build(COMMITTEES,'listCommittees','Committees');
+  var subOg=document.createElement('optgroup'), subUl=document.getElementById('listSubs');
+  subOg.label='Program Committee subcommittees';
+  SUBS.forEach(function(n){
+    var r=document.createElement('li');r.textContent=n;subUl.appendChild(r);
+    addOption(subOg,n,['Virginia Smith'],programRow,r);
+  });
+  sel.appendChild(subOg);
   build(WORKING,'listWorking','Working groups');
-  var ALL=COMMITTEES.concat(WORKING);
   sel.addEventListener('change',function(){
-    rows.forEach(function(r){r.classList.remove('match');});
+    [].forEach.call(document.querySelectorAll('.org .match, .subs .match'),function(r){r.classList.remove('match');});
     var out=document.getElementById('finderResult');
     if(sel.value===''){out.textContent='';return;}
-    var c=ALL[+sel.value];
-    rows[+sel.value].classList.add('match');
-    var multi=c[1].indexOf(' and ')>-1;
-    out.innerHTML='Your staff liaison'+(multi?'s are ':' is ')+'<strong>'+c[1]+'</strong>.';
+    var c=entries[+sel.value];
+    c.row.classList.add('match');
+    if(c.sub)c.sub.classList.add('match');
+    out.innerHTML='Your staff liaison'+(c.liaisons.length>1?'s are ':' is ')+people(c.liaisons)+'.';
   });
 
   /* ---------- Board practice ---------- */
