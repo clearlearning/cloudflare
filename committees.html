@@ -35,7 +35,7 @@ body{margin:0;background:var(--bg);color:var(--text);font-family:var(--font);fon
 a{color:var(--link);text-underline-offset:.18em}
 :focus-visible{outline:3px solid var(--gold);outline-offset:2px;border-radius:3px}
 h1,h2,h3{line-height:1.2;margin:0}
-h2{color:var(--heading);font-size:1.75rem;font-weight:800;letter-spacing:-.01em}
+h2{color:var(--heading);font-size:1.75rem;font-weight:800;letter-spacing:-.01em;border-bottom: 4px solid #dda838;padding-bottom: 0.4rem;}
 h3{color:var(--heading);font-size:1.125rem;font-weight:700}
 p{margin:0 0 1rem}
 .skip{position:absolute;left:-999px;top:0;background:var(--gold);color:var(--burgundy);padding:.5rem 1rem;font-weight:700;z-index:10}
@@ -89,7 +89,7 @@ p{margin:0 0 1rem}
 .toc a:hover{color:var(--heading)}
 .toc a.active{border-left-color:var(--gold);color:var(--heading);font-weight:700}
 main{max-width:760px;padding-bottom:4rem}
-section{padding-top:3rem;margin-bottom:1rem}
+section{padding-top:2rem;margin-bottom:1rem;margin-top: 2rem;}
 section > .intro{font-size:1.1rem;color:var(--muted);margin:.6rem 0 1.5rem;max-width:62ch}
 
 @media (max-width:960px){
@@ -99,6 +99,8 @@ section > .intro{font-size:1.1rem;color:var(--muted);margin:.6rem 0 1.5rem;max-w
   .toc a{border:1px solid var(--line);border-radius:999px;padding:.3rem .8rem;margin:0}
   .toc a.active{border-color:var(--gold)}
 }
+
+
 
 /* ---------- Start here ---------- */
 .expect{display:grid;grid-template-columns:1fr 1fr;gap:0;border-top:1px solid var(--line);margin:0 0 2rem}
@@ -125,8 +127,16 @@ section > .intro{font-size:1.1rem;color:var(--muted);margin:.6rem 0 1.5rem;max-w
 .finder{display:flex;flex-wrap:wrap;gap:.75rem;align-items:center;margin-bottom:1rem}
 .finder label{font-weight:700}
 select{font:inherit;padding:.55rem .75rem;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--text);max-width:100%}
-.finder-result{min-height:1.6em;font-size:1.1rem;margin-bottom:1.5rem}
-.finder-result strong{color:var(--heading)}
+.finder-result{margin-bottom:1.5rem}
+.finder-result:empty{display:none}
+.finder-result > p{font-size:1.1rem;margin:0 0 .75rem}
+.finder-cards{display:flex;flex-wrap:wrap;gap:1rem}
+.liaison-card{display:flex;align-items:center;gap:1rem;background:var(--surface);border-left:4px solid var(--gold);border-radius:0 8px 8px 0;padding:.9rem 1.25rem .9rem 1rem;flex:1 1 280px;max-width:440px}
+.liaison-card img{width:72px;height:72px;border-radius:50%;object-fit:cover;object-position:center 25%;flex-shrink:0;background:var(--line)}
+.liaison-card strong{display:block;color:var(--heading);font-size:1.05rem}
+.liaison-card span{display:block;color:var(--muted);font-size:.93rem}
+.liaison-card a{font-size:.93rem;word-break:break-all}
+
 .org-board{background:var(--burgundy);color:#fff;border-radius:8px;padding:1rem 1.25rem;text-align:center}
 .org-board strong{display:block;font-size:1.1rem}
 .org-board span{font-size:.92rem;opacity:.85}
@@ -135,15 +145,12 @@ select{font:inherit;padding:.55rem .75rem;border:1px solid var(--line);border-ra
 .org-group h3{margin-bottom:.5rem}
 .org-group ul{list-style:none;margin:0;padding:0}
 .org-group li{display:flex;justify-content:space-between;gap:1rem;padding:.6rem .5rem;border-bottom:1px solid var(--line);font-size:.95rem;border-radius:4px}
-.org-group li > span:last-child{color:var(--muted);text-align:right;flex-shrink:0;max-width:45%}
-.org-group li.match{background:var(--chip-chair);color:var(--chip-chair-ink)}
-.org-group li.match > span:last-child,.org-group li.match a{color:var(--chip-chair-ink);font-weight:700}
-.general{margin-top:1.25rem;font-size:.97rem;color:var(--muted)}
+.general > p{margin:0 0 .75rem}
+.general{margin-top:1.5rem;font-size:.97rem;color:var(--muted)}
 .subs{margin-top:1.25rem;background:var(--surface);border-radius:8px;padding:1rem 1.25rem;font-size:.95rem}
 .subs p{margin:0 0 .5rem}
 .subs ul{margin:0;padding-left:1.2rem;columns:2;column-gap:1.5rem}
 .subs li{margin-bottom:.3rem;break-inside:avoid;border-radius:4px;padding:0 .3rem}
-.subs li.match{background:var(--chip-chair);color:var(--chip-chair-ink);font-weight:700}
 .org-group li sup{color:var(--heading);font-weight:700}
 .staff-link{font-weight:700}
 @media (max-width:640px){.subs ul{columns:1}}
@@ -269,8 +276,9 @@ footer p{margin:.25rem 0}
     <p>On This Page</p>
     <ol>
       <li><a href="#start">Start Here</a></li>
-      <li><a href="#liaisons">Your Staff Liaison</a></li>
+      <li><a href="#structure">Committee Structure</a></li>
       <li><a href="#roles">Who Does What</a></li>
+      <li><a href="#liaisons">Find Your Staff Liaison</a></li>
       <li><a href="#priorities">Your Priorities</a></li>
       <li><a href="#meetings">Running Meetings</a></li>
       <li><a href="#decisions">Making Decisions</a></li>
@@ -303,36 +311,28 @@ footer p{margin:.25rem 0}
         </div>
         <div class="bar" aria-hidden="true"><span id="checkBar"></span></div>
         <ul id="checklist">
-          <li><label><input type="checkbox" data-key="charter"><span><span class="task">Review the committee charter</span><span class="hint">It defines what your committee is responsible for. Look in your committee's resource folder in OnBoard, or ask your staff liaison.</span></span></label></li>
+          <li><label><input type="checkbox" data-key="charter"><span><span class="task">Review the committee charter</span><span class="hint">It defines what your committee is responsible for. Look in your <strong>committee's resource folder</strong> in OnBoard, or ask your staff liaison.</span></span></label></li>
           <li><label><input type="checkbox" data-key="sod"><span><span class="task">Review the statements of direction</span><span class="hint">These are the Board's priorities for your committee this year. <a href="#priorities">How statements of direction work</a></span></span></label></li>
-          <li><label><input type="checkbox" data-key="minutes"><span><span class="task">Review recent minutes and ongoing projects</span><span class="hint">Current and past minutes are in OnBoard.</span></span></label></li>
+          <li><label><input type="checkbox" data-key="minutes"><span><span class="task">Review recent minutes and ongoing projects</span><span class="hint">Current and past minutes are in OnBoard under the <strong>Meetings</strong> tab.</span></span></label></li>
           <li><label><input type="checkbox" data-key="meet"><span><span class="task">Meet with your staff liaison and vice-chair</span><span class="hint">Talk through priorities and the upcoming agenda. <a href="#liaisons">Find your staff liaison</a></span></span></label></li>
         </ul>
         <button class="link-btn" type="button" id="checkReset">Clear checklist</button>
       </div>
     </section>
 
-    <!-- LIAISONS -->
-    <section id="liaisons" aria-labelledby="liaisons-h">
-      <h2 id="liaisons-h">Your Staff Liaison</h2>
-      <p class="intro">Your staff liaison is your main connection to CLEAR staff. Start with them for any question about your committee's work.</p>
-
-      <div class="finder">
-        <label for="committeeSelect">My committee is</label>
-        <select id="committeeSelect"><option value="">Choose a committee or working group</option></select>
-      </div>
-      <p class="finder-result" id="finderResult" aria-live="polite"></p>
-
+    <!-- STRUCTURE -->
+    <section id="structure" aria-labelledby="structure-h">
+      <h2 id="structure-h">Committee Structure</h2>
+      <p class="intro">CLEAR's committees and working groups carry out their work under the direction of the Board.</p>
       <div class="org">
         <div class="org-board"><strong>Board of Directors</strong><span>Sets priorities and gives direction and approval</span></div>
         <div class="org-stem" aria-hidden="true"></div>
         <div class="org-groups">
           <div class="org-group"><h3>Committees</h3><ul id="listCommittees"></ul></div>
-          <div class="org-group"><h3>Working groups</h3><ul id="listWorking"></ul></div>
+          <div class="org-group"><h3>Working Groups</h3><ul id="listWorking"></ul></div>
         </div>
       </div>
-      <div class="subs"><p><span aria-hidden="true">*</span> <strong>Annual Educational Conference Program Committee subcommittees</strong> (staff liaison: <span data-staff="Virginia Smith"></span>)</p><ul id="listSubs"></ul></div>
-      <p class="general">For general committee questions and OnBoard access, contact <span data-staff="Stephanie Thompson"></span>.</p>
+      <div class="subs"><p><span aria-hidden="true">*</span> <strong>Annual Educational Conference Program Committee Subcommittees</strong></p><ul id="listSubs"></ul></div>
     </section>
 
     <!-- ROLES -->
@@ -346,6 +346,18 @@ footer p{margin:.25rem 0}
         <div class="role"><dt>Staff Liaison</dt><dd>Coordinates logistics, prepares meeting materials and minutes, and connects the committee to CLEAR staff.</dd></div>
       </dl>
       <div class="callout"><p><strong>Changing over in September.</strong> New chairs take over at the close of the Annual Educational Conference. Staff will still check in with outgoing chairs about minutes and immediate follow-up from the September meeting.</p></div>
+    </section>
+
+    <!-- LIAISONS -->
+    <section id="liaisons" aria-labelledby="liaisons-h">
+      <h2 id="liaisons-h">Find Your Staff Liaison</h2>
+      <p class="intro">Your staff liaison is your main connection to CLEAR staff. Start with them for any question about your committee's work.</p>
+      <div class="finder">
+        <label for="committeeSelect">My committee is</label>
+        <select id="committeeSelect"><option value="">Choose a committee or working group</option></select>
+      </div>
+      <div class="finder-result" id="finderResult" aria-live="polite"></div>
+      <div class="general"><p style="font-weight: 700; color: var(--text); font-family: var(--font); font-size: 1.0625rem; line-height: 1.6;">For general committee questions and OnBoard access, contact:</p><div class="finder-cards" id="generalCard"></div></div>
     </section>
 
     <!-- PRIORITIES -->
@@ -563,23 +575,33 @@ footer p{margin:.25rem 0}
   document.getElementById('checkReset').addEventListener('click',function(){boxes.forEach(function(b){b.checked=false;});updateCheck();});
   updateCheck();
 
-  /* ---------- Staff email addresses ----------
-     Enter each address between the quotes. Any name with an address becomes an email link everywhere on the page. */
+  /* ---------- Staff directory ---------- */
+  var IMG='https://assets-002.noviams.com/novi-file-uploads/clear/members/';
   var STAFF={
-    'Amanda Vance':'',
-    'Virginia Smith':'',
-    'Matt Grayson':'',
-    'Jodie Markey':'',
-    'Adam Parfitt':'',
-    'Tora Stubberud-Dobbs':'',
-    'Stephanie Thompson':''
+    'Adam Parfitt':{cred:'CAE',title:'Executive Director',email:'aparfitt@clearhq.org',photo:IMG+'adamparfitt_hs5-4.jpg'},
+    'Jodie Markey':{cred:'CAE',title:'Deputy Director',email:'jmarkey@clearhq.org',photo:IMG+'jodiemarkey_hs2-1.jpg'},
+    'Amanda Vance':{cred:'PMP',title:'Learning & Systems Manager',email:'avance@clearhq.org',photo:IMG+'_d854079.jpg'},
+    'Virginia Smith':{cred:'MA',title:'Program Manager',email:'vsmith@clearhq.org',photo:IMG+'virginiashapland_hs-1.jpg'},
+    'Matt Grayson':{cred:'CAE',title:'Governance Coordinator',email:'mgrayson@clearhq.org',photo:IMG+'mattgrayson_hs1-2.jpg'},
+    'Tora Stubberud-Dobbs':{cred:'MBA',title:'Program Specialist',email:'tstubberud@clearhq.org',photo:IMG+'_d853281.jpg'},
+    'Stephanie Thompson':{cred:'',title:'Content Coordinator',email:'sthompson@clearhq.org',photo:IMG+'stephaniethompson_hs-1.jpg'}
   };
+  function mailto(email,committee){
+    return 'mailto:'+email+'?subject='+encodeURIComponent('CLEAR Committee Question'+(committee?': '+committee:''));
+  }
+  function fullName(n){var c=STAFF[n].cred;return n+(c?', '+c:'');}
   function person(n){
-    var e=STAFF[n];
-    return e?'<a class="staff-link" href="mailto:'+e+'">'+n+'</a>':'<strong>'+n+'</strong>';
+    var p=STAFF[n];
+    return p&&p.email?'<a class="staff-link" href="'+mailto(p.email)+'">'+n+'</a>':'<strong>'+n+'</strong>';
+  }
+  function card(n,committee){
+    var p=STAFF[n];
+    return '<div class="liaison-card"><img src="'+p.photo+'" alt="Photo of '+n+'" loading="lazy"><div><strong>'+fullName(n)+'</strong><span>'+p.title+'</span><a href="'+mailto(p.email,committee)+'">'+p.email+'</a></div></div>';
   }
   function people(list){return list.map(person).join(' and ');}
   [].forEach.call(document.querySelectorAll('[data-staff]'),function(el){el.innerHTML=person(el.dataset.staff);});
+
+  document.getElementById('generalCard').innerHTML=card('Stephanie Thompson','General Question');
 
   /* ---------- Liaisons ---------- */
   var COMMITTEES=[
@@ -605,7 +627,7 @@ footer p{margin:.25rem 0}
   ];
   var sel=document.getElementById('committeeSelect'), entries=[], programRow=null;
   function addOption(og,label,liaisons,row,sub){
-    entries.push({liaisons:liaisons,row:row,sub:sub});
+    entries.push({label:label,liaisons:liaisons,row:row,sub:sub});
     var o=document.createElement('option');o.value=entries.length-1;o.textContent=label;og.appendChild(o);
   }
   function build(list,ulId,label){
@@ -613,7 +635,7 @@ footer p{margin:.25rem 0}
     og.label=label;
     list.forEach(function(c){
       var r=document.createElement('li');
-      r.innerHTML='<span>'+c[0]+(c[2]?'<sup aria-hidden="true">*</sup>':'')+'</span><span>'+people(c[1])+'</span>';
+      r.innerHTML='<span>'+c[0]+(c[2]?'<sup aria-hidden="true">*</sup>':'')+'</span>';
       ul.appendChild(r);
       addOption(og,c[0],c[1],r,null);
       if(c[2])programRow=r;
@@ -630,13 +652,10 @@ footer p{margin:.25rem 0}
   sel.appendChild(subOg);
   build(WORKING,'listWorking','Working groups');
   sel.addEventListener('change',function(){
-    [].forEach.call(document.querySelectorAll('.org .match, .subs .match'),function(r){r.classList.remove('match');});
     var out=document.getElementById('finderResult');
     if(sel.value===''){out.textContent='';return;}
     var c=entries[+sel.value];
-    c.row.classList.add('match');
-    if(c.sub)c.sub.classList.add('match');
-    out.innerHTML='Your staff liaison'+(c.liaisons.length>1?'s are ':' is ')+people(c.liaisons)+'.';
+    out.innerHTML='<p>Your staff liaison'+(c.liaisons.length>1?'s are':' is')+':</p><div class="finder-cards">'+c.liaisons.map(function(n){return card(n,c.label);}).join('')+'</div>';
   });
 
   /* ---------- Board practice ---------- */
