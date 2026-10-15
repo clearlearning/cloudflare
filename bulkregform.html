@@ -42,6 +42,7 @@
   .upload-row .divider{color:#aaa;font-size:12px;}
   .license-counter{display:flex;align-items:center;gap:10px;font-size:13px;margin-bottom:14px;padding:10px 16px;border-radius:var(--radius);background:var(--gray-light);}
   .license-counter.over{background:var(--amber-bg);color:var(--amber);font-weight:600;}
+  .license-counter.full{background:var(--green-bg);color:var(--green);}
   .table-wrap{overflow-x:auto;border:1px solid var(--gray-mid);border-radius:var(--radius);}
   table{width:100%;border-collapse:collapse;font-size:13px;}
   thead th{background:var(--blue);color:var(--white);padding:10px 10px;text-align:left;font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:0.3px;}
@@ -107,6 +108,12 @@
         <label>Product Purchased <span class="req">*</span></label>
         <select id="productSelect"><option value="">Select the product you purchased...</option></select>
         <span class="field-error">Select the product you purchased.</span>
+      </div>
+      <div class="form-group hidden" id="fg_seatCount">
+        <label>Number of Seats Purchased <span class="req">*</span></label>
+        <input type="number" id="seatCount" min="1" max="10000" step="1" inputmode="numeric" placeholder="e.g. 25">
+        <span class="hint">Shown on your order confirmation. You can register up to this many subscribers.</span>
+        <span class="field-error">Enter the number of seats purchased as a whole number of 1 or more.</span>
       </div>
     </div>
     <div class="form-row">
@@ -192,10 +199,18 @@ const PRODUCTS = [
   "Introduction to Regulatory Governance - Unlimited Licenses",
   "So, You Think You Want... - 25 Licenses",
   "So, You Think You Want... - Unlimited Licenses",
+  "Regulation 101 Microlearning Series",
   // Add more "Product Name - N Licenses" / "- Unlimited Licenses" entries here.
+];
+// Products where the purchaser enters their own seat count. Subscriber
+// entry is hard-capped at that number (no overage allowed).
+const SEAT_PRODUCTS = [
+  "Regulation 101 Microlearning Series",
 ];
 const SUBMIT_ENDPOINT = 'https://clear-lms-proxy.avance.workers.dev/subreg/submit';
 // ============================================================
+
+function isSeatProduct(name){return SEAT_PRODUCTS.includes(name);}
 
 function parseLicenseCount(name){
   if(/unlimited/i.test(name))return null; // null = unlimited
@@ -203,7 +218,14 @@ function parseLicenseCount(name){
   return m?parseInt(m[1],10):1;
 }
 
-const STATE={product:'',licenseCap:null,rows:[],rowSeq:0};
+function parseSeatCount(){
+  const v=document.getElementById('seatCount').value.trim();
+  if(!/^\d+$/.test(v))return null;
+  const n=parseInt(v,10);
+  return n>=1&&n<=10000?n:null;
+}
+
+const STATE={product:'',licenseCap:null,seatBased:false,rows:[],rowSeq:0};
 
 // Populate product dropdown
 (function(){
@@ -217,24 +239,67 @@ function newRow(agencyDefault){
   return{id:STATE.rowSeq,firstName:'',lastName:'',email:'',jobTitle:'',agency:agencyDefault||document.getElementById('agencyName').value.trim(),errors:{}};
 }
 
+function seatsAvailable(){
+  // true when another row can be added under the current cap
+  if(STATE.licenseCap===null||!STATE.seatBased)return true;
+  return STATE.rows.length<STATE.licenseCap;
+}
+
 function onProductChange(){
   const name=document.getElementById('productSelect').value;
   STATE.product=name;
   clearFieldError('fg_product');
+  STATE.seatBased=isSeatProduct(name);
+  document.getElementById('fg_seatCount').classList.toggle('hidden',!STATE.seatBased);
   if(!name){
     document.getElementById('subscriberPanel').style.display='none';
     document.getElementById('reviewPanel').classList.add('hidden');
     return;
   }
+  STATE.rows=[];
+  if(STATE.seatBased){
+    applySeatCount();
+    return;
+  }
   STATE.licenseCap=parseLicenseCount(name);
   const startCount=STATE.licenseCap===null?5:Math.min(STATE.licenseCap,30);
   const agencyDefault=document.getElementById('agencyName').value.trim();
-  STATE.rows=[];
   for(let i=0;i<Math.max(startCount,1);i++)STATE.rows.push(newRow(agencyDefault));
   document.getElementById('subscriberPanel').style.display='block';
   renderRows();
   updateReview();
 }
+
+// Rebuilds the table for seat-based products whenever the seat count changes.
+// Entered subscribers are always kept; only blank rows are added or trimmed.
+function applySeatCount(){
+  const n=parseSeatCount();
+  if(n===null){
+    STATE.licenseCap=null;
+    document.getElementById('subscriberPanel').style.display='none';
+    updateReview();
+    return;
+  }
+  STATE.licenseCap=n;
+  const agencyDefault=document.getElementById('agencyName').value.trim();
+  const kept=STATE.rows.filter(r=>!rowIsBlank(r));
+  const target=Math.min(n,Math.max(kept.length+1,Math.min(n,30)));
+  const rows=kept.slice();
+  while(rows.length<target)rows.push(newRow(agencyDefault));
+  if(!rows.length)rows.push(newRow(agencyDefault));
+  STATE.rows=rows;
+  document.getElementById('subscriberPanel').style.display='block';
+  renderRows();
+  updateReview();
+}
+
+document.getElementById('seatCount').addEventListener('input',()=>{
+  clearFieldError('fg_seatCount');
+  if(STATE.seatBased)applySeatCount();
+});
+document.getElementById('seatCount').addEventListener('blur',()=>{
+  if(STATE.seatBased&&document.getElementById('seatCount').value.trim()&&parseSeatCount()===null)setFieldError('fg_seatCount');
+});
 
 document.getElementById('agencyName').addEventListener('input',()=>{
   clearFieldError('fg_agencyName');
@@ -272,9 +337,11 @@ function checkDuplicateEmails(){
 
 function maybeAutoAddRow(){
   const last=STATE.rows[STATE.rows.length-1];
-  if(last&&rowIsFilled(last)){
+  if(last&&rowIsFilled(last)&&seatsAvailable()){
     STATE.rows.push(newRow());
+    return true;
   }
+  return false;
 }
 
 function renderRows(){
@@ -301,6 +368,7 @@ function renderRows(){
     el.addEventListener('click',()=>{
       if(STATE.rows.length<=1)return;
       STATE.rows=STATE.rows.filter(r=>r.id!==parseInt(el.dataset.remove));
+      maybeAutoAddRow(); // frees a seat — offer a blank row again if the table was full
       renderRows();
       updateReview();
     });
@@ -315,8 +383,7 @@ function onCellInput(e){
   if(!row)return;
   row[field]=e.target.value;
   const wasLast=STATE.rows[STATE.rows.length-1].id===id;
-  if(wasLast&&rowIsFilled(row)){
-    maybeAutoAddRow();
+  if(wasLast&&rowIsFilled(row)&&maybeAutoAddRow()){
     renderRows();
     // restore focus roughly to same field of same row after re-render
     const again=document.querySelector('input[data-id="'+id+'"][data-f="'+field+'"]');
@@ -325,6 +392,7 @@ function onCellInput(e){
     validateRow(row);
     checkDuplicateEmails();
     e.target.classList.toggle('cell-error',!!row.errors[field]);
+    renderLicenseCounter();
   }
   updateReview();
 }
@@ -332,6 +400,24 @@ function onCellInput(e){
 function renderLicenseCounter(){
   const el=document.getElementById('licenseCounter');
   const filledCount=STATE.rows.filter(rowIsFilled).length;
+  if(STATE.seatBased&&STATE.licenseCap!==null){
+    const cap=STATE.licenseCap;
+    const entered=STATE.rows.filter(r=>!rowIsBlank(r)).length;
+    const seatWord=cap===1?'seat':'seats';
+    if(entered>cap){
+      el.className='license-counter over';
+      el.innerHTML='<strong>'+entered+'</strong> subscribers entered, but your order includes <strong>'+cap+'</strong> '+seatWord
+        +'. Remove '+(entered-cap)+' subscriber'+(entered-cap===1?'':'s')+' or update the seat count to continue.';
+    }else if(filledCount>=cap){
+      el.className='license-counter full';
+      el.innerHTML='All <strong>'+cap+'</strong> purchased '+seatWord+' have been assigned. To register someone else, remove an existing subscriber.';
+    }else{
+      el.className='license-counter';
+      el.innerHTML='<strong>'+filledCount+'</strong> of <strong>'+cap+'</strong> purchased '+seatWord+' assigned &mdash; '
+        +(cap-filledCount)+' remaining.';
+    }
+    return;
+  }
   if(STATE.licenseCap===null){
     el.className='license-counter';
     el.innerHTML='<strong>'+filledCount+'</strong> subscriber'+(filledCount===1?'':'s')+' entered &mdash; unlimited license.';
@@ -402,17 +488,24 @@ document.getElementById('uploadFileInput').addEventListener('change',function(e)
       if(!rows.length){
         statusEl.className='status-bar error';statusEl.innerHTML='No subscriber rows were found in the file.';return;
       }
-      rows.push(newRow(agencyDefault)); // trailing blank row for further manual entry
+      if(STATE.seatBased&&STATE.licenseCap!==null&&rows.length>STATE.licenseCap){
+        statusEl.className='status-bar error';
+        statusEl.innerHTML='The file contains <strong>'+rows.length+'</strong> subscribers, but your order includes <strong>'+STATE.licenseCap+'</strong> seat'+(STATE.licenseCap===1?'':'s')
+          +'. Remove '+(rows.length-STATE.licenseCap)+' row'+(rows.length-STATE.licenseCap===1?'':'s')+' from the file and upload it again. Your current entries have not been changed.';
+        return;
+      }
+      const loadedCount=rows.length;
+      if(!STATE.seatBased||rows.length<STATE.licenseCap)rows.push(newRow(agencyDefault)); // trailing blank row for further manual entry
       STATE.rows=rows;
       renderRows();
       updateReview();
       const problemCount=STATE.rows.filter(r=>Object.keys(r.errors).length>0).length;
       if(problemCount>0){
         statusEl.className='status-bar error';
-        statusEl.innerHTML='Loaded '+(rows.length-1)+' row(s). <strong>'+problemCount+' row(s) need attention</strong> &mdash; fixed cells are outlined in red in the table below.';
+        statusEl.innerHTML='Loaded '+loadedCount+' row(s). <strong>'+problemCount+' row(s) need attention</strong> &mdash; cells that need correction are outlined in red in the table below.';
       }else{
         statusEl.className='status-bar success';
-        statusEl.innerHTML='Loaded '+(rows.length-1)+' subscriber(s) successfully. Review the table below, then submit.';
+        statusEl.innerHTML='Loaded '+loadedCount+' subscriber(s) successfully. Review the table below, then submit.';
       }
     }catch(err){
       statusEl.className='status-bar error';statusEl.innerHTML='Could not read that file: '+esc(err.message);
@@ -433,25 +526,33 @@ function newRowFromValues(firstName,lastName,email,jobTitle,agency){
 function clearFieldError(id){document.getElementById(id).classList.remove('invalid');}
 function setFieldError(id){document.getElementById(id).classList.add('invalid');}
 
+function isOverSeatCap(){
+  if(!STATE.seatBased||STATE.licenseCap===null)return false;
+  return STATE.rows.filter(r=>!rowIsBlank(r)).length>STATE.licenseCap;
+}
+
 function updateReview(){
-  const hasProduct=!!STATE.product;
+  const hasProduct=!!STATE.product&&(!STATE.seatBased||STATE.licenseCap!==null);
   document.getElementById('reviewPanel').classList.toggle('hidden',!hasProduct);
   if(!hasProduct)return;
   const filled=STATE.rows.filter(rowIsFilled);
   const hasErrors=STATE.rows.some(r=>Object.keys(r.errors).length>0);
+  const overCap=isOverSeatCap();
   const topFieldsOk=document.getElementById('orderNumber').value.trim()
     &&document.getElementById('purchaserName').value.trim()
     &&document.getElementById('agencyName').value.trim();
-  const ready=topFieldsOk&&filled.length>0&&!hasErrors;
+  const ready=topFieldsOk&&filled.length>0&&!hasErrors&&!overCap;
   document.getElementById('submitBtn').disabled=!ready;
   const note=document.getElementById('submitNote');
   if(!topFieldsOk)note.textContent='Complete order number, your name, and agency above to continue.';
   else if(filled.length===0)note.textContent='Add at least one subscriber before submitting.';
+  else if(overCap)note.textContent='The number of subscribers exceeds the seats purchased. Remove subscribers or update the seat count.';
   else if(hasErrors)note.textContent='Fix the highlighted subscriber rows before submitting.';
   else note.textContent='';
   document.getElementById('reviewSummary').innerHTML=
     '<strong>Order:</strong> '+esc(document.getElementById('orderNumber').value.trim()||'—')+'<br>'
     +'<strong>Product:</strong> '+esc(STATE.product)+'<br>'
+    +(STATE.seatBased?'<strong>Seats purchased:</strong> '+STATE.licenseCap+'<br>':'')
     +'<strong>Purchaser:</strong> '+esc(document.getElementById('purchaserName').value.trim()||'—')+'<br>'
     +'<strong>Agency:</strong> '+esc(document.getElementById('agencyName').value.trim()||'—')+'<br>'
     +'<strong>Subscribers ready to submit:</strong> '+filled.length;
@@ -468,9 +569,11 @@ document.getElementById('submitBtn').addEventListener('click',async()=>{
   let missing=false;
   if(!orderNumber){setFieldError('fg_orderNumber');missing=true;}
   if(!STATE.product){setFieldError('fg_product');missing=true;}
+  if(STATE.seatBased&&parseSeatCount()===null){setFieldError('fg_seatCount');missing=true;}
   if(!purchaserName){setFieldError('fg_purchaserName');missing=true;}
   if(!agencyName){setFieldError('fg_agencyName');missing=true;}
   if(missing)return;
+  if(isOverSeatCap())return;
 
   const subscribers=STATE.rows.filter(rowIsFilled).map(r=>({
     firstName:r.firstName.trim(),lastName:r.lastName.trim(),email:r.email.trim().toLowerCase(),
@@ -484,7 +587,9 @@ document.getElementById('submitBtn').addEventListener('click',async()=>{
 
   const payload={
     orderNumber,productName:STATE.product,purchaserName,agencyName,
-    subscribers,licenseCap:STATE.licenseCap,submittedAt:new Date().toISOString()
+    subscribers,licenseCap:STATE.licenseCap,
+    seatsPurchased:STATE.seatBased?STATE.licenseCap:null,
+    submittedAt:new Date().toISOString()
   };
 
   try{
